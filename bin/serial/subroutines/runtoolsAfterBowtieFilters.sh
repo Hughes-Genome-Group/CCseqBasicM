@@ -465,7 +465,6 @@ echo 'a[n]=$2;' >> LOOP1_${flashstatus}.awk
 echo 'for (f=3; f<=NF; f++){a[n]=a[n]"\t"$f};' >> LOOP1_${flashstatus}.awk
 echo 'c[n]=$4;p=$1;n=n+1;' >> LOOP1_${flashstatus}.awk
 echo '}' >> LOOP1_${flashstatus}.awk
-
 # PRINT - and zero values
 echo 'else' >> LOOP1_${flashstatus}.awk
 echo '{' >> LOOP1_${flashstatus}.awk

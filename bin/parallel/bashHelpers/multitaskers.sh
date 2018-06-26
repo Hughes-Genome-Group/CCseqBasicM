@@ -222,7 +222,7 @@ else
 fi
 # memory in Megas - the whole node has this amount. Thou shalt not go over :D
 wholenodemem=300000
-wholenodesafetylimit=$((${wholenodemem}-50000))
+wholenodesafetylimit=$((${wholenodemem}-80000))
 
 # foundFoldersCount=$(($(ls -1 | grep '^fastq_' | grep -c "")))
 # We default to 24 processors, and are not planning to change this to become a flag instead ..
