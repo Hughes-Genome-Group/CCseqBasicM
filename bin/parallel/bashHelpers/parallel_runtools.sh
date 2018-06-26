@@ -965,7 +965,7 @@ mkdir BLAT
 # If we have previous blats.
 if [ "${isReuseBlatPathGiven}" -eq 1 ]; then
 
-ls ${reuseblatpath}
+# ls ${reuseblatpath}
 if [ $? -ne 0 ];then
     printThis="Cannot find the BLAT results folder --BLATforREUSEfolderPath ${reuseblatpath} . Check your run command ! "
     printToLogFile
@@ -1048,9 +1048,8 @@ if [ "${blatwarningsCount}" -ne 0 ];then
     printToLogFile
     printThis="The psl files in the folder need to be named like this : TEMP_{thisOligoName}_blat.psl \nwhere {thisOligoName} is the oligo name from the oligo file"
     printToLogFile
-    echo "List of the missing oligos below : "
-    echo "${blatwarningOligoList}"
-    echo
+    printThis="List of the missing oligos below : \n ${blatwarningOligoList}"
+    printToLogFile
     printThis="EXITING "
     printToLogFile
     exit 1

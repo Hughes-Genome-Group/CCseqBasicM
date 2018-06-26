@@ -270,6 +270,7 @@ do {
     
     while [ ${wePotentiallyStartNew} -eq 0 ]
     do
+    wePotentiallyStartNew=1
     checkIfDownloadsInProgress
     checkIfTooMuchMemUseAlready
     
@@ -285,6 +286,12 @@ do {
     
     monitorRun
     sleep ${sleepSeconds}
+    
+    # for testing purposes
+    echo ${allOfTheRunningOnes} >> processNumbersRunning.log
+    ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> processNumbersRunning.log
+    echo "That is ${i} running just now" >> processNumbersRunning.log
+    echo >> processNumbersRunning.log
     
 }
 done
@@ -304,6 +311,7 @@ do {
     
     while [ ${wePotentiallyStartNew} -eq 0 ]
     do
+    wePotentiallyStartNew=1
     checkIfDownloadsInProgress
     checkIfTooMuchMemUseAlready
     
@@ -608,7 +616,7 @@ fi
 
 if [ -s runJustNow_${m}.log ];then
 
-usageMessage="runNo ${m} $(cat runJustNow_${m}.log) localmem ${localMemoryUsage}M TEMPDIRmem ${tempareaMemoryUsage} ${timepoint}"
+usageMessage="runNo ${m} $(cat runJustNow_${m}.log) localmem ${localMemoryUsage}M TEMPDIRmem ${tempareaMemoryUsage}M ${timepoint}"
 echo ${usageMessage} >> runsJUSTNOW.txt
 usageMessage="$(cat runJustNow_${m}.log) ${localMemoryUsage}M ${tempareaMemoryUsage}M ${timepoint}"
 echo ${usageMessage} | sed 's/\s/\t/g' >> wholerunUsage_${m}.txt
