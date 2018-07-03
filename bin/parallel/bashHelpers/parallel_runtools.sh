@@ -459,8 +459,8 @@ bamCombineInnerSub(){
     echo 'TEMPcountF=$( samtools view -c ${tempfile} )' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcountFtotal=$((${TEMPcountFtotal}+${TEMPcountF}))' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'echo -e "${TEMPcountF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/logfiles/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo ${TEMPcountF} >> FLASHEDbamINcounts.txt' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh    
+    echo 'echo ${TEMPcountF} >> FLASHEDbamINcounts.txt' >> ${outputbamsfolder}/bamCombineRun.sh
     echo "done" >> ${outputbamsfolder}/bamCombineRun.sh
 
     echo  >> ${outputbamsfolder}/bamCombineRun.sh
@@ -473,8 +473,8 @@ bamCombineInnerSub(){
     echo 'TEMPcountNF=$( samtools view -c ${tempfile} )' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcountNFtotal=$((${TEMPcountNFtotal}+${TEMPcountNF}))' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'echo -e "${TEMPcountNF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/logfiles/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo ${TEMPcountNF} >> NONFLASHEDbamINcounts.txt' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'echo ${TEMPcountNF} >> NONFLASHEDbamINcounts.txt' >> ${outputbamsfolder}/bamCombineRun.sh
     echo "done" >> ${outputbamsfolder}/bamCombineRun.sh
     
     echo  >> ${outputbamsfolder}/bamCombineRun.sh
