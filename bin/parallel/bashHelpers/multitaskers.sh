@@ -220,6 +220,7 @@ else
         echo "Will use $(pwd) to store all runtime files ! "
     fi
 fi
+
 # memory in Megas - the whole node has this amount. Thou shalt not go over :D
 wholenodemem=300000
 wholenodesafetylimit=$((${wholenodemem}-80000))
@@ -279,10 +280,22 @@ do {
     
     done
     
-    cp ${CaptureParallelPath}/${runScriptToBeUsed} run${FqOrOl}${i}_$$.sh
-    chmod u+x run${FqOrOl}${i}_$$.sh
+    # Log folder for other-than-fastq-runs to be the chr/oligo directory
+    if [ "${FastqOrOligo}" == "Fastq" ];then
+        erroutLogsToHere="."
+    else
+        erroutLogsToHere="runtimelogfiles/${i}"
+        checkThis="${erroutLogsToHere}"
+        checkedName='${erroutLogsToHere}'
+        checkParse
+        mkdir -p ${erroutLogsToHere}
+    fi
+    
+    cp ${CaptureParallelPath}/${runScriptToBeUsed} ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh
+    chmod u+x ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh
     echo "./run${FqOrOl}${i}_$$.sh ${i}  1> run${FqOrOl}${i}.out 2> run${FqOrOl}${i}.err"
-    ./run${FqOrOl}${i}_$$.sh ${i}  1> run${FqOrOl}${i}.out 2> run${FqOrOl}${i}.err &
+    ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh ${i}  1> ${erroutLogsToHere}/run${FqOrOl}${i}.out 2> ${erroutLogsToHere}/run${FqOrOl}${i}.err &
+    echo run${FqOrOl}${i}_$$.sh >> startedRunsList.log
     
     monitorRun
     sleep ${sleepSeconds}
@@ -301,7 +314,6 @@ else
 # after that we need to monitor ..
 
 allOfTheRunningOnes=""
-
 for (( i=1; i<=${askedProcessors}; i++ ))
 do {
     
@@ -319,12 +331,24 @@ do {
     sleep ${sleepSeconds}
     
     done
+
+    # Log folder for other-than-fastq-runs to be the chr/oligo directory
+    if [ "${FastqOrOligo}" == "Fastq" ];then
+        erroutLogsToHere="."
+    else
+        erroutLogsToHere="runtimelogfiles/${i}"
+        checkThis="${erroutLogsToHere}"
+        checkedName='${erroutLogsToHere}'
+        checkParse
+        mkdir -p ${erroutLogsToHere}
+    fi
     
-    cp ${CaptureParallelPath}/${runScriptToBeUsed} run${FqOrOl}${i}_$$.sh
-    chmod u+x run${FqOrOl}${i}_$$.sh
+    cp ${CaptureParallelPath}/${runScriptToBeUsed} ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh
+    chmod u+x ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh
     echo "./run${FqOrOl}${i}_$$.sh ${i}  1> run${FqOrOl}${i}.out 2> run${FqOrOl}${i}.err"
-    ./run${FqOrOl}${i}_$$.sh ${i}  1> run${FqOrOl}${i}.out 2> run${FqOrOl}${i}.err &
+    ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh ${i}  1> ${erroutLogsToHere}/run${FqOrOl}${i}.out 2> ${erroutLogsToHere}/run${FqOrOl}${i}.err &
     allOfTheRunningOnes="${allOfTheRunningOnes} $!"
+    echo run${FqOrOl}${i}_$$.sh >> startedRunsList.log
     
     monitorRun 
     sleep ${sleepSeconds}
@@ -365,12 +389,24 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     checkIfTooMuchMemUseAlready
 
     if [ "${wePotentiallyStartNew}" == 1 ];then
+  
+    # Log folder for other-than-fastq-runs to be the chr/oligo directory
+    if [ "${FastqOrOligo}" == "Fastq" ];then
+        erroutLogsToHere="."
+    else
+        erroutLogsToHere="runtimelogfiles/${i}"
+        checkThis="${erroutLogsToHere}"
+        checkedName='${erroutLogsToHere}'
+        checkParse
+        mkdir -p ${erroutLogsToHere}
+    fi
     
-    cp ${CaptureParallelPath}/${runScriptToBeUsed} run${FqOrOl}${currentFastqNumber}_$$.sh
-    chmod u+x run${FqOrOl}${currentFastqNumber}_$$.sh
+    cp ${CaptureParallelPath}/${runScriptToBeUsed} ${erroutLogsToHere}/run${FqOrOl}${currentFastqNumber}_$$.sh
+    chmod u+x ${erroutLogsToHere}/${FqOrOl}${currentFastqNumber}_$$.sh
     echo "./run${FqOrOl}${currentFastqNumber}_$$.sh ${currentFastqNumber}  1> run${FqOrOl}${currentFastqNumber}.out 2> run${FqOrOl}${currentFastqNumber}.err"
-    ./run${FqOrOl}${currentFastqNumber}_$$.sh ${currentFastqNumber}  1> run${FqOrOl}${currentFastqNumber}.out 2> run${FqOrOl}${currentFastqNumber}.err &
+    ${erroutLogsToHere}/run${FqOrOl}${currentFastqNumber}_$$.sh ${currentFastqNumber}  1> ${erroutLogsToHere}/run${FqOrOl}${currentFastqNumber}.out 2> ${erroutLogsToHere}/run${FqOrOl}${currentFastqNumber}.err &
     allOfTheRunningOnes="${allOfTheRunningOnes} $!"
+    echo run${FqOrOl}${currentFastqNumber}_$$.sh >> startedRunsList.log
     
     weStillNeedThisMany=$((${weStillNeedThisMany}-1))
     currentFastqNumber=$((${currentFastqNumber}+1))
@@ -464,13 +500,20 @@ echo >> processNumbersRunning.log
 
 # Now everything is done, so cleaning up !
 
+mkdir qsubLogFiles
+
+if [ "${erroutLogsToHere}" == '.' ]; then
+
 mkdir runscripts
 mv run*.sh runscripts/.
 
-mkdir qsubLogFiles
 mv run${FqOrOl}*.out qsubLogFiles/.
 mv run${FqOrOl}*.err qsubLogFiles/.
+
 mv ${fastqOrOligo}*_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log qsubLogFiles/.
+
+fi
+
 mv processNumbersRunning.log qsubLogFiles/.
 
 echo > maxMemUsages.log

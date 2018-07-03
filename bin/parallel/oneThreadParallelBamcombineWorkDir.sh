@@ -144,8 +144,8 @@ printNewChapterToLogFile
     echo "bam combining started : $(date)"
 
     # Writing the queue environment variables to a log file :
-    ./echoer_for_SunGridEngine_environment.sh > ${SGE_O_WORKDIR}/bamcombine${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
-
+    # ./echoer_for_SunGridEngine_environment.sh > ${SGE_O_WORKDIR}/bamcombine${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+    ./echoer_for_SunGridEngine_environment.sh > listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
     
     finCount=0
     nfinCount=0
@@ -163,14 +163,18 @@ printNewChapterToLogFile
     }
     else
     {
-        rm -r TEMP_FLASHED.head TEMP_NONFLASHED.head
-        finCount=$(cat FLASHEDbamOUTcount.txt | tr '\n' '+' | sed 's/+$/\n/' | bc -l)
-        nfinCount=$(cat NONFLASHEDbamOUTcount.txt | tr '\n' '+' | sed 's/+$/\n/' | bc -l)
+        rm -f TEMP_FLASHED.head TEMP_NONFLASHED.head
+        finCount=$(cat FLASHEDbamINcounts.txt | tr '\n' '+' | sed 's/+$/\n/' | bc -l)
+        nfinCount=$(cat NONFLASHEDbamINcounts.txt | tr '\n' '+' | sed 's/+$/\n/' | bc -l)
         foutCount=$(cat FLASHEDbamOUTcount.txt)
         nfoutCount=$(cat NONFLASHEDbamOUTcount.txt)
         
-        if [ "${finCount}" -ne "${foutCount}" ]; then runOK=0; fi
-        if [ "${nfinCount}" -ne "${nfoutCount}" ]; then runOK=0; fi
+        if [ "${finCount}" -ne "${foutCount}" ] || [ "${nfinCount}" -ne "${nfoutCount}" ]; then runOK=0; 
+        
+        printThis="Bam-combining generated truncated files on line ${oligoCounter} of C_analyseOligoBunches/runlist.txt ! "
+        printToLogFile
+        
+        fi
     }
     fi   
     

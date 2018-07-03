@@ -176,7 +176,8 @@ echo "./tmpdirMemoryasker.sh ${oligoCounter} ${TMPDIR} ${SGE_O_WORKDIR}/ & "
 tmpdirMmemoryAskerProcessnumber=$!
 
 # Writing the queue environment variables to a log file :
-${oligoFolderRelativePath}/echoer_for_SunGridEngine_environment.sh > ${SGE_O_WORKDIR}/oligo${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+# ${oligoFolderRelativePath}/echoer_for_SunGridEngine_environment.sh > ${SGE_O_WORKDIR}/oligo${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+${oligoFolderRelativePath}/echoer_for_SunGridEngine_environment.sh > listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
 
 printThis="oligo_${oligoCounter} : Run CC analysis oligo-wise (after F1 folder) .. "
 printNewChapterToLogFile

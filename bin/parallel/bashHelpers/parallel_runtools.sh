@@ -406,12 +406,13 @@ bamCombineInnerSub(){
     echo "outputbamsfolder ${outputbamsfolder}"
     echo "outputlogsfolder ${outputlogsfolder}"
     
-    echo "ls -lht ${inputbamstringFlashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt"
-    ls -lht ${inputbamstringFlashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt
-    thisBunchIsFine=$?
-    echo "ls -lht ${inputbamstringNonflashed} > bamlistings/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt"
-    ls -lht ${inputbamstringNonflashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt
-    thisBunchIsFine=$((${thisBunchIsFine}+$?))
+    echo "ls -lht ${inputbamstringFlashed} > ${outputlogsfolder}/logfiles/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt"
+    ls -lht ${inputbamstringFlashed} > ${outputlogsfolder}/logfiles/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt
+    TEMPfine=$?
+    echo "ls -lht ${inputbamstringNonflashed} > ${outputlogsfolder}/logfiles/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt"
+    ls -lht ${inputbamstringNonflashed} > ${outputlogsfolder}/logfiles/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt
+    TEMPfine2=$?
+    if [ "${TEMPfine}" -ne 0 ] && [ "${TEMPfine2}" -ne 0 ];then thisBunchIsFine=0;fi
 
     if [ "${thisBunchIsFine}" -eq 0 ] && [ "${thisBunchAlreadyReportedFailure}" -eq 0 ] ; then {
      echo -e "\t0\tcannot_find_files_in_ls" >> ${outputlogsfolder}/bamcombineprepSuccess.log
@@ -450,20 +451,30 @@ bamCombineInnerSub(){
     echo "echo Read counts" > ${outputbamsfolder}/bamCombineRun.sh    
     echo  >> ${outputbamsfolder}/bamCombineRun.sh
     
+    echo "TEMPcountFtotal=0" >> ${outputbamsfolder}/bamCombineRun.sh
     echo "for tempfile in ${inputbamstringFlashed}" >> ${outputbamsfolder}/bamCombineRun.sh
-    echo "do" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo "do" >> ${outputbamsfolder}/bamCombineRun.sh    
+    echo 'TEMPcountF=0' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'if [ -s "${tempfile}" ]; then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcountF=$( samtools view -c ${tempfile} )' >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo -e "${TEMPcountF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'TEMPcountFtotal=$((${TEMPcountFtotal}+${TEMPcountF}))' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'echo -e "${TEMPcountF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/logfiles/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'echo ${TEMPcountF} >> FLASHEDbamINcounts.txt' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh    
     echo "done" >> ${outputbamsfolder}/bamCombineRun.sh
 
     echo  >> ${outputbamsfolder}/bamCombineRun.sh
     
+    echo "TEMPcountNFtotal=0" >> ${outputbamsfolder}/bamCombineRun.sh
     echo "for tempfile in ${inputbamstringNonflashed}" >> ${outputbamsfolder}/bamCombineRun.sh
     echo "do" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'TEMPcountNF=0' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'if [ -s "${tempfile}" ]; then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcountNF=$( samtools view -c ${tempfile} )' >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo -e "${TEMPcountNF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'TEMPcountNFtotal=$((${TEMPcountNFtotal}+${TEMPcountNF}))' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'echo -e "${TEMPcountNF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/logfiles/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'echo ${TEMPcountNF} >> NONFLASHEDbamINcounts.txt' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh
     echo "done" >> ${outputbamsfolder}/bamCombineRun.sh
     
     echo  >> ${outputbamsfolder}/bamCombineRun.sh
@@ -474,28 +485,28 @@ bamCombineInnerSub(){
     echo  >> ${outputbamsfolder}/bamCombineRun.sh
 
     # Flashed - if we have bams ..
-    echo 'if [ "${TEMPcountF}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'if [ "${TEMPcountFtotal}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo "date" >> ${outputbamsfolder}/bamCombineRun.sh
     echo "samtools cat -h TEMP_FLASHED.head ${inputbamstringFlashed} > FLASHED_REdig.bam 2> samtoolsCat.err" >> ${outputbamsfolder}/bamCombineRun.sh 
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh   
     # Nonflashed - if we have bams ..
-    echo 'if [ "${TEMPcountNF}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'if [ "${TEMPcountNFtotal}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo "date" >> ${outputbamsfolder}/bamCombineRun.sh
     echo "samtools cat -h TEMP_NONFLASHED.head ${inputbamstringNonflashed} > NONFLASHED_REdig.bam 2>> samtoolsCat.err" >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh   
     echo  >> ${outputbamsfolder}/bamCombineRun.sh
 
     # Counts ..
-    echo 'TEMPcount=0'
-    echo 'if [ "${TEMPcountF}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'TEMPcount=0' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'if [ "${TEMPcountFtotal}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcount=$( samtools view -c FLASHED_REdig.bam )' >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo -e "${TEMPcount}\t"$(pwd)"/FLASHED_REdig.bam" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'echo -e "${TEMPcount}\t"$(pwd)"/FLASHED_REdig.bam" >> '$(cd ${outputlogsfolder};pwd)"/logfiles/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh   
     echo 'echo ${TEMPcount} >> FLASHEDbamOUTcount.txt' >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'TEMPcount=0'
-    echo 'if [ "${TEMPcountNF}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'TEMPcount=0' >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'if [ "${TEMPcountNFtotal}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcount=$( samtools view -c NONFLASHED_REdig.bam )' >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo -e "${TEMPcount}\t"$(pwd)"/NONFLASHED_REdig.bam" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'echo -e "${TEMPcount}\t"$(pwd)"/NONFLASHED_REdig.bam" >> '$(cd ${outputlogsfolder};pwd)"/logfiles/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh   
     echo 'echo ${TEMPcount} >> NONFLASHEDbamOUTcount.txt' >> ${outputbamsfolder}/bamCombineRun.sh
 
@@ -569,9 +580,9 @@ bamCombineChecksSaveThisForFuturePurposes(){
      echo -e "\tFlashedreadCount:${TEMPflashedCount}\tNonflashedreadCount:${TEMPnonflashedCount}" >> ${outputlogsfolder}/bamcombineSuccess.log
      
      # Globin combining doesn't get the very detailed counters - so asking if detailed counters folder exists ..
-     if [ -d  bamlistings ];then
-     echo -e "Combined count :\t${TEMPflashedCount}" >> bamlistings/bamlisting_FLASHED_chr${thisOligoName}.txt
-     echo -e "Combined count :\t${TEMPnonflashedCount}" >> bamlistings/bamlisting_NONFLASHED_chr${thisOligoName}.txt
+     if [ -d  logfiles ];then
+     echo -e "Combined count :\t${TEMPflashedCount}" >> logfiles/bamlisting_FLASHED_chr${thisOligoName}.txt
+     echo -e "Combined count :\t${TEMPnonflashedCount}" >> logfiles/bamlisting_NONFLASHED_chr${thisOligoName}.txt
      fi 
      
     }
@@ -594,10 +605,10 @@ echo "# Bam combine - preparing for run - 1 (prepare finished without errors) , 
 # C_combineOligoWise/chr1/Hba-1/oligoFileOneliner.txt
 
 # Copy over the folder structure - for the log files
-mkdir bamlistings
-cp -r * bamlistings/. 2> "/dev/null"
-rmdir bamlistings/bamlistings
-rm -f bamlistings/bamcombineprepSuccess.log
+mkdir logfiles
+cp -r * logfiles/. 2> "/dev/null"
+rmdir logfiles/logfiles
+rm -f logfiles/bamcombineprepSuccess.log
 
 mkdir runlistings
 
@@ -736,6 +747,8 @@ F1foldername="F1_beforeCCanalyser_${samplename}_${CCversion}"
 rm -rf D_analyseOligoWise
 mkdir D_analyseOligoWise
 mkdir D_analyseOligoWise/runlistings
+mkdir D_analyserOligoWise/
+
 
 oligofileCount=1
 weSawGlobins=0
@@ -762,6 +775,9 @@ do
     if [ ! -d D_analyseOligoWise/${thisOligoChr} ]; then
         mkdir D_analyseOligoWise/${thisOligoChr}
     fi
+    
+    # Copy over the folder structure - for the log files
+    mkdir -p D_analyseOligoWise/logfiles/${thisOligoChr}/${thisOligoName}
     
     # If we enter the printing loops for this oligo - by default we do, if we already did that globin, we don't.
     wePrepareThisOligo=1
@@ -823,8 +839,6 @@ do
             
             # Catenating the globins to single file ..
             
-            # Copy over the folder structure - for the log files
-            mkdir -p D_analyseOligoWise/bamlistings/${thisOligoChr}/${thisOligoName}
             if [ ! -d  D_analyseOligoWise/runlistings ]; then mkdir D_analyseOligoWise/runlistings; fi
             
             firstflashedfile="${thisChrFolder}/${globin1}/FLASHED_REdig.bam"

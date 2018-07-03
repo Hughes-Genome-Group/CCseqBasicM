@@ -164,7 +164,8 @@ printNewChapterToLogFile
     echo "capture analysis started : $(date)"
 
     # Writing the queue environment variables to a log file :
-    ./echoer_for_SunGridEngine_environment.sh > ${wholenodeSubmitDir}/oligo${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+    # ./echoer_for_SunGridEngine_environment.sh > ${wholenodeSubmitDir}/oligo${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+    ./echoer_for_SunGridEngine_environment.sh > listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
     
       printThis="$(cat run.sh)"
       printToLogFile

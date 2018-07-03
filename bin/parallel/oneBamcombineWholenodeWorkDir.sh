@@ -149,7 +149,8 @@ printNewChapterToLogFile
     echo "bam combining started : $(date)"
       
     # Writing the queue environment variables to a log file :
-    ./echoer_for_SunGridEngine_environment.sh > ${wholenodeSubmitDir}/bamcombine${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+    # ./echoer_for_SunGridEngine_environment.sh > ${wholenodeSubmitDir}/bamcombine${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+    ./echoer_for_SunGridEngine_environment.sh > listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
         
       fCount=0
       nfCount=0
@@ -165,9 +166,19 @@ printNewChapterToLogFile
       }
       else
       {
-        rm -r TEMP_FLASHED.head TEMP_NONFLASHED.head
-        fCount=$(cat FLASHEDbamOUTcount.txt)
-        nfCount=$(cat NONFLASHEDbamOUTcount.txt)
+        rm -f TEMP_FLASHED.head TEMP_NONFLASHED.head
+        finCount=$(cat FLASHEDbamINcounts.txt | tr '\n' '+' | sed 's/+$/\n/' | bc -l)
+        nfinCount=$(cat NONFLASHEDbamINcounts.txt | tr '\n' '+' | sed 's/+$/\n/' | bc -l)
+        foutCount=$(cat FLASHEDbamOUTcount.txt)
+        nfoutCount=$(cat NONFLASHEDbamOUTcount.txt)
+        
+        if [ "${finCount}" -ne "${foutCount}" ] || [ "${nfinCount}" -ne "${nfoutCount}" ]; then runOK=0; 
+        
+        printThis="Bam-combining generated truncated files on line ${oligoCounter} of C_analyseOligoBunches/runlist.txt ! "
+        printToLogFile
+        
+        fi
+        
       }
       fi  
 
@@ -180,9 +191,9 @@ printNewChapterToLogFile
     
     doQuotaTesting
     
-    printThis="FLASHEDcount ${fCount} NONFLASHEDcount ${nfCount} runOK ${runOK}"
+    printThis="FLASHEDin ${finCount} FLASHEDout ${finCount} NONFLASHEDin ${nfinCount} NONFLASHEDout ${nfoutCount} runOK ${runOK}"
     printToLogFile
-    echo "FLASHEDcount ${fCount} NONFLASHEDcount ${nfCount} runOK ${runOK}" > bamcombineSuccess.log
+    echo "FLASHEDin ${finCount} FLASHEDout ${finCount} NONFLASHEDin ${nfinCount} NONFLASHEDout ${nfoutCount} runOK ${runOK}" > bamcombineSuccess.log
     
     
 # ----------------------------------------
