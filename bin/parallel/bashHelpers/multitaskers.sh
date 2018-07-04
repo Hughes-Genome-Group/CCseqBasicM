@@ -356,7 +356,7 @@ do {
     # for testing purposes
     echo ${allOfTheRunningOnes} >> processNumbersRunning.log
     ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> processNumbersRunning.log
-    echo "That is ${i} running just now" >> processNumbersRunning.log
+    echo "That is ${i} runs started so far" >> processNumbersRunning.log
     echo >> processNumbersRunning.log
 
 }
@@ -414,7 +414,7 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     # for testing purposes
     echo ${allOfTheRunningOnes} >> processNumbersRunning.log
     ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> processNumbersRunning.log
-    echo "That is ${countOfThemRunningJustNow} running just now, and we still need to start ${weStillNeedThisMany} runs" >> processNumbersRunning.log
+    echo "That is "$( ${allOfTheRunningOnes} | tr ' ' '\n' | grep -c "")" runs started, ${countOfThemRunningJustNow} running just now, and we still need to start ${weStillNeedThisMany} runs" >> processNumbersRunning.log
     echo >> processNumbersRunning.log
     
     fi    
