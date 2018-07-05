@@ -131,6 +131,13 @@ do {
 
 # sleepMinutes=10
 sleepMinutes=1
+
+# Override for bamcombining (start more frequently than every 1 minutes)
+if [ "${FastqOrOligo}" == "Bamcombine" ];then
+    sleepMinutes=0.1
+fi
+
+
 sleepSeconds=$((${sleepMinutes}*60))
 echo
 echo "Will be monitoring the runs in $(pwd)/allRunsJUSTNOW.txt "
@@ -371,7 +378,9 @@ echo "i.e. every ${sleepSeconds} seconds"
 echo
 
 weStillNeedThisMany=$((${foundFoldersCount}-${askedProcessors}))
-currentFastqNumber=$((${askedProcessors}+1))
+# This was confusing as inconsistent with above where the looper is ${i}
+# currentFastqNumber=$((${askedProcessors}+1))
+i=$((${askedProcessors}+1))
 while [ "${weStillNeedThisMany}" -gt 0 ]
 do
 {
@@ -401,15 +410,17 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
         mkdir -p ${erroutLogsToHere}
     fi
     
-    cp ${CaptureParallelPath}/${runScriptToBeUsed} ${erroutLogsToHere}/run${FqOrOl}${currentFastqNumber}_$$.sh
-    chmod u+x ${erroutLogsToHere}/${FqOrOl}${currentFastqNumber}_$$.sh
-    echo "./run${FqOrOl}${currentFastqNumber}_$$.sh ${currentFastqNumber}  1> run${FqOrOl}${currentFastqNumber}.out 2> run${FqOrOl}${currentFastqNumber}.err"
-    ${erroutLogsToHere}/run${FqOrOl}${currentFastqNumber}_$$.sh ${currentFastqNumber}  1> ${erroutLogsToHere}/run${FqOrOl}${currentFastqNumber}.out 2> ${erroutLogsToHere}/run${FqOrOl}${currentFastqNumber}.err &
+    cp ${CaptureParallelPath}/${runScriptToBeUsed} ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh
+    chmod u+x ${erroutLogsToHere}/${FqOrOl}${i}_$$.sh
+    echo "./run${FqOrOl}${i}_$$.sh ${i}  1> run${FqOrOl}${i}.out 2> run${FqOrOl}${i}.err"
+    ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh ${i}  1> ${erroutLogsToHere}/run${FqOrOl}${i}.out 2> ${erroutLogsToHere}/run${FqOrOl}${i}.err &
     allOfTheRunningOnes="${allOfTheRunningOnes} $!"
-    echo run${FqOrOl}${currentFastqNumber}_$$.sh >> startedRunsList.log
+    echo run${FqOrOl}${i}_$$.sh >> startedRunsList.log
     
     weStillNeedThisMany=$((${weStillNeedThisMany}-1))
-    currentFastqNumber=$((${currentFastqNumber}+1))
+    # This was confusing as inconsistent with above where the looper is ${i}
+    # currentFastqNumber=$((${currentFastqNumber}+1))
+    i=$((${i}+1))
     
     # for testing purposes
     echo ${allOfTheRunningOnes} >> processNumbersRunning.log
@@ -570,7 +581,7 @@ if [ "${useTMPDIRforThis}" -eq 1 ];then
 
 weUseThisManyMegas=0
 if [ "${useWholenodeQueue}" -eq 1 ]; then
-    weUseThisManyMegas=$(($( du -sm ${TMPDIR} | cut -f 1 )))
+    weUseThisManyMegas=$(($( du -sm ${TMPDIR} 2>> /dev/null | cut -f 1 )))
 else
     if [ -s runJustNow_${m}.log.tmpdir ];then
         tempareaMemoryUsage=$( cat runJustNow_${m}.log.tmpdir )
@@ -633,7 +644,7 @@ for (( m=1; m<=${foundFoldersCount}; m++ ))
 do {
 
 # Memory as well
-localMemoryUsage=$( du -sm ${wholenodeSubmitDir} | cut -f 1 )
+localMemoryUsage=$( du -sm ${wholenodeSubmitDir} 2>> /dev/null | cut -f 1 )
 timepoint=$(date +%H:%M)
 
 # Override for bamcombining (never in TMPDIR)
@@ -643,7 +654,7 @@ else
 
     if [ "${useTMPDIRforThis}" -eq 1 ];then
         if [ "${useWholenodeQueue}" -eq 1 ]; then
-        tempareaMemoryUsage=$( du -sm ${TMPDIR} | cut -f 1 )
+        tempareaMemoryUsage=$( du -sm ${TMPDIR} 2>> /dev/null | cut -f 1 )
         else
             if [ -s runJustNow_${m}.log.tmpdir ];then
             tempareaMemoryUsage=$( cat runJustNow_${m}.log.tmpdir )

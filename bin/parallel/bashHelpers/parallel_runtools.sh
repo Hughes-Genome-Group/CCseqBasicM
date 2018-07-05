@@ -229,7 +229,7 @@ do {
         if [ "${useTMPDIRforThis}" -eq 1 ];then
         # TMPDIR memory usage ETERNAL loop into here, as cannot be done outside the node ..
         echo 'while [ 1 == 1 ]; do' > tmpdirMemoryasker.sh
-        echo 'du -sm ${2} | cut -f 1 > ${3}runJustNow_${1}.log.tmpdir' >> tmpdirMemoryasker.sh                
+        echo 'du -sm ${2} | cut -f 1 2>> /dev/null > ${3}runJustNow_${1}.log.tmpdir' >> tmpdirMemoryasker.sh                
         echo 'sleep 60' >> tmpdirMemoryasker.sh
         echo 'done' >> tmpdirMemoryasker.sh
         echo  >> tmpdirMemoryasker.sh
@@ -952,7 +952,7 @@ do
     if [ "${useWholenodeQueue}" -eq 0 ] &&[ "${useTMPDIRforThis}" -eq 1 ];then
         # TMPDIR memory usage ETERNAL loop into here, as cannot be done outside the node ..
         echo 'while [ 1 == 1 ]; do' > tmpdirMemoryasker.sh
-        echo 'du -sm ${2} | cut -f 1 > ${3}runJustNow_${1}.log.tmpdir' >> tmpdirMemoryasker.sh                
+        echo 'du -sm ${2} | cut -f 1 2>> /dev/null > ${3}runJustNow_${1}.log.tmpdir' >> tmpdirMemoryasker.sh                
         echo 'sleep 60' >> tmpdirMemoryasker.sh
         echo 'done' >> tmpdirMemoryasker.sh
         echo  >> tmpdirMemoryasker.sh

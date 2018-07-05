@@ -40,18 +40,18 @@ printThis='Deleting all folder D bam and wig files (gff files and bigwig files r
 printToLogFile
 
 echo "Total disk space Megas (before deleting) : " > ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
-du -sm | cut -f 1 >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
+du -sm 2>> /dev/null | cut -f 1 >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
 
 echo "Total disk space Megas of bam files (before deleting) : " >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
-du -sm F[12345]*/*.bam | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
+du -sm F[12345]*/*.bam 2>> /dev/null | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
 rm -f F[12345]*/*.bam
 
 echo "Total disk space Megas of wig files (before deleting) : " >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
-du -sm F[123456]*/*.wig | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
+du -sm F[123456]*/*.wig 2>> /dev/null | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
 rm -f F[123456]*/*.wig
 
 echo "Total disk space (after deleting) : " >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
-du -sm | cut -f 1 >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
+du -sm 2>> /dev/null | cut -f 1 >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
 
 echo
 date
@@ -101,9 +101,9 @@ doQuotaTesting(){
         
     echo
     echo "Local disk usage for THIS RUN - at the moment (check you don't go over your t1-data area quota) :"
-    du -sh ${SGE_O_WORKDIR}
+    du -sh ${SGE_O_WORKDIR} 2>> /dev/null
     echo "TMPDIR cluster temp area usage - check you don't go over 12GB (normal queue) or 200GB (largemem queue) :"
-    du -sh ${TMPDIR}
+    du -sh ${TMPDIR} 2>> /dev/null
 
 #_____________________
 # For testing purposes

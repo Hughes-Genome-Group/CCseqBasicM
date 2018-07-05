@@ -155,6 +155,8 @@ onlyblat=0
 
 reuseblatpath='.'
 
+stepsABCDtopdir=$(pwd)
+
 #------------------------------------------
 
 # Loading subroutines in ..
@@ -341,8 +343,6 @@ ls -lht ${oligofile}
 echo
 
 # -----------------------------------------
-
-stepsABCDtopdir=$(pwd)
 
 rm -rf A_prepareForRun
 mkdir A_prepareForRun

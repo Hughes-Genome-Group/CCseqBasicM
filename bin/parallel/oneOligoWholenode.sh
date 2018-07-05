@@ -100,9 +100,9 @@ doQuotaTesting(){
         
     echo
     echo "Local disk usage for THIS RUN - at the moment (check you don't go over your t1-data area quota) :"
-    du -sh ${wholenodeSubmitDir}
+    du -sh ${wholenodeSubmitDir} 2>> /dev/null
     echo "TMPDIR cluster temp area usage - check you don't go too close to 300GB :"
-    du -sh ${TMPDIR}
+    du -sh ${TMPDIR} 2>> /dev/null
     
 #_____________________
 # For testing purposes
@@ -209,18 +209,18 @@ printNewChapterToLogFile
       printToLogFile
       
       echo "Total disk space Megas (before deleting) : " > bamWigSizesBeforeDeleting.log
-      du -sm | cut -f 1 >> bamWigSizesBeforeDeleting.log
+      du -sm 2>> /dev/null | cut -f 1 >> bamWigSizesBeforeDeleting.log
       
       echo "Total disk space Megas of bam files (before deleting) : " >> bamWigSizesBeforeDeleting.log
-      du -sm F[12345]*/*.bam | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> bamWigSizesBeforeDeleting.log
+      du -sm F[12345]*/*.bam 2>> /dev/null | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> bamWigSizesBeforeDeleting.log
       rm -f F[12345]*/*.bam
       
       echo "Total disk space Megas of wig files (before deleting) : " >> bamWigSizesBeforeDeleting.log
-      du -sm F[123456]*/*.wig | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> bamWigSizesBeforeDeleting.log
+      du -sm F[123456]*/*.wig 2>> /dev/null | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> bamWigSizesBeforeDeleting.log
       rm -f F[123456]*/*.wig
       
       echo "Total disk space (after deleting) : " >> bamWigSizesBeforeDeleting.log
-      du -sm | cut -f 1 >> bamWigSizesBeforeDeleting.log  
+      du -sm 2>> /dev/null | cut -f 1 >> bamWigSizesBeforeDeleting.log  
       }  
       fi  
     
