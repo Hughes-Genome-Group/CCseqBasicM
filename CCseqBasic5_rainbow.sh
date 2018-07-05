@@ -155,7 +155,9 @@ onlyblat=0
 
 reuseblatpath='.'
 
-stepsABCDtopdir=$(pwd)
+rainbowRunTOPDIR=$(pwd)
+echo "rainbowRunTOPDIR ${rainbowRunTOPDIR}"
+echo
 
 #------------------------------------------
 
@@ -484,10 +486,10 @@ checkParse
 
 # ------------------------------------
 
-cdCommand='cd ${stepsABCDtopdir}'
-cdToThis="${stepsABCDtopdir}"
+cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
+cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety
-cd ${stepsABCDtopdir}
+cd ${rainbowRunTOPDIR}
 
 prepareBlatFolder
 
@@ -557,10 +559,10 @@ runMultitask
 fi
 doQuotaTesting
 
-cdCommand='cd ${stepsABCDtopdir}'
-cdToThis="${stepsABCDtopdir}"
+cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
+cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety  
-cd ${stepsABCDtopdir}
+cd ${rainbowRunTOPDIR}
 
 checkFastqRunErrors
 
@@ -584,10 +586,10 @@ if [ "${stopAfterFolderB}" -eq 1 ]; then
     exit 0
 fi
 
-cdCommand='cd ${stepsABCDtopdir}'
-cdToThis="${stepsABCDtopdir}"
+cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
+cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety
-cd ${stepsABCDtopdir}
+cd ${rainbowRunTOPDIR}
     
 # This is end of if startAfterFolderB : If resuming after fastq repair reruns
 }
@@ -657,17 +659,17 @@ runMultitask
 fi
 doQuotaTesting
 
-cdCommand='cd ${stepsABCDtopdir}'
-cdToThis="${stepsABCDtopdir}"
+cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
+cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety  
-cd ${stepsABCDtopdir}
+cd ${rainbowRunTOPDIR}
 checkBamcombineErrors
 
 date
-cdCommand='cd ${stepsABCDtopdir}'
-cdToThis="${stepsABCDtopdir}"
+cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
+cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety
-cd ${stepsABCDtopdir}
+cd ${rainbowRunTOPDIR}
 
 # onlyCCanalyser end if
 fi
@@ -701,10 +703,10 @@ echo
 # echo "${CaptureParallelPath}/parallelVisualisationLogs.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme} ${inputgenomename} ${tiled} $(basename ${B_FOLDER_PATH}) $(basename ${C_FOLDER_PATH}) ${oligofile}"
 # ${CaptureParallelPath}/parallelVisualisationLogs.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme} ${inputgenomename} ${tiled} $(basename ${B_FOLDER_PATH}) $(basename ${C_FOLDER_PATH}) ${oligofile}
 
-cdCommand='cd ${stepsABCDtopdir}'
-cdToThis="${stepsABCDtopdir}"
+cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
+cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety  
-cd ${stepsABCDtopdir}
+cd ${rainbowRunTOPDIR}
 
 # ------------------------------
 
@@ -798,10 +800,10 @@ runMultitask
 fi
 doQuotaTesting
 
-cdCommand='cd ${stepsABCDtopdir}'
-cdToThis="${stepsABCDtopdir}"
+cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
+cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety  
-cd ${stepsABCDtopdir}
+cd ${rainbowRunTOPDIR}
 
 checkParallelCCanalyserErrors
 
@@ -837,10 +839,10 @@ stepEmiddir=$(pwd)
 echo "${CaptureParallelPath}/parallelVisualisation.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme}"
 ${CaptureParallelPath}/parallelVisualisation.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme}
 
-cdCommand='cd ${stepsABCDtopdir}'
-cdToThis="${stepsABCDtopdir}"
+cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
+cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety  
-cd ${stepsABCDtopdir}
+cd ${rainbowRunTOPDIR}
 
 # -----------------------------------------
 

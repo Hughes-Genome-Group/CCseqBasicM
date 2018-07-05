@@ -753,8 +753,13 @@ if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
 fi
 
 
-cp ${datafolder}/*.gff $file TEMPdir/.
-   
+cp ${datafolder}/*.gff TEMPdir/.
+
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixFLASHED}*.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported FLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else
 for file in TEMPdir/${dataprefixFLASHED}*.gff
 do
     
@@ -767,7 +772,13 @@ do
     ploidyGFFoverlap
     
 done
+fi
 
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixNONFLASHED}*.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported NONFLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else
 for file in TEMPdir/${dataprefixNONFLASHED}*.gff
 do
     
@@ -781,10 +792,16 @@ do
     ploidyGFFoverlap    
     
 done
+fi
 
 else
 # If we don't ploidy filter, we copy, with name _noPF.gff
-    
+
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixFLASHED}*.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported FLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else    
 for file in TEMPdir/${dataprefixFLASHED}*.gff
 do
     oligoname=$( echo $file | sed 's/.*'${dataprefixFLASHED}'_//' | sed 's/.gff$//' )
@@ -792,7 +809,13 @@ do
     cp ${file} TEMPdir2/${newname}_noPF.gff
     
 done
+fi
 
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixNONFLASHED}*.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported NONFLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else
 for file in TEMPdir/${dataprefixNONFLASHED}*.gff
 do
    
@@ -801,7 +824,8 @@ do
     cp ${file} TEMPdir2/${newname}_noPF.gff    
 
 done
-    
+fi
+ 
 fi
 
 # Deleting temporary files as last step..
@@ -817,7 +841,11 @@ printToLogFile
 printThis="Generating blat-excluded regions list for blat filtering.."
 printToLogFile
 
-
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixFLASHED}*PF.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported FLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else  
 for file in TEMPdir2/${dataprefixFLASHED}*PF.gff
 do
     
@@ -828,7 +856,13 @@ do
     blatGFFoverlap
    
 done
+fi
 
+areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixNONFLASHED}*PF.gff | grep -c "" )))
+if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
+    printThis="WARNING : no reported NONFLASHED fragments found - to apply BLAT-filtered regions to ! "
+    printToLogFile    
+else  
 for file in TEMPdir2/${dataprefixNONFLASHED}*PF.gff
 do
   
@@ -839,6 +873,7 @@ do
     blatGFFoverlap
     
 done
+fi
 
 rm -rf TEMPdir2
 

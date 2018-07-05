@@ -790,7 +790,8 @@ sampleForCCanalyser="RAW_${Sample}"
 
 samForCCanalyser="F1_beforeCCanalyser_${Sample}_${CCversion}/FLASHED_REdig.sam"
 testedFile="${samForCCanalyser}"
-doTempFileTesting
+tempFileFine=1
+doTempFileInfo
 
 rm -f parameters_for_filtering.log
 
@@ -802,7 +803,9 @@ DUPLFILTER=0
 
 echo "F2_fl" > ${JustNowLogFile}
 
+if [ "${tempFileFine}" -eq 1 ]; then
 runCCanalyser
+fi
 doQuotaTesting
 
 printThis="##################################"
@@ -815,7 +818,8 @@ sampleForCCanalyser="RAW_${Sample}"
 
 samForCCanalyser="F1_beforeCCanalyser_${Sample}_${CCversion}/NONFLASHED_REdig.sam"
 testedFile="${samForCCanalyser}"
-doTempFileTesting
+tempFileFine=1
+doTempFileInfo
 
 # Files which come twice (both flashed and nonflashed runs) are removed here ..
 rm -f parameters_for_filtering.log
@@ -828,7 +832,9 @@ DUPLFILTER=0
 
 echo "F2_nonfl" > ${JustNowLogFile}
 
+if [ "${tempFileFine}" -eq 1 ]; then
 runCCanalyser
+fi
 doQuotaTesting
 
 
@@ -979,7 +985,8 @@ sampleForCCanalyser="PREfiltered_${Sample}"
 
 samForCCanalyser="F1_beforeCCanalyser_${Sample}_${CCversion}/FLASHED_REdig.sam"
 testedFile="${samForCCanalyser}"
-doTempFileTesting
+tempFileFine=1
+doTempFileInfo
 
 rm -f parameters_for_filtering.log
 
@@ -988,7 +995,9 @@ DUPLFILTER=1
 
 echo "F3_fl" > ${JustNowLogFile}
 
+if [ "${tempFileFine}" -eq 1 ]; then
 runCCanalyser
+fi
 doQuotaTesting
 
 # Adding the flashed filename, but not forgetting the common prefix either..
@@ -1011,7 +1020,8 @@ sampleForCCanalyser="PREfiltered_${Sample}"
 
 samForCCanalyser="F1_beforeCCanalyser_${Sample}_${CCversion}/NONFLASHED_REdig.sam"
 testedFile="${samForCCanalyser}"
-doTempFileTesting
+tempFileFine=1
+doTempFileInfo
 
 rm -f parameters_for_filtering.log
 
@@ -1020,7 +1030,9 @@ DUPLFILTER=1
 
 echo "F3_nonfl" > ${JustNowLogFile}
 
+if [ "${tempFileFine}" -eq 1 ]; then
 runCCanalyser
+fi
 doQuotaTesting
 
 # Adding the nonflashed filename
@@ -1102,17 +1114,11 @@ cp filtering.log ${publicPathForCCanalyser}/.
 
 if [ "${TEMPreturnvalue}" -ne 0 ]; then
     
-    printThis="Filtering after BLAT was crashed !"
-    printToLogFile
-    printThis="( If this was BLAT-generation run, this is what you wanted ) "
+    printThis="Filtering after BLAT was crashed ! - maybe you had no reads left in either FLASHED or NONFLASHED file for thi/es(e) oligo(s), in folder F3/preFiltered ? "
     printToLogFile
     
-    printThis="Your psl-files for BLAT-filtering can be found in folder :\n $( pwd )/BlatPloidyFilterRun/REUSE_blat/"
-    printToLogFile
-
     printThis="EXITING !"
     printToLogFile
-    
     exit 1
     
 fi
@@ -1171,7 +1177,8 @@ samForCCanalyser="FLASHED_REdig.sam"
 
 FILTEREDsamBasename=$( echo ${samForCCanalyser} | sed 's/.*\///' | sed 's/\.sam$//' )
 testedFile="${samForCCanalyser}"
-doTempFileTesting
+tempFileFine=1
+doTempFileInfo
 
 # Now changing the identifier from "RAW" to "FILTERED" - to set the output folder
 
@@ -1182,7 +1189,9 @@ DUPLFILTER=0
 
 echo "F5_fl" > ${JustNowLogFile}
 
+if [ "${tempFileFine}" -eq 1 ]; then
 runCCanalyser
+fi
 doQuotaTesting
 
 # Remove symlink
@@ -1202,7 +1211,8 @@ samForCCanalyser="NONFLASHED_REdig.sam"
 
 FILTEREDsamBasename=$( echo ${samForCCanalyser} | sed 's/.*\///' | sed 's/\.sam$//' )
 testedFile="${samForCCanalyser}"
-doTempFileTesting
+tempFileFine=1
+doTempFileInfo
 
 # Now changing the identifier from "RAW" to "FILTERED" - to set the output folder
 sampleForCCanalyser="FILTERED_${Sample}"
@@ -1212,7 +1222,9 @@ DUPLFILTER=0
 
 echo "F5_nonfl" > ${JustNowLogFile}
 
+if [ "${tempFileFine}" -eq 1 ]; then
 runCCanalyser
+fi
 doQuotaTesting
 
 # Remove symlink
@@ -1253,7 +1265,8 @@ COMBINEDsamBasename=$( echo ${samForCCanalyser} | sed 's/.*\///' | sed 's/\.sam$
 samForCCanalyser="COMBINED.sam"
 COMBINEDsamBasename=$( echo ${samForCCanalyser} | sed 's/.*\///' | sed 's/\.sam$//' )
 testedFile="${samForCCanalyser}"
-doTempFileTesting
+tempFileFine=1
+doTempFileInfo
 
 printThis="------------------------------"
 printToLogFile
@@ -1280,7 +1293,9 @@ if [ "${PARALLEL}" -eq 2 ]; then
   otherParameters="${otherParameters} --colormarkbigwigs "
 fi
 
+if [ "${tempFileFine}" -eq 1 ]; then
 runCCanalyser
+fi
 doQuotaTesting
 
 # Remove input file

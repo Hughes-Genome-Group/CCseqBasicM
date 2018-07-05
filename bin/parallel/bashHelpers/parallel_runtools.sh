@@ -747,14 +747,12 @@ F1foldername="F1_beforeCCanalyser_${samplename}_${CCversion}"
 rm -rf D_analyseOligoWise
 mkdir D_analyseOligoWise
 mkdir D_analyseOligoWise/runlistings
-mkdir D_analyserOligoWise/
-
 
 oligofileCount=1
 weSawGlobins=0
 for file in $(pwd)/C_combineOligoWise/*/*/oligoFileOneliner.txt 
 do
-    printThis="$oligofile"
+    printThis="Oligono ${oligofileCount} --------------------- "
     printToLogFile
     thisOligoName=$( basename $( dirname $file ))
     thisOligoChr=$( basename $( dirname $( dirname $file ))) 
@@ -772,6 +770,9 @@ do
     checkedName='${thisChrFolder}'
     checkParse
     
+    # For testing purposes
+    echo "${thisOligoName} with oligo file ${file}"
+
     if [ ! -d D_analyseOligoWise/${thisOligoChr} ]; then
         mkdir D_analyseOligoWise/${thisOligoChr}
     fi
@@ -791,8 +792,6 @@ do
         thisOligoName="HbbCombined"
     fi
 
-    # For testing purposes
-    echo ${thisOligoName}
     rm -f D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/run.sh
     
     # Hard coding the globin captures here ..
@@ -938,7 +937,7 @@ do
     # All runs (globins or not) - get the same run.sh - except normal oligos get the copy of the F1 folder, but globins already have true copy so don't need this.
     JustNowFile=$(pwd)/D_analyseOligoWise/runJustNow
     
-    echo "${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${file} --${REenzymeShort} --parallel 2 --BLATforREUSEfolderPath ${BLAT_FOLDER_PREFIX} --pf ${publicfolder}/bunchWise/bunch_${thisOligoName} --monitorRunLogFile ${JustNowFile}_${oligofileCount}.log ${parameterList} "
+    # echo "${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${file} --${REenzymeShort} --parallel 2 --BLATforREUSEfolderPath ${BLAT_FOLDER_PREFIX} --pf ${publicfolder}/bunchWise/bunch_${thisOligoName} --monitorRunLogFile ${JustNowFile}_${oligofileCount}.log ${parameterList} "
     echo "${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${file} --${REenzymeShort} --parallel 2 --BLATforREUSEfolderPath ${BLAT_FOLDER_PREFIX} --pf ${publicfolder}/bunchWise/bunch_${thisOligoName} --monitorRunLogFile ${JustNowFile}_${oligofileCount}.log ${parameterList}" >> D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/run.sh
     
     chmod u+x D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/run.sh

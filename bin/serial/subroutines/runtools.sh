@@ -947,26 +947,36 @@ cd F1_beforeCCanalyser_${Sample}_${CCversion}
 # Run crash : we will have SAM instead of bam - if we don't check existence here, we will overwrite (due to funny glitch in samtools 1.1 ) - we are already in samtools 1.3 but that may still be valid ?
 if [ ! -s FLASHED_REdig.sam ]
 then
-    samtools view -h FLASHED_REdig.bam > TEMP.sam
-    mv -f TEMP.sam FLASHED_REdig.sam
-    if [ -s FLASHED_REdig.sam ]; then
-        rm -f FLASHED_REdig.bam
+    if [ -s FLASHED_REdig.bam ]
+    then
+        samtools view -h FLASHED_REdig.bam > TEMP.sam
+        mv -f TEMP.sam FLASHED_REdig.sam
+        if [ -s FLASHED_REdig.sam ]; then
+            rm -f FLASHED_REdig.bam
+        else
+            echo "EXITING ! : Couldn't make FLASHED_REdig.sam from FLASHED_REdig.bam" >> "/dev/stderr"
+            exit 1
+        fi
     else
-        echo "EXITING ! : Couldn't make FLASHED_REdig.sam from FLASHED_REdig.bam" >> "/dev/stderr"
-        exit 1
+    echo "WARNING : Couldn't find FLASHED_REdig.bam/.sam - continuing without any flashed reads .. " >> "/dev/stderr"
     fi
 fi
 
 # Run crash : we will have SAM instead of bam - if we don't check existence here, we will overwrite (due to funny glitch in samtools 1.1 ) - we are already in samtools 1.3 but that may still be valid ?
 if [ ! -s NONFLASHED_REdig.sam ]
 then
-    samtools view -h NONFLASHED_REdig.bam > TEMP.sam
-    mv -f TEMP.sam NONFLASHED_REdig.sam
-    if [ -s NONFLASHED_REdig.sam ]; then
-        rm -f NONFLASHED_REdig.bam
+    if [ -s NONFLASHED_REdig.bam ]
+    then
+        samtools view -h NONFLASHED_REdig.bam > TEMP.sam
+        mv -f TEMP.sam NONFLASHED_REdig.sam
+        if [ -s NONFLASHED_REdig.sam ]; then
+            rm -f NONFLASHED_REdig.bam
+        else
+            echo "EXITING ! : Couldn't make NONFLASHED_REdig.sam from NONFLASHED_REdig.bam" >> "/dev/stderr"
+            exit 1
+        fi
     else
-        echo "EXITING ! : Couldn't make NONFLASHED_REdig.sam from NONFLASHED_REdig.bam" >> "/dev/stderr"
-        exit 1
+    echo "WARNING : Couldn't find NONFLASHED_REdig.bam/.sam - continuing without any nonflashed reads .. " >> "/dev/stderr"
     fi
 fi
 

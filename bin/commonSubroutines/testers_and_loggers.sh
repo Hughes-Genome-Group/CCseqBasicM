@@ -114,6 +114,19 @@ doTempFileTesting(){
 fi
 }
 
+doTempFileInfo(){
+    
+    # NEEDS THIS TO BE SET BEFORE CALL :
+    # testedFile=""
+    # SETS THIS :
+    # tempFileFine=0
+    
+    if [ ! -r "${testedFile}" ] || [ ! -e "${testedFile}" ] || [ ! -f "${testedFile}" ] || [ ! -s "${testedFile}" ]; then
+      printThis="WARNING : Temporary file not found or empty file : ${testedFile} \n Will be skipping the steps which need this file .. "
+      if [ "${thisIsTesterLoggerTest}" != "" ];then printToTesterLogFile; testerLooperSingleTestPassedOK=0; else printToLogFile; fi
+fi
+}
+
 fileTesting(){
     
     # NEEDS THIS TO BE SET BEFORE CALL :

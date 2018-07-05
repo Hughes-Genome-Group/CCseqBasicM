@@ -129,20 +129,16 @@ do {
 # 1) we may be queueuing -  nothing running and no log files yet
 # 2) we may be running - we have log files now
 
-# sleepMinutes=10
-sleepMinutes=1
-
-# Override for bamcombining (start more frequently than every 1 minutes)
-if [ "${FastqOrOligo}" == "Bamcombine" ];then
-    sleepMinutes=0.1
+sleepSeconds=60
+# Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
+if [ "${FastqOrOligo}" == "Bamcombine" ] || [ "${FastqOrOligo}" == "Oligo" ];then
+    sleepSeconds=10
 fi
 
 
-sleepSeconds=$((${sleepMinutes}*60))
 echo
 echo "Will be monitoring the runs in $(pwd)/allRunsJUSTNOW.txt "
-echo "every ${sleepMinutes} minutes"
-echo "i.e. every ${sleepSeconds} seconds"
+echo "every ${sleepSeconds} seconds"
 echo
 
 while [ $(($( qstat | grep -c ${CCversion}_$$ ))) -gt 0 ]
