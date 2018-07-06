@@ -28,7 +28,9 @@ echo "Running following commands :" >> "/dev/stderr"
 cat TEMP_commands.sh >> "/dev/stderr"
 echo "Possible error messages while running abovelisted commands :" >> "/dev/stderr"
 echo >> "/dev/stderr"
+setStringentFailForTheFollowing
 ./TEMP_commands.sh
+stopStringentFailAfterTheAbove
 rm -f TEMP_commands.sh    
 }
 
@@ -191,7 +193,9 @@ for file in TEMP*coordinate.bed
 do
 
 echo "bedtools getfasta -fi ${genomefasta} -bed ${file} -fo ${file}.fa"
+setStringentFailForTheFollowing
 bedtools getfasta -fi ${genomefasta} -bed ${file} -fo ${file}.fa
+stopStringentFailAfterTheAbove
 if [ "$?" -ne 0 ]; then
     printThis="bedtools getfasta failed for exclusion fragment file ${file} ! \n EXITING !! "
     printToLogFile
@@ -246,7 +250,9 @@ then
         TEMPchr=$( head -n 1 ${file} | sed 's/^>//' | sed 's/^C/c/' | sed 's/:.*//' )
         echo "ONLY CIS BLAT : viewpoint ${basename} , Cis chromosome : ${TEMPchr}"
         cat ${ucscBuild} | grep '^'${TEMPchr}'\s' | awk '{print $1"\t0\t"$2}' > TEMP.bed
+        setStringentFailForTheFollowing
         bedtools getfasta -fi ${genomefasta} -bed TEMP.bed -fo TEMP.fa
+        stopStringentFailAfterTheAbove
         if [ "$?" -ne 0 ]; then
         printThis="bedtools getfasta failed for CIS chromosome genome gasta generation for cromosome ${TEMPchr} ! \n EXITING !! "
         printToLogFile
@@ -257,7 +263,9 @@ then
         rm -f TEMP.bed
         echo "blat ${blatParams} TEMP.fa ${file} ${basename}_blat.psl"
         echo "blat ${blatParams} TEMP.fa ${file} ${basename}_blat.psl" >> "/dev/stderr"
+        setStringentFailForTheFollowing
         blat ${blatParams} TEMP.fa ${file} ${basename}_blat.psl
+        stopStringentFailAfterTheAbove
         if [ "$?" -ne 0 ]; then
         printThis="CIS blat failed for oligo ${basename} ! \n EXITING !! "
         printToLogFile
@@ -268,7 +276,9 @@ then
     else
     echo "blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl"
     echo "blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl" >> "/dev/stderr"
+    setStringentFailForTheFollowing
     blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl
+    stopStringentFailAfterTheAbove
     if [ "$?" -ne 0 ]; then
     printThis="Blat failed for oligo ${basename} ! \n EXITING !! "
     printToLogFile
@@ -362,7 +372,9 @@ echo "-----------------------"
 echo "perl ${CaptureFilterPath}/2_psl_parser.pl -f ${file} -o ${basename}_oligocoordinate.txt -a ${oligofile} -r ${recoordinatefile}"
 echo "perl ${CaptureFilterPath}/2_psl_parser.pl -f ${file} -o ${basename}_oligocoordinate.txt -a ${oligofile} -r ${recoordinatefile}" >> "/dev/stderr"
 echo
+setStringentFailForTheFollowing
 perl ${CaptureFilterPath}/2_psl_parser.pl -f ${file} -o ${basename}_oligocoordinate.txt -a ${oligofile} -r ${recoordinatefile}
+stopStringentFailAfterTheAbove
 if [ "$?" -ne 0 ]; then
 printThis="Run filtering script (2_psl_parser.pl) for ${basename} crashed ! \n EXITING !! "
 printToLogFile
@@ -437,7 +449,9 @@ do
 newname=$( echo $file | sed 's/.gfc$//' )
 cat ${file} | sed 's/:/\tcol2\tcol3\t/' | sed 's/-/\t/' | sed 's/$/\t.\t.\t.\tfacet=0/' > ${newname}.gff
 
+setStringentFailForTheFollowing
 bedtools slop -i ${newname}.gff -g ${ucscBuild} -b ${extend} > ${newname}_extendedBy${extend}b.gff
+stopStringentFailAfterTheAbove
 if [ "$?" -ne 0 ]; then
 printThis="Bedtools slop to extend filtering coordinates failed for ${newname} ! \n EXITING !! "
 printToLogFile

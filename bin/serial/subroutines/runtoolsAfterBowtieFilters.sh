@@ -1155,8 +1155,8 @@ set +e +o pipefail
 
 # Testing that join went fine ..
 
-temp1=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep "Remaining reads :" | sed 's/.*Remaining reads :\s//' )))
-temp2=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep 'Remaining reads (after join)' | sed 's/.*Remaining reads (after join).*\s:\s//' )))
+temp1=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep ${thisChr} | grep 'Remaining reads :' | sed 's/.*Remaining reads :\s//' )))
+temp2=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep ${thisChr} | grep 'Remaining reads (after join)' | sed 's/.*Remaining reads (after join).*\s:\s//' )))
 
 if [ "${temp1}" -ne "${temp2}" ];
 then

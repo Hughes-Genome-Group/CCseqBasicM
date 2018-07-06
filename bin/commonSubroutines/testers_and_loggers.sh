@@ -92,6 +92,21 @@ echo "" >> "read_trimming.log"
     
 }
 
+setStringentFailForTheFollowing(){
+# ------------------------
+# To crash whenever anything withing this breaks ..
+set -e -o pipefail
+# ------------------------    
+}
+
+stopStringentFailAfterTheAbove(){
+ # ------------------------
+# Revert to normal (+e : don't crash when a command fails. +o pipefail takes it back to "only monitor the last command of a pipe" )
+set +e +o pipefail
+# ------------------------ 
+}
+
+
 doInputFileTesting(){
     
     # NEEDS THIS TO BE SET BEFORE CALL :

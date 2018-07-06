@@ -58,7 +58,9 @@ cut -f 1 oligos.bed | uniq | sort | uniq > genome_${REenzyme}_oligo_chromosomes.
 # chr1    1       2       kissa
 # chr1    19      20      kissa
 
+setStringentFailForTheFollowing
 bedtools subtract -a oligos.bed -b ${fullPathDpnBlacklist} > genome_${REenzyme}_oligo_overlap.bed
+stopStringentFailAfterTheAbove
 
 testedFile="genome_${REenzyme}_oligo_overlap.bed"
 doTempFileTesting
@@ -84,7 +86,9 @@ checkRemoveSafety
 rm -f genome_${REenzyme}_blacklist.bed
 
 # Plus/minus 300 bases to both directions
+setStringentFailForTheFollowing
 cat ${fullPathDpnGenome} | sed 's/:/\t/' | sed 's/-/\t/' | awk '{if(($3-$2)>(2*'${sonicationSize}')){print "chr"$1"\t"$2+'${sonicationSize}'"\t"$3-'${sonicationSize}'}}' > genome_${REenzyme}_blacklist.bed
+stopStringentFailAfterTheAbove
 
 testedFile="genome_${REenzyme}_blacklist.bed"
 doTempFileTesting
@@ -125,7 +129,9 @@ printToLogFile
 printThis="perl ${RunScriptsPath}/${REenzyme}cutGenome4.pl ${GenomeFasta}"
 printToLogFile
 
+setStringentFailForTheFollowing
 perl ${RunScriptsPath}/${REenzyme}cutGenome4.pl "${GenomeFasta}"
+stopStringentFailAfterTheAbove
 
 testedFile="genome_${REenzyme}_coordinates.txt"
 doTempFileTesting
@@ -156,7 +162,9 @@ if [[ ${FLASH} -eq "1" ]]; then
     printToLogFile
     
     # flash --interleaved-output -p "${intQuals}" READ1.fastq READ2.fastq > flashing.log
+    setStringentFailForTheFollowing
     flash --interleaved-output -p "${intQuals}" -m "${flashOverlap}" -x "${flashErrorTolerance}" READ1.fastq READ2.fastq > flashing.log 2> flashing.err
+    stopStringentFailAfterTheAbove
     
     # This outputs these files :
     # flashing.log  FLASHED.fastq  out.hist  out.histogram  NONFLASHED.fastq  i.e. before name change : out.extendedFrags.fastq out.notCombined.fastq
@@ -212,7 +220,9 @@ printToLogFile
 # remove parameter file from possible earlier run..
 rm -f parameters_for_filtering.log
 
+setStringentFailForTheFollowing
 perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion "${CCversion}" -o "${OligoFile}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" ${otherParameters}
+stopStringentFailAfterTheAbove
 
 if [ "$?" -ne 0 ];then
     printThis="Filtering parameter generation run reported error !"
@@ -351,7 +361,9 @@ cp ${OligoFile} usedOligoFile.txt
 # remove parameter file from possible earlier run..
 rm -f parameters_for_filtering.log
 
+setStringentFailForTheFollowing
 perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion "${CCversion}" -o "${OligoFile}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" ${otherParameters}
+stopStringentFailAfterTheAbove
 
 if [ "$?" -ne 0 ];then
     printThis="Filtering parameter generation run reported error !"
@@ -388,7 +400,9 @@ echo "-o Oligonucleotide position filename "
 
 runDir=$( pwd )
 
+setStringentFailForTheFollowing
 perl ${RunScriptsPath}/${CCscriptname} -o "${OligoFile}"  -s "${Sample}" --onlyoligofile ${otherParameters}
+stopStringentFailAfterTheAbove
 if [ "$?" -ne 0 ];then
     printThis="Oligo file bunching run reported error !"
     printNewChapterToLogFile
@@ -525,7 +539,9 @@ echo >fastqcRuns.err
 echo "RAW untrimmed files " >fastqcRuns.err
 echo >>fastqcRuns.err
 
+setStringentFailForTheFollowing
 ${RunScriptsPath}/QC_and_Trimming.sh --fastqc 1>>fastqcRuns.out 2>>fastqcRuns.err
+stopStringentFailAfterTheAbove
 
     # Changing names of fastqc folders to be "ORIGINAL"
     
@@ -557,7 +573,9 @@ date
 printThis="${RunScriptsPath}/QC_and_Trimming.sh -q ${intQuals} --filter 3 --qmin ${QMIN}"
 printToLogFile
 
+setStringentFailForTheFollowing
 ${RunScriptsPath}/QC_and_Trimming.sh -q "${intQuals}" --filter 3 --qmin ${QMIN} 1>trimming.log 2>trimming.err
+stopStringentFailAfterTheAbove
 
 date
 
@@ -592,7 +610,9 @@ echo >>fastqcRuns.err
 printThis="${RunScriptsPath}/QC_and_Trimming.sh --fastqc"
 printToLogFile
 
+setStringentFailForTheFollowing
 ${RunScriptsPath}/QC_and_Trimming.sh --fastqc  1>>fastqcRuns.out 2>>fastqcRuns.err
+stopStringentFailAfterTheAbove
 
     # Changing names of fastqc folders to be "TRIMMED"
     
@@ -642,12 +662,16 @@ printToLogFile
 
 rm -rf FLASHED_fastqc
 mkdir FLASHED_fastqc
+setStringentFailForTheFollowing
 ${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 FLASHED  1>>fastqcRuns.out 2>>fastqcRuns.err
+stopStringentFailAfterTheAbove
 mv -f FLASHED_fastqc.html FLASHED_fastqc/fastqc_report.html
 
 rm -rf NONFLASHED_fastqc
 mkdir NONFLASHED_fastqc
+setStringentFailForTheFollowing
 ${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 NONFLASHED  1>>fastqcRuns.out 2>>fastqcRuns.err
+stopStringentFailAfterTheAbove
 mv -f NONFLASHED_fastqc.html NONFLASHED_fastqc/fastqc_report.html
 
 
@@ -665,7 +689,9 @@ date
 printThis="perl ${RunScriptsPath}/${REenzyme}cutReads4.pl FLASHED.fastq FLASHED"
 printToLogFile
 
+setStringentFailForTheFollowing
 perl ${RunScriptsPath}/${REenzyme}cutReads4.pl FLASHED.fastq FLASHED > FLASHED_${REenzyme}digestion.log
+stopStringentFailAfterTheAbove
 
 date
 
@@ -687,7 +713,9 @@ printToLogFile
 printThis="perl ${RunScriptsPath}/${REenzyme}cutReads4.pl NONFLASHED.fastq NONFLASHED"
 printToLogFile
 
+setStringentFailForTheFollowing
 perl ${RunScriptsPath}/${REenzyme}cutReads4.pl NONFLASHED.fastq NONFLASHED > NONFLASHED_${REenzyme}digestion.log
+stopStringentFailAfterTheAbove
 cat NONFLASHED_${REenzyme}digestion.log
 
  ls -lht
@@ -710,12 +738,16 @@ printToLogFile
 
 rm -rf FLASHED_REdig_fastqc
 mkdir FLASHED_REdig_fastqc
+setStringentFailForTheFollowing
 ${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 FLASHED_REdig  1>>fastqcRuns.out 2>>fastqcRuns.err
+stopStringentFailAfterTheAbove
 mv -f FLASHED_REdig_fastqc.html FLASHED_REdig_fastqc/fastqc_report.html
 
 rm -rf NONFLASHED_REdig_fastqc
 mkdir NONFLASHED_REdig_fastqc
+setStringentFailForTheFollowing
 ${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 NONFLASHED_REdig  1>>fastqcRuns.out 2>>fastqcRuns.err
+stopStringentFailAfterTheAbove
 mv -f NONFLASHED_REdig_fastqc.html NONFLASHED_REdig_fastqc/fastqc_report.html
 
 
@@ -742,10 +774,14 @@ setMparameter
 date
 
 if [ "${BOWTIE}" -eq 2 ] ; then
+setStringentFailForTheFollowing
 bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U FLASHED_REdig.fastq > FLASHED_REdig_unfiltered.sam 2>>bowties.log
+stopStringentFailAfterTheAbove
 echo "bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U FLASHED_REdig.fastq"
 else
+setStringentFailForTheFollowing
 bowtie -p 1 --chunkmb "${BOWTIEMEMORY}" ${otherBowtie1Parameters} ${bowtieQuals} ${mParameter} --best --strata --sam "${BowtieGenome}" FLASHED_REdig.fastq > FLASHED_REdig_unfiltered.sam 2>>bowties.log
+stopStringentFailAfterTheAbove
 fi
 
 date
@@ -799,10 +835,14 @@ setMparameter
 date
 
 if [ "${BOWTIE}" -eq 2 ] ; then
+setStringentFailForTheFollowing
 bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U NONFLASHED_REdig.fastq > NONFLASHED_REdig_unfiltered.sam
+stopStringentFailAfterTheAbove
 echo "bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U NONFLASHED_REdig.fastq"
 else
+setStringentFailForTheFollowing
 bowtie -p 1 --chunkmb "${BOWTIEMEMORY}" ${otherBowtie1Parameters} ${bowtieQuals} ${mParameter} --best --strata --sam "${BowtieGenome}" NONFLASHED_REdig.fastq > NONFLASHED_REdig_unfiltered.sam 2>> bowties.log
+stopStringentFailAfterTheAbove
 fi
 
 date
@@ -949,7 +989,9 @@ if [ ! -s FLASHED_REdig.sam ]
 then
     if [ -s FLASHED_REdig.bam ]
     then
+        setStringentFailForTheFollowing
         samtools view -h FLASHED_REdig.bam > TEMP.sam
+        stopStringentFailAfterTheAbove
         mv -f TEMP.sam FLASHED_REdig.sam
         if [ -s FLASHED_REdig.sam ]; then
             rm -f FLASHED_REdig.bam
@@ -967,7 +1009,9 @@ if [ ! -s NONFLASHED_REdig.sam ]
 then
     if [ -s NONFLASHED_REdig.bam ]
     then
+        setStringentFailForTheFollowing
         samtools view -h NONFLASHED_REdig.bam > TEMP.sam
+        stopStringentFailAfterTheAbove
         mv -f TEMP.sam NONFLASHED_REdig.sam
         if [ -s NONFLASHED_REdig.sam ]; then
             rm -f NONFLASHED_REdig.bam

@@ -86,8 +86,10 @@ reuseBLATpath='.'
 
 ploidyGFFoverlap(){
     echo "intersectappend.pl ${file} ${ploidyPath} PloidyRegion TRUE FALSE "
-    echo "intersectappend.pl ${file} ${ploidyPath} PloidyRegion TRUE FALSE "  >> "/dev/stderr"    
+    echo "intersectappend.pl ${file} ${ploidyPath} PloidyRegion TRUE FALSE "  >> "/dev/stderr"
+    setStringentFailForTheFollowing
     ${RunScriptsPath}/intersectappend.pl ${file} ${ploidyPath} PloidyRegion TRUE FALSE | sed 's/\s\.PloidyRegion/\tPloidyRegion/' > TEMP.txt
+    stopStringentFailAfterTheAbove
     
     moveCommand='mv -f TEMP.txt TEMPdir2/${newname}_PF.gff'
     moveThis="TEMP.txt"
@@ -105,8 +107,9 @@ blatGFFoverlap(){
         
             echo "intersectappend.pl ${file} ${oligoname}_blat_blat_filter_extendedBy${extend}b.gff BlatFilteredRegion TRUE FALSE "
             echo "intersectappend.pl ${file} ${oligoname}_blat_blat_filter_extendedBy${extend}b.gff BlatFilteredRegion TRUE FALSE "  >> "/dev/stderr"
-        
+        setStringentFailForTheFollowing      
         ${RunScriptsPath}/intersectappend.pl ${file} ${oligoname}_blat_blat_filter_extendedBy${extend}b.gff BlatFilteredRegion TRUE FALSE > ${outputfolder}/${newname}_BF.gff
+        stopStringentFailAfterTheAbove
         
     else
         echo "No blat filtering needed for this oligo ! - or this is globines combined track (or other track not listed in oligo file), for which this step is skipped.."
@@ -146,7 +149,9 @@ do
             # Generating the bam file for the filtering..
             printThis="Generating the bam file for the filtering..\n samtools view -Sb -o TEMP.bam ${reporterfile}"
             printToLogFile
+            setStringentFailForTheFollowing
             samtools view -Sb -o TEMP.bam ${reporterfile}
+            stopStringentFailAfterTheAbove
             samDataLineCount=$( samtools view -c TEMP.bam )
             echo "Before filtering we have ${samDataLineCount} data lines in the SAM file"
             printToLogFile
@@ -171,7 +176,9 @@ do
             
             printThis="Sorting the bam file for the filtering..\nsamtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam; samtools index TEMP_sorted.bam"
             printToLogFile
+            setStringentFailForTheFollowing
             samtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam
+            stopStringentFailAfterTheAbove
             mv -f TEMP_sorted.bam TEMP.bam
             samtools index TEMP.bam
     
@@ -190,7 +197,9 @@ do
         cut -f 1,4,5 "${outputfolder}/${dataprefix}_${basename}_forPloidyFiltering.gff" | awk '{print $1"\t"$2-1"\t"$3}' > TEMP.bed
         
         # Counting overlaps..
+        setStringentFailForTheFollowing
         overlaps=$( samtools view -c -L TEMP.bed TEMP.bam )
+        stopStringentFailAfterTheAbove
         
         echo "We will filter ${overlaps} sam fragments which overlap with the PLOIDY regions.."
     
@@ -212,7 +221,9 @@ do
         cut -f 1,4,5 "${outputfolder}/${dataprefix}_${basename}_forBlatFiltering.gff" | awk '{print $1"\t"$2-1"\t"$3}' > TEMP.bed
         
         # Counting overlaps..
+        setStringentFailForTheFollowing
         overlaps=$( samtools view -c -L TEMP.bed TEMP.bam )
+        stopStringentFailAfterTheAbove
         
         echo "We will filter ${overlaps} sam fragments which overlap with the BLAT-filter regions.."
     
@@ -230,7 +241,9 @@ do
         echo "${basename} ${dataprefix} - filtering for PLOIDY and BLAT regions.."
         
         echo "bedtools intersect -v -abam ${file} -b ${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff"
+        setStringentFailForTheFollowing
         bedtools intersect -v -abam TEMP.bam -b ${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff > TEMPfiltered.bam
+        stopStringentFailAfterTheAbove
         mv -f TEMPfiltered.bam TEMP.bam
         
     fi
@@ -243,7 +256,9 @@ do
     printThis="After PLOIDY and BLAT filter we have ${samfragments} sam fragments left in our ${basename} ${dataprefix} reporter fragment file."
     printToLogFile
 
+    setStringentFailForTheFollowing
     samtools view -h -o ${outputfolder}/${basename}_filtered.sam TEMP.bam
+    stopStringentFailAfterTheAbove
     rm -f TEMP.bam*
     
     # Removing temporary files..
@@ -277,21 +292,27 @@ do
     ls -lht ${outputfolder}/${basename}_filtered.sam >> "/dev/stderr"
     ls -lht ${datafolder}/${dataprefix}_capture_${basename}.sam >> "/dev/stderr"
 
-    
+    setStringentFailForTheFollowing
     cat ${outputfolder}/${basename}_filtered.sam | grep -v "^@" > TEMP.sam
     cat ${datafolder}/${dataprefix}_capture_${basename}.sam  | grep -v "^@" >> TEMP.sam
+    stopStringentFailAfterTheAbove
+
     ls -lht | grep TEMP >> "/dev/stderr"
 
     # Sorting the files..
 
-    cut -f 1 TEMP.sam | sed 's/:PE[12]:[0123456789][0123456789]*$//' > TEMP_sortcolumn.txt
-    
+    setStringentFailForTheFollowing
+    cut -f 1 TEMP.sam | sed 's/:PE[12]:[0123456789][0123456789]*$//' > TEMP_sortcolumn.txt   
     paste TEMP_sortcolumn.txt TEMP.sam | sort -k1,1 | cut -f 1 --complement > TEMP_sorted.sam
+    stopStringentFailAfterTheAbove
+
     ls -lht | grep TEMP >> "/dev/stderr"
     rm -f TEMP.sam TEMP_sortcolumn.txt
     
     # Adding to existing file..
+    setStringentFailForTheFollowing
     cat TEMP_sorted.sam >> TEMP_${dataprefix}_combined.sam
+    stopStringentFailAfterTheAbove
     ls -lht | grep TEMP >> "/dev/stderr"
     rm -f TEMP_sorted.sam
 
@@ -892,9 +913,11 @@ do
     newname=$( echo $file | sed 's/.*\///' | sed 's/_noPF_noBF.gff$//' | sed 's/_PF_noBF.gff$//' | sed 's/_noPF_BF.gff$//' | sed 's/_PF_BF.gff$//' )
 
     # We have to do grep -v here, as we don't know which of the filter combinations we actually have..
+    setStringentFailForTheFollowing
     cat $file | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
     cat $file | grep 'BlatFilteredRegion=TRUE' > ${outputfolder}/${newname}_forBlatFiltering.gff
     cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+    stopStringentFailAfterTheAbove
     
 done
 
@@ -928,7 +951,9 @@ filterSams
     
 # Make bed file of all blat-filter-marked DPNII regions..
 
+setStringentFailForTheFollowing
 cat ${outputfolder}/*.gff | grep BlatFilteredRegion=TRUE | cut -f 1,3,4,5 | awk '{ print $1"\t"$3"\t"$4"\t"$2 }' > ${outputfolder}/blatFilterMarkedREfragments.bed
+stopStringentFailAfterTheAbove
 
 printThis="Combined filtered SAM file - final touches.."
 printToLogFile 
@@ -937,12 +962,16 @@ ls -lht TEMP*.sam
 ls -lht TEMP*.sam >> "/dev/stderr"
 
 dataprefix="${dataprefixFLASHED}"
+setStringentFailForTheFollowing
 cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
+stopStringentFailAfterTheAbove
 rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
 
 dataprefix="${dataprefixNONFLASHED}"
 
+setStringentFailForTheFollowing
 cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
+stopStringentFailAfterTheAbove
 rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
 
 ls -lht ${outputfolder}/*filtered_combined.sam
