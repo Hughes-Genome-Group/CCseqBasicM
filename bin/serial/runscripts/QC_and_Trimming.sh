@@ -325,12 +325,16 @@ trimmingOK=1
 if [ "${singleEnd}" -eq 0 ] ; then
     printThis="trim_galore --trim1 --phred${QUAL} --paired -q ${qualFilter} -a ${A1} -a2 ${A2} --length ${L} --stringency ${S} ${READ1}.fastq ${READ2}.fastq"
     printToTrimmingLogFile
+    setStringentFailForTheFollowing
     trim_galore --trim1 "--phred${QUAL}" --paired -q "${qualFilter}" -a "${A1}" -a2 "${A2}" --length "${L}" --stringency "${S}" "${READ1}.fastq" "${READ2}.fastq" >> "read_trimming.log"
+    stopStringentFailAfterTheAbove
     if [ $? -ne 0 ]; then trimmingOK=0;fi
 else
     printThis="trim_galore --phred${QUAL} -q ${qualFilter} -a ${A1} --length ${L} --stringency ${S} ${READ1}.fastq"
     printToTrimmingLogFile
+    setStringentFailForTheFollowing
     trim_galore "--phred${QUAL}" -q "${qualFilter}" -a "${A1}" --length "${L}" --stringency "${S}" "${READ1}.fastq" >> "read_trimming.log"    
+    stopStringentFailAfterTheAbove
     if [ $? -ne 0 ]; then trimmingOK=0;fi
 fi
 
@@ -365,8 +369,8 @@ if [ ! -s ${READ1}_val_1.fq ]; then
 fi
 
 if [ "${singleEnd}" -eq 0 ] ; then
-if [ ! -s ${READ1}_val_2.fq ]; then
-    printThis="Trimming failed : Trimgalore output file ${READ1}_val_2.fq is empty ! \n EXITING !! "
+if [ ! -s ${READ2}_val_2.fq ]; then
+    printThis="Trimming failed : Trimgalore output file ${READ2}_val_2.fq is empty ! \n EXITING !! "
     printToLogFile
     exit 1    
 fi    
@@ -429,21 +433,26 @@ elif [ "${runMode}" -eq 5 ] ; then
     
     printThis="READ 1"
     printToTrimmingLogFile
+    setStringentFailForTheFollowing
     cutadapt -O "${S}" "--quality-base=${QUAL}" -q "${qualFilter}" -m 0 -g "${A1}" "${READ1}.fastq" -o TEMP_R1_trimmed.fastq >> "read_trimming.log"
+    stopStringentFailAfterTheAbove
     if [ $? -ne 0 ]; then trimmingOK=0;fi
 
 if [ "${singleEnd}" -eq 0 ] ; then
     printThis="READ 2"
     printToTrimmingLogFile
+    setStringentFailForTheFollowing
     cutadapt -O "${S}" "--quality-base=${QUAL}" -q "${qualFilter}" -m 0 -g "${A1}" "${READ2}.fastq" -o TEMP_R2_trimmed.fastq >> "read_trimming.log"
-    
+    stopStringentFailAfterTheAbove  
     printThis="Running trim_galore in 'non-trimming mode' to eliminate too short read pairs, excludes both reads in pair if EITHER of them end up shorter than ${L}bp"
     printToTrimmingLogFile   
  
     printThis="trim_galore --trim1 --phred${QUAL} --paired -q ${qualFilter} -a ${A1} --length ${L} --stringency 1000 TEMP_R1_trimmed.fastq TEMP_R2_trimmed.fastq"
     printToTrimmingLogFile
     
+    setStringentFailForTheFollowing
     trim_galore "--phred${QUAL}" --trim1 --paired -q "${qualFilter}" -a "${A1}" --length "${L}" --stringency 1000 TEMP_R1_trimmed.fastq TEMP_R2_trimmed.fastq >> "read_trimming.log"
+    stopStringentFailAfterTheAbove
     if [ $? -ne 0 ]; then trimmingOK=0;fi
     rm -f TEMP_R1_trimmed.fastq TEMP_R2_trimmed.fastq
 
