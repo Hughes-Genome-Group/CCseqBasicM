@@ -253,10 +253,10 @@ printNewChapterToLogFile
     pwd
     echo
     
-    ls -lR $(pwd) > TMPareaAfterMovingBack.log
+    ls -lR $(pwd) > TMPareaDataAfterMovingItBackHere.log
     
-    cat TMPareaBeforeMovingBack.log  | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -k2,2 -k1,1 | grep -v MovingBack > forDiff1.txt
-    cat TMPareaAfterMovingBack.log   | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -k2,2 -k1,1 | grep -v MovingBack > forDiff2.txt
+    cat TMPareaBeforeMovingBack.log  | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -k2,2 -k1,1 | grep -v Moving > forDiff1.txt
+    cat TMPareaDataAfterMovingItBackHere.log   | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -k2,2 -k1,1 | grep -v Moving > forDiff2.txt
     
     doQuotaTesting
     
@@ -269,11 +269,13 @@ printNewChapterToLogFile
         
         runOK=0    
     fi
+    rm -f forDiff1.txt forDiff2.txt
     
-    # Removing temp if all went fine
+    # Removing temp and after-move-broken symlinks if all went fine
     if [ "${runOK}" -eq 1 ];then
-        echo "would delete beforeTMPDIR here - but commenterd out "
-        # rm -rf ${SGE_O_WORKDIR}/fastq_${fastqCounter}_beforeTMPDIR
+        rm -rf ${SGE_O_WORKDIR}/fastq_${fastqCounter}_beforeTMPDIR
+        rm -f genome_*.txt
+        rm -f genome_*.bed
     fi
     
     cd ${SGE_O_WORKDIR}

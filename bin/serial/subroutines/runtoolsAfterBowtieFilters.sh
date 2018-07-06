@@ -792,6 +792,10 @@ printThis="Preparing reports for LOOPs 2-3-4-5 ${flashstatus}.. "
 printNewChapterToLogFile
 date
 
+# Here cleaning the bam files of LOOP1 to their own folder ..
+mkdir LOOP1_prefilteredBams
+mv -f LOOP1_*_prefiltered.bam LOOP1_prefilteredBams/.
+
 echo
 echo  "Now whole loop 2-3-4-5 is ran for all chromosomes, and we will generate these summary tables :"
 echo  $(pwd)"LOOP2_${flashstatus}_REdig_onlyOneFragment_table.txt"
