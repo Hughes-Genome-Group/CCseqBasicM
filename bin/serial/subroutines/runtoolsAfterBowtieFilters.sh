@@ -623,6 +623,25 @@ echo
 
 # ------------------------
 
+echo
+echo  "Will be running LOOP 2-3-4-5 ${flashstatus} for the following sam files :"
+echo
+for thisSamFile1 in LOOP1_${flashstatus}_*_REdig_prefiltered.sam
+do
+{
+    thisChr=$( echo ${thisSamFile1} | sed 's/^LOOP1_'${flashstatus}'_//' | sed 's/_REdig_prefiltered.sam//' )
+    checkThis=${thisChr}
+    checkedName='${thisChr}'
+    checkParse
+    echo "${thisChr}   ${thisSamFile1}"
+}
+done
+echo
+
+echo
+echo  "Starting runs for LOOP 2-3-4-5 ${flashstatus} .."
+echo
+
 for thisSamFile1 in LOOP1_${flashstatus}_*_REdig_prefiltered.sam
 do
 {
@@ -791,10 +810,6 @@ chrWiseFilteringLoopsReports(){
 printThis="Preparing reports for LOOPs 2-3-4-5 ${flashstatus}.. "
 printNewChapterToLogFile
 date
-
-# Here cleaning the bam files of LOOP1 to their own folder ..
-mkdir LOOP1_prefilteredBams
-mv -f LOOP1_*_prefiltered.bam LOOP1_prefilteredBams/.
 
 echo
 echo  "Now whole loop 2-3-4-5 is ran for all chromosomes, and we will generate these summary tables :"

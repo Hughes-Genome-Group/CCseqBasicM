@@ -321,14 +321,17 @@ elif [ "${runMode}" -eq 3 ] ; then
     printThis="Allows 10% sequencing errors, at least ${S}b has to match, excludes both reads in pair if EITHER of them end up shorter than ${L}bp\nCuts the low-quality part of 3' end - quality cutoff being : ${qualFilter}, in PHRED${QUAL} quality score scheme"
     printToTrimmingLogFile
 
+trimmingOK=1
 if [ "${singleEnd}" -eq 0 ] ; then
     printThis="trim_galore --trim1 --phred${QUAL} --paired -q ${qualFilter} -a ${A1} -a2 ${A2} --length ${L} --stringency ${S} ${READ1}.fastq ${READ2}.fastq"
     printToTrimmingLogFile
     trim_galore --trim1 "--phred${QUAL}" --paired -q "${qualFilter}" -a "${A1}" -a2 "${A2}" --length "${L}" --stringency "${S}" "${READ1}.fastq" "${READ2}.fastq" >> "read_trimming.log"
+    if [ $? -ne 0 ]; then trimmingOK=0;fi
 else
     printThis="trim_galore --phred${QUAL} -q ${qualFilter} -a ${A1} --length ${L} --stringency ${S} ${READ1}.fastq"
     printToTrimmingLogFile
     trim_galore "--phred${QUAL}" -q "${qualFilter}" -a "${A1}" --length "${L}" --stringency "${S}" "${READ1}.fastq" >> "read_trimming.log"    
+    if [ $? -ne 0 ]; then trimmingOK=0;fi
 fi
 
 
@@ -344,6 +347,30 @@ if [ "${singleEnd}" -eq 0 ] ; then
 fi
 
     rm -f *trimming_report.txt
+    
+# Check if trimming went find, if not, exit 1
+
+if [ "${trimmingOK}" -eq 0 ]; then
+    printThis="Trimming crashed !\n EXITING !! "
+    printToLogFile
+    exit 1    
+fi
+    
+# Check if files exist, if not, exit 1
+
+if [ ! -s ${READ1}_val_1.fq ]; then
+    printThis="Trimming failed : Trimgalore output file ${READ1}_val_1.fq is empty ! \n EXITING !! "
+    printToLogFile
+    exit 1    
+fi
+
+if [ "${singleEnd}" -eq 0 ] ; then
+if [ ! -s ${READ1}_val_2.fq ]; then
+    printThis="Trimming failed : Trimgalore output file ${READ1}_val_2.fq is empty ! \n EXITING !! "
+    printToLogFile
+    exit 1    
+fi    
+fi
     
     # OVERWRITE STEP !!!!
     
@@ -392,6 +419,8 @@ elif [ "${runMode}" -eq 5 ] ; then
    A1=${A1_5prime}
    A2=${A2_5prime}
    
+    trimmingOK=1
+   
     printThis="Running cutadapt for ILLUMINA PAIRED END SEQUENCING ADAPTERS only - like this :\nTrims both reads against the REVERSE COMPLEMENT (GCTCTTCCGATCT) of Illumina next-to-the-read 13bp adaptor sequence AGATCGGAAGAGC, (and everything before it in 5' end)"
     printToTrimmingLogFile
     
@@ -401,7 +430,8 @@ elif [ "${runMode}" -eq 5 ] ; then
     printThis="READ 1"
     printToTrimmingLogFile
     cutadapt -O "${S}" "--quality-base=${QUAL}" -q "${qualFilter}" -m 0 -g "${A1}" "${READ1}.fastq" -o TEMP_R1_trimmed.fastq >> "read_trimming.log"
-   
+    if [ $? -ne 0 ]; then trimmingOK=0;fi
+
 if [ "${singleEnd}" -eq 0 ] ; then
     printThis="READ 2"
     printToTrimmingLogFile
@@ -414,6 +444,7 @@ if [ "${singleEnd}" -eq 0 ] ; then
     printToTrimmingLogFile
     
     trim_galore "--phred${QUAL}" --trim1 --paired -q "${qualFilter}" -a "${A1}" --length "${L}" --stringency 1000 TEMP_R1_trimmed.fastq TEMP_R2_trimmed.fastq >> "read_trimming.log"
+    if [ $? -ne 0 ]; then trimmingOK=0;fi
     rm -f TEMP_R1_trimmed.fastq TEMP_R2_trimmed.fastq
 
     moveCommand='mv -f TEMP_R1_trimmed_val_1.fq ${READ1}.fastq'
@@ -430,6 +461,11 @@ else
     mv -f "TEMP_R1_trimmed.fastq" "${READ1}.fastq"
 fi
 
+if [ "${trimmingOK}" -eq 0 ]; then
+    printThis="Trimming crashed !\n EXITING !! "
+    printToLogFile
+    exit 1    
+fi
     
 echo
 echo "TRIMMING STEP LOG FILE PRODUCED / UPDATED :"
