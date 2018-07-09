@@ -750,16 +750,16 @@ do
     thisSamFile=${thisSamFile2}
     thisCapFile=${thisCapFile3}
 
-    thisCapReadCount=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep ${thisChr} | grep 'Remaining reads (after join)' | sed 's/.*\s:\s//' )))
+    thisCapReadCount=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep '^'${thisChr}'\s' | grep 'Remaining reads (after join)' | sed 's/.*\s:\s//' )))
     checkThis=${thisCapReadCount}
     checkedName='LOOP4 ${thisCapReadCount}'
     
-    thisSamReadCount=$(($( cat LOOP2_${flashstatus}_REdig_onlyOneFragment.txt | grep ${thisChr} | grep "Remaining reads"     | sed 's/.*\s:\s//' )))
+    thisSamReadCount=$(($( cat LOOP2_${flashstatus}_REdig_onlyOneFragment.txt | grep '^'${thisChr}'\s' | grep "Remaining reads"     | sed 's/.*\s:\s//' )))
     checkThis=${thisSamReadCount}
     checkedName='LOOP4 ${thisSamReadCount}'
     checkParse
     
-    thisSamFragCount=$(($( cat LOOP2_${flashstatus}_REdig_onlyOneFragment.txt | grep ${thisChr} | grep "Remaining fragments" | sed 's/.*\s:\s//' )))
+    thisSamFragCount=$(($( cat LOOP2_${flashstatus}_REdig_onlyOneFragment.txt | grep '^'${thisChr}'\s' | grep "Remaining fragments" | sed 's/.*\s:\s//' )))
     checkThis=${thisSamFragCount}
     checkedName='LOOP4 ${thisSamFragCount}'
     checkParse
@@ -1114,7 +1114,7 @@ echo "fullPathOligoWhitelist ${fullPathOligoWhitelist}"
 echo "flashstatus ${flashstatus}"
 echo
 
-cat ${fullPathOligoWhitelist} | grep ${thisChr} > ${thisChr}_oligoWhitelist.bed
+cat ${fullPathOligoWhitelist} | grep '^'${thisChr}'\s' > ${thisChr}_oligoWhitelist.bed
 testedFile="${thisChr}_oligoWhitelist.bed"
 doTempFileTesting
 
@@ -1155,8 +1155,8 @@ set +e +o pipefail
 
 # Testing that join went fine ..
 
-temp1=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep ${thisChr} | grep 'Remaining reads :' | sed 's/.*Remaining reads :\s//' )))
-temp2=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep ${thisChr} | grep 'Remaining reads (after join)' | sed 's/.*Remaining reads (after join).*\s:\s//' )))
+temp1=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep '^'${thisChr}'\s' | grep 'Remaining reads :' | sed 's/.*Remaining reads :\s//' )))
+temp2=$(($( cat LOOP3_${flashstatus}_multicaptures.txt | grep '^'${thisChr}'\s' | grep 'Remaining reads (after join)' | sed 's/.*Remaining reads (after join).*\s:\s//' )))
 
 if [ "${temp1}" -ne "${temp2}" ];
 then
