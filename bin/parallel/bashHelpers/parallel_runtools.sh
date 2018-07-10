@@ -804,6 +804,13 @@ do
             wePrepareThisOligo=0
         fi
     fi
+
+    # ######################################################################    
+    # For first round testing - turning the globin combining off !
+    # ######################################################################
+    # weSawGlobins=0
+    # thisIsGlobinRound=0
+    
     
     # Doing the globin, if need be ..
     if [ "${thisIsGlobinRound}" -eq 1 ]; then
