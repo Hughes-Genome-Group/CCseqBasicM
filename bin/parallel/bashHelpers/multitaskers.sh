@@ -301,7 +301,10 @@ do {
     echo run${FqOrOl}${i}_$$.sh >> startedRunsList.log
     
     monitorRun
-    sleep ${sleepSeconds}
+    # First round starters get longer stagger - to avoid the initial REdig peaks to co-incide ..
+    longSleep=$((${sleepSeconds}*10))
+    # sleep ${sleepSeconds}
+    sleep ${longSleep}
     
     # for testing purposes
     echo ${allOfTheRunningOnes} >> processNumbersRunning.log
@@ -353,8 +356,11 @@ do {
     allOfTheRunningOnes="${allOfTheRunningOnes} $!"
     echo run${FqOrOl}${i}_$$.sh >> startedRunsList.log
     
-    monitorRun 
-    sleep ${sleepSeconds}
+    monitorRun
+    # First round starters get longer stagger - to avoid the initial REdig peaks to co-incide ..
+    longSleep=$((${sleepSeconds}*10))
+    # sleep ${sleepSeconds}
+    sleep ${longSleep}
     
     # for testing purposes
     echo ${allOfTheRunningOnes} >> processNumbersRunning.log
@@ -407,7 +413,7 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     fi
     
     cp ${CaptureParallelPath}/${runScriptToBeUsed} ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh
-    chmod u+x ${erroutLogsToHere}/${FqOrOl}${i}_$$.sh
+    chmod u+x ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh
     echo "./run${FqOrOl}${i}_$$.sh ${i}  1> run${FqOrOl}${i}.out 2> run${FqOrOl}${i}.err"
     ${erroutLogsToHere}/run${FqOrOl}${i}_$$.sh ${i}  1> ${erroutLogsToHere}/run${FqOrOl}${i}.out 2> ${erroutLogsToHere}/run${FqOrOl}${i}.err &
     allOfTheRunningOnes="${allOfTheRunningOnes} $!"
@@ -421,7 +427,8 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     # for testing purposes
     echo ${allOfTheRunningOnes} >> processNumbersRunning.log
     ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> processNumbersRunning.log
-    echo "That is "$( ${allOfTheRunningOnes} | tr ' ' '\n' | grep -c "")" runs started, ${countOfThemRunningJustNow} running just now, and we still need to start ${weStillNeedThisMany} runs" >> processNumbersRunning.log
+    TEMPcountAllNow=$( ${allOfTheRunningOnes} | tr ' ' '\n' | grep -c "" )
+    echo "That is ${TEMPcountAllNow} runs started, ${countOfThemRunningJustNow} running just now, and we still need to start ${weStillNeedThisMany} runs" >> processNumbersRunning.log
     echo >> processNumbersRunning.log
     
     fi    
