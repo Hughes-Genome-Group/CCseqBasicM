@@ -147,9 +147,10 @@ do
 
 monitorRun
 
+# For threaded jobs ..
 qstat | grep ${CCversion}_$$ >> allRunsJUSTNOW.txt
 
-# For testing purposes
+# For testing purposes (threaded jobs)
 qstat | grep ${CCversion}_$$ >> wholerunQstatMessages.txt
 
 sleep ${sleepSeconds}
@@ -231,7 +232,6 @@ wholenodesafetylimit=$((${wholenodemem}-80000))
 # foundFoldersCount=$(($(ls -1 | grep '^fastq_' | grep -c "")))
 # We default to 24 processors, and are not planning to change this to become a flag instead ..
 askedProcessors=24
-# askedProcessors=2
 neededQsubsCount=$(($((${foundFoldersCount}/${askedProcessors}))+1))
 
 echo
@@ -243,15 +243,16 @@ echo
 
 # -------------------
 
-# sleepMinutes=30
-sleepMinutes=1
-sleepSeconds=$((${sleepMinutes}*60))
-# sleepSeconds=10
+sleepSeconds=60
+# Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
+if [ "${FastqOrOligo}" == "Bamcombine" ] || [ "${FastqOrOligo}" == "Oligo" ];then
+    sleepSeconds=10
+fi
+longSleep=$((${sleepSeconds}*10))
 
 echo
 echo "Will be sleeping between starting each of the first 24 runs (to avoid i/o rush hour in downloading ${fastqOrOligo}s) .. "
-echo "sleep time : ${sleepMinutes} minutes"
-echo "i.e. ${sleepSeconds} seconds"
+echo "sleep time : ${longSleep} seconds"
 echo
 
 echo
@@ -302,15 +303,14 @@ do {
     
     monitorRun
     # First round starters get longer stagger - to avoid the initial REdig peaks to co-incide ..
-    longSleep=$((${sleepSeconds}*10))
     # sleep ${sleepSeconds}
     sleep ${longSleep}
     
     # for testing purposes
-    echo ${allOfTheRunningOnes} >> processNumbersRunning.log
-    ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> processNumbersRunning.log
-    echo "That is ${i} running just now" >> processNumbersRunning.log
-    echo >> processNumbersRunning.log
+    echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+    ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
+    echo "That is ${i} running just now" >> allRunsJUSTNOW.txt
+    echo >> allRunsJUSTNOW.txt
     
 }
 done
@@ -358,15 +358,15 @@ do {
     
     monitorRun
     # First round starters get longer stagger - to avoid the initial REdig peaks to co-incide ..
-    longSleep=$((${sleepSeconds}*10))
     # sleep ${sleepSeconds}
     sleep ${longSleep}
     
     # for testing purposes
-    echo ${allOfTheRunningOnes} >> processNumbersRunning.log
-    ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> processNumbersRunning.log
-    echo "That is ${i} runs started so far" >> processNumbersRunning.log
-    echo >> processNumbersRunning.log
+    date  >> allRunsJUSTNOW.txt
+    echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+    ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
+    echo "That is ${i} runs started so far" >> allRunsJUSTNOW.txt
+    echo >> allRunsJUSTNOW.txt
 
 }
 done
@@ -387,7 +387,10 @@ while [ "${weStillNeedThisMany}" -gt 0 ]
 do
 {
 
-countOfThemRunningJustNow=$(($( ps h -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
+date >> multitaskLooperAll.log
+echo 'ps --no-headers -p' > multitaskLooperNow.log
+echo 'ps --no-headers -p' >> multitaskLooperAll.log
+countOfThemRunningJustNow=$(($( ps --no-headers -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
 
 checkThis="${countOfThemRunningJustNow}"
 checkedName='${countOfThemRunningJustNow}'
@@ -396,7 +399,15 @@ checkParse
 if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     
     wePotentiallyStartNew=1
+
+    date >> multitaskLooperAll.log
+    echo 'checkIfDownloadsInProgress' > multitaskLooperNow.log
+    echo 'checkIfDownloadsInProgress' >> multitaskLooperAll.log
     checkIfDownloadsInProgress
+
+    date >> multitaskLooperAll.log
+    echo 'checkIfTooMuchMemUseAlready' > multitaskLooperNow.log
+    echo 'checkIfTooMuchMemUseAlready' >> multitaskLooperAll.log
     checkIfTooMuchMemUseAlready
 
     if [ "${wePotentiallyStartNew}" == 1 ];then
@@ -425,18 +436,28 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     i=$((${i}+1))
     
     # for testing purposes
-    echo ${allOfTheRunningOnes} >> processNumbersRunning.log
-    ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> processNumbersRunning.log
-    TEMPcountAllNow=$( ${allOfTheRunningOnes} | tr ' ' '\n' | grep -c "" )
-    echo "That is ${TEMPcountAllNow} runs started, ${countOfThemRunningJustNow} running just now, and we still need to start ${weStillNeedThisMany} runs" >> processNumbersRunning.log
-    echo >> processNumbersRunning.log
+    date  >> allRunsJUSTNOW.txt
+    echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+    ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
+
+    TEMPcountAllNow=$( echo ${allOfTheRunningOnes} | tr ' ' '\n' | grep -c "" )
+    TEMPcountOfThemRunningJustNow=$(($( ps --no-headers -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
+
+    echo "That is ${TEMPcountAllNow} runs started, ${TEMPcountOfThemRunningJustNow} running just now, and we still need to start ${weStillNeedThisMany} runs" >> allRunsJUSTNOW.txt
+    echo >> allRunsJUSTNOW.txt
     
     fi    
     
 fi
 
+date >> multitaskLooperAll.log
+echo 'monitorRun' > multitaskLooperNow.log
+echo 'monitorRun' >> multitaskLooperAll.log
 monitorRun
 
+date >> multitaskLooperAll.log
+echo "sleep ${sleepSeconds}" > multitaskLooperNow.log
+echo "sleep ${sleepSeconds}" >> multitaskLooperAll.log
 sleep ${sleepSeconds}
 
 }
@@ -450,7 +471,7 @@ fi
 # Now monitoring until the jobs have ended ..
 
 
-countOfThemRunningJustNow=$(($( ps h -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
+countOfThemRunningJustNow=$(($( ps --no-headers -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
 checkThis="${countOfThemRunningJustNow}"
 checkedName='${countOfThemRunningJustNow}'
 checkParse
@@ -460,7 +481,7 @@ checkParse
 # or I simply parse the id wrongly ?
 
 echo '----------------------------'
-echo "Into while monitored with ps h -p"
+echo "Into while monitored with ps --no-headers -p"
 date
 echo '----------------------------'
 
@@ -471,7 +492,7 @@ do
 monitorRun
 
 sleep ${sleepSeconds}
-countOfThemRunningJustNow=$(($( ps h -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
+countOfThemRunningJustNow=$(($( ps --no-headers -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
 checkThis="${countOfThemRunningJustNow}"
 checkedName='${countOfThemRunningJustNow}'
 checkParse
@@ -480,15 +501,16 @@ checkParse
 done
 
 echo '----------------------------'
-echo 'Out of while monitored with ps h -p'
+echo 'Out of while monitored with ps --no-headers -p'
 date
 echo '----------------------------'
 
 # for testing purposes
-echo ${allOfTheRunningOnes} >> processNumbersRunning.log
-ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> processNumbersRunning.log
-echo "That is ${countOfThemRunningJustNow} running just now - out of WHILE monitored with ps $(date)" >> processNumbersRunning.log
-echo >> processNumbersRunning.log
+date  >> allRunsJUSTNOW.txt
+echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
+echo "That is ${countOfThemRunningJustNow} running just now - out of WHILE monitored with ps $(date)" >> allRunsJUSTNOW.txt
+echo >> allRunsJUSTNOW.txt
 
 # As the above seems leaking, adding extra wait here ..
 # (hoping wait attacks also background processes, and defaults to the user's processes ..)
@@ -507,10 +529,11 @@ date
 echo '----------------------------'
 
 # for testing purposes
-echo ${allOfTheRunningOnes} >> processNumbersRunning.log
-ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> processNumbersRunning.log
-echo "That is ${countOfThemRunningJustNow} running just now - out of WAIT all processes at $(date)" >> processNumbersRunning.log
-echo >> processNumbersRunning.log
+date  >> allRunsJUSTNOW.txt
+echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
+echo "That is ${countOfThemRunningJustNow} running just now - out of WAIT all processes at $(date)" >> allRunsJUSTNOW.txt
+echo >> allRunsJUSTNOW.txt
 
 # Now everything is done, so cleaning up !
 
@@ -528,7 +551,7 @@ mv ${fastqOrOligo}*_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log qsubLogF
 
 fi
 
-mv processNumbersRunning.log qsubLogFiles/.
+mv allRunsJUSTNOW.txt qsubLogFiles/.
 
 echo > maxMemUsages.log
 echo "Maximum cluster TMPDIR memory area usage (during our run) : " > maxMemUsages.log
@@ -596,14 +619,15 @@ fi
 if [ "${weUseThisManyMegas}" -gt "${wholenodesafetylimit}" ];then
 
     echo >> allRunsJUSTNOW.txt
-    echo "We currently use ${weUseThisManyMegas}M memory in TMPDIR ," >> allRunsJUSTNOW.txt
+    date >> allRunsJUSTNOW.txt
+    echo "We currently use ${weUseThisManyMegas}M memory in TMPDIR" >> allRunsJUSTNOW.txt
     echo " and as the safe usage upper limit is ${wholenodesafetylimit}M," >> allRunsJUSTNOW.txt
     echo " we need to wait until the load comes down, before starting new ones .." >> allRunsJUSTNOW.txt
     
     wePotentiallyStartNew=0
     
     date >> highMemoryTimelog.txt
-    echo "We currently use ${weUseThisManyMegas}M memory in TMPDIR ," >> highMemoryTimelog.txt
+    echo "We currently use ${weUseThisManyMegas}M memory in TMPDIR" >> highMemoryTimelog.txt
     
     
 fi
@@ -616,6 +640,7 @@ checkIfDownloadsInProgress(){
 # If we have downloads in progress - we can not start a new one .. 
 if [ $(($( ls | grep ${fastqOrOligo}*_download_inProgress.log | grep -c "" ))) -ne 0 ]; then
     echo >> allRunsJUSTNOW.txt
+    date >> allRunsJUSTNOW.txt
     echo "Downloads in progress for runs : " >> allRunsJUSTNOW.txt
     ls | grep ${fastqOrOligo}*_download_inProgress.log | sed 's/_download_inProgress.log//' >> allRunsJUSTNOW.txt
     echo "Will wait until download finished, before starting new ones .." >> allRunsJUSTNOW.txt
@@ -647,7 +672,10 @@ for (( m=1; m<=${foundFoldersCount}; m++ ))
 do {
 
 # Memory as well
-localMemoryUsage=$( du -sm ${wholenodeSubmitDir} 2>> /dev/null | cut -f 1 )
+
+# Commenting this out as this is too much. du takes so long time when we have A LOT OF FILES like we have (tens of thousands)
+# localMemoryUsage=$( du -sm ${wholenodeSubmitDir} 2>> /dev/null | cut -f 1 )
+localMemoryUsage="NOTcounted"
 timepoint=$(date +%H:%M)
 
 # Override for bamcombining (never in TMPDIR)
@@ -657,7 +685,9 @@ else
 
     if [ "${useTMPDIRforThis}" -eq 1 ];then
         if [ "${useWholenodeQueue}" -eq 1 ]; then
-        tempareaMemoryUsage=$( du -sm ${TMPDIR} 2>> /dev/null | cut -f 1 )
+        # tempareaMemoryUsage=$( du -sm ${TMPDIR} 2>> /dev/null | cut -f 1 )
+        # Not using du in TMPDIR as TMPDIR for each node has its own filesystem, so df can be used instead (tip from Ewan 310718)
+        tempareaMemoryUsage=$( df --block-size 1000000 ${TMPDIR} | sed 's/\s\s*/\t/g' | cut -f 2 | tail -n 1 )
         else
             if [ -s runJustNow_${m}.log.tmpdir ];then
             tempareaMemoryUsage=$( cat runJustNow_${m}.log.tmpdir )
