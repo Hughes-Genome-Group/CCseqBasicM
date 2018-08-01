@@ -158,7 +158,9 @@ doQuotaTesting(){
     echo
     echo "Local disk usage for THIS RUN - at the moment (check you don't go over your t1-data area quota) :"
     du -sh ${dirForQuotaAsking} 2>> /dev/null
-    if [ "${useTMPDIRforThis}" -ne 0 ]; then echo "TMPDIR cluster temp area usage - check you don't go over 12GB (normal queue) or 200GB (largemem queue) :"; du -sh "${TMPDIR}" 2>> /dev/null; fi
+    # Not using du in TMPDIR as TMPDIR for each node has its own filesystem, so df can be used instead (tip from Ewan 310718)
+    # if [ "${useTMPDIRforThis}" -ne 0 ]; then echo "TMPDIR cluster temp area usage - check you don't go over 12GB (normal queue) or 200GB (largemem queue) :"; du -sh "${TMPDIR}" 2>> /dev/null; fi
+    if [ "${useTMPDIRforThis}" -ne 0 ]; then echo "TMPDIR cluster temp area usage - check you don't go over 12GB (normal queue) or 200GB (largemem queue) :"; df --block-size 1000000 ${TMPDIR} 2>> /dev/null; fi
     echo
     
 }

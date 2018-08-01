@@ -607,7 +607,9 @@ if [ "${useTMPDIRforThis}" -eq 1 ];then
 
 weUseThisManyMegas=0
 if [ "${useWholenodeQueue}" -eq 1 ]; then
-    weUseThisManyMegas=$(($( du -sm ${TMPDIR} 2>> /dev/null | cut -f 1 )))
+    # Not using du in TMPDIR as TMPDIR for each node has its own filesystem, so df can be used instead (tip from Ewan 310718)
+    weUseThisManyMegas=$( df --block-size 1000000 ${TMPDIR} | sed 's/\s\s*/\t/g' | cut -f 2 | tail -n 1 )
+    # weUseThisManyMegas=$(($( du -sm ${TMPDIR} 2>> /dev/null | cut -f 1 )))
 else
     if [ -s runJustNow_${m}.log.tmpdir ];then
         tempareaMemoryUsage=$( cat runJustNow_${m}.log.tmpdir )
