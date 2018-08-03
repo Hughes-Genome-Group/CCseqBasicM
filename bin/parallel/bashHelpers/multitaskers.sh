@@ -410,7 +410,7 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     echo 'checkIfTooMuchMemUseAlready' >> multitaskLooperAll.log
     checkIfTooMuchMemUseAlready
 
-    if [ "${wePotentiallyStartNew}" == 1 ];then
+    if [ "${wePotentiallyStartNew}" -eq 1 ];then
   
     # Log folder for other-than-fastq-runs to be the chr/oligo directory
     if [ "${FastqOrOligo}" == "Fastq" ];then
@@ -679,6 +679,7 @@ date > runsJUSTNOW.txt
 localMemoryUsage="NOTcounted"
 timepoint=$(date +%H:%M)
 
+stuffParsedFromTop=""
 # Override for bamcombining (never in TMPDIR)
 if [ "${FastqOrOligo}" == "Bamcombine" ];then
     tempareaMemoryUsage=0
@@ -689,6 +690,13 @@ else
         # tempareaMemoryUsage=$( du -sm ${TMPDIR} 2>> /dev/null | cut -f 1 )
         # Not using du in TMPDIR as TMPDIR for each node has its own filesystem, so df can be used instead (tip from Ewan 310718)
         tempareaMemoryUsage=$( df --block-size 1000000 ${TMPDIR} | sed 's/\s\s*/\t/g' | cut -f 3 | tail -n 1 )
+        top -b -n 1 | head -n 5 > TEMPtop.log
+        usedProcsRightNow=$( head -n 1 TEMPtop.log | sed 's/.*load average: //' | sed 's/,.*//' )
+        procUsePercentsRightNow=$( head -n 3 TEMPtop.log | tail -n 1 | tr ',' '\t' | tr ':' '\t' | sed 's/\s\s*/ /g'| cut -f 2,3,5,6 | sed 's/%..//g' )
+        freeMemJustNow=$( tail -n 2 TEMPtop.log | head -n 1 | sed 's/.*used,\s*//' | sed 's/...k.*/M/' )
+        cachedMemJustNow=$( tail -n 1 TEMPtop.log | sed 's/.*free,\s*//' | sed 's/...k.*/M/' )
+        stuffParsedFromTop=" ${usedProcsRightNow} ${procUsePercentsRightNow} ${freeMemJustNow} ${cachedMemJustNow}"
+        
         else
             if [ -s runJustNow_${m}.log.tmpdir ];then
             tempareaMemoryUsage=$( cat runJustNow_${m}.log.tmpdir )
@@ -715,7 +723,7 @@ if [ -s runJustNow_${m}.log ];then
 
 usageMessage="runNo ${m} $(cat runJustNow_${m}.log) localmem ${localMemoryUsage}M TEMPDIRmem ${tempareaMemoryUsage}M ${timepoint}"
 echo ${usageMessage} >> runsJUSTNOW.txt
-usageMessage="$(cat runJustNow_${m}.log) ${localMemoryUsage}M ${tempareaMemoryUsage}M ${timepoint}"
+usageMessage="$(cat runJustNow_${m}.log) ${localMemoryUsage}M ${tempareaMemoryUsage}M ${timepoint}${stuffParsedFromTop}"
 echo ${usageMessage} | sed 's/\s/\t/g' >> wholerunUsage_${m}.txt
 
 fi
