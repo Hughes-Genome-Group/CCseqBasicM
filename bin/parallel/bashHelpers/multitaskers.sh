@@ -132,7 +132,7 @@ do {
 sleepSeconds=60
 # Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
 if [ "${FastqOrOligo}" == "Bamcombine" ] || [ "${FastqOrOligo}" == "Oligo" ];then
-    sleepSeconds=10
+    sleepSeconds=1
 fi
 
 
@@ -246,7 +246,7 @@ echo
 sleepSeconds=60
 # Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
 if [ "${FastqOrOligo}" == "Bamcombine" ] || [ "${FastqOrOligo}" == "Oligo" ];then
-    sleepSeconds=10
+    sleepSeconds=1
 fi
 longSleep=$((${sleepSeconds}*10))
 
@@ -437,7 +437,7 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     
     # for testing purposes
     date  >> allRunsJUSTNOW.txt
-    echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+    # echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
     ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
 
     TEMPcountAllNow=$( echo ${allOfTheRunningOnes} | tr ' ' '\n' | grep -c "" )
@@ -507,7 +507,7 @@ echo '----------------------------'
 
 # for testing purposes
 date  >> allRunsJUSTNOW.txt
-echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+# echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
 ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
 echo "That is ${countOfThemRunningJustNow} running just now - out of WHILE monitored with ps $(date)" >> allRunsJUSTNOW.txt
 echo >> allRunsJUSTNOW.txt
@@ -530,7 +530,7 @@ echo '----------------------------'
 
 # for testing purposes
 date  >> allRunsJUSTNOW.txt
-echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+# echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
 ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
 echo "That is ${countOfThemRunningJustNow} running just now - out of WAIT all processes at $(date)" >> allRunsJUSTNOW.txt
 echo >> allRunsJUSTNOW.txt
@@ -657,6 +657,10 @@ fi
 }
 
 monitorRun(){
+
+# If we are bamcombine run, not doing this at all.    
+if [ "${FastqOrOligo}" != "Bamcombine" ]
+then
     
 #_____________________
 # For testing purposes
@@ -731,5 +735,7 @@ fi
 }
 done
 
+
+fi
 
 }
