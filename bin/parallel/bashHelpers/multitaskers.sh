@@ -696,7 +696,7 @@ else
         tempareaMemoryUsage=$( df --block-size 1000000 ${TMPDIR} | sed 's/\s\s*/\t/g' | cut -f 3 | tail -n 1 )
         top -b -n 1 | head -n 5 > TEMPtop.log
         usedProcsRightNow=$( head -n 1 TEMPtop.log | sed 's/.*load average: //' | sed 's/,.*//' )
-        procUsePercentsRightNow=$( head -n 3 TEMPtop.log | tail -n 1 | tr ',' '\t' | tr ':' '\t' | sed 's/\s\s*/ /g'| cut -f 2,3,5,6 | sed 's/%..//g' )
+        procUsePercentsRightNow=$( head -n 3 TEMPtop.log | tail -n 1 | tr ',' '\t' | tr ':' '\t' | sed 's/\s\s*/\t/g'| cut -f 2,3,5,6 | sed 's/%/\t%/g' )
         freeMemJustNow=$( tail -n 2 TEMPtop.log | head -n 1 | sed 's/.*used,\s*//' | sed 's/...k.*/M/' )
         cachedMemJustNow=$( tail -n 1 TEMPtop.log | sed 's/.*free,\s*//' | sed 's/...k.*/M/' )
         stuffParsedFromTop=" ${usedProcsRightNow} ${procUsePercentsRightNow} ${freeMemJustNow} ${cachedMemJustNow}"
@@ -711,7 +711,7 @@ else
     else
     tempareaMemoryUsage=0    
     fi
-
+    
 fi
 
 #_____________________
@@ -736,6 +736,19 @@ fi
 done
 
 
+# If we are bamcombine run, only top output, and only once. 
+else
+    timepoint=$(date +%H:%M)
+    
+    top -b -n 1 | head -n 5 > TEMPtop.log
+    usedProcsRightNow=$( head -n 1 TEMPtop.log | sed 's/.*load average: //' | sed 's/,.*//' )
+    procUsePercentsRightNow=$( head -n 3 TEMPtop.log | tail -n 1 | tr ',' '\t' | tr ':' '\t' | sed 's/\s\s*/\t/g'| cut -f 2,3,5,6 | sed 's/%/\t%/g' )
+    freeMemJustNow=$( tail -n 2 TEMPtop.log | head -n 1 | sed 's/.*used,\s*//' | sed 's/...k.*/M/' )
+    cachedMemJustNow=$( tail -n 1 TEMPtop.log | sed 's/.*free,\s*//' | sed 's/...k.*/M/' )
+    stuffParsedFromTop=" ${usedProcsRightNow} ${procUsePercentsRightNow} ${freeMemJustNow} ${cachedMemJustNow}"
+    
+    usageMessage="${timepoint}${stuffParsedFromTop}"
+    echo ${usageMessage} | sed 's/\s/\t/g' >> wholerunUsage.txt
 fi
 
 }
