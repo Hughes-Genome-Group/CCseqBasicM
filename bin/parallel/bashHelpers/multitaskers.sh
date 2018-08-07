@@ -234,6 +234,12 @@ wholenodesafetylimit=$((${wholenodemem}-80000))
 # foundFoldersCount=$(($(ls -1 | grep '^fastq_' | grep -c "")))
 # We default to 24 processors, and are not planning to change this to become a flag instead ..
 askedProcessors=24
+# Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
+if [ "${FastqOrOligo}" == "Bamcombine" ] || [ "${FastqOrOligo}" == "Oligo" ];then
+    askedProcessors=100
+elif [ "${FastqOrOligo}" == "Oligo" ];then
+    askedProcessors=30
+fi
 neededQsubsCount=$(($((${foundFoldersCount}/${askedProcessors}))+1))
 
 echo
@@ -682,7 +688,6 @@ date > runsJUSTNOW.txt
 # localMemoryUsage=$( du -sm ${wholenodeSubmitDir} 2>> /dev/null | cut -f 1 )
 localMemoryUsage="NOTcounted"
 
-stuffParsedFromTop=""
 # Override for bamcombining (never in TMPDIR)
 if [ "${FastqOrOligo}" == "Bamcombine" ];then
     tempareaMemoryUsage=0
