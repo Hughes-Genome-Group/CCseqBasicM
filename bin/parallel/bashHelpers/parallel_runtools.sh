@@ -808,8 +808,8 @@ do
     # ######################################################################    
     # For first round testing - turning the globin combining off !
     # ######################################################################
-    # weSawGlobins=0
-    # thisIsGlobinRound=0
+    weSawGlobins=0
+    thisIsGlobinRound=0
     
     
     # Doing the globin, if need be ..

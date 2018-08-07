@@ -862,7 +862,7 @@ printToLogFile
 printThis="Generating blat-excluded regions list for blat filtering.."
 printToLogFile
 
-areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixFLASHED}*PF.gff | grep -c "" )))
+areWeActuallyHavingGffFiles=$(($( ls TEMPdir2/${dataprefixFLASHED}*PF.gff | grep -c "" )))
 if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
     printThis="WARNING : no reported FLASHED fragments found - to apply BLAT-filtered regions to ! "
     printToLogFile    
@@ -879,7 +879,7 @@ do
 done
 fi
 
-areWeActuallyHavingGffFiles=$(($( ls ${datafolder}/${dataprefixNONFLASHED}*PF.gff | grep -c "" )))
+areWeActuallyHavingGffFiles=$(($( ls TEMPdir2/${dataprefixNONFLASHED}*PF.gff | grep -c "" )))
 if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
     printThis="WARNING : no reported NONFLASHED fragments found - to apply BLAT-filtered regions to ! "
     printToLogFile    
