@@ -131,8 +131,10 @@ do {
 
 sleepSeconds=60
 # Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
-if [ "${FastqOrOligo}" == "Bamcombine" ] || [ "${FastqOrOligo}" == "Oligo" ];then
+if [ "${FastqOrOligo}" == "Bamcombine" ];then
     sleepSeconds=1
+elif [ "${FastqOrOligo}" == "Oligo" ];then
+    sleepSeconds=10
 fi
 
 
@@ -163,7 +165,7 @@ mkdir qsubLogFiles
 mv ${CCversion}_$$_${fqOrOL}* qsubLogFiles/.
 mv ${fastqOrOligo}*_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log qsubLogFiles/.
 mv wholerun* qsubLogFiles/.
-rm -f allRunsJUSTNOW.txt
+mv -f allRunsJUSTNOW.txt qsubLogFiles/allRunsRUNTIME.log
 rm -f runsJUSTNOW*.txt
 
 echo > maxMemUsages.log
@@ -247,6 +249,8 @@ sleepSeconds=60
 # Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
 if [ "${FastqOrOligo}" == "Bamcombine" ] || [ "${FastqOrOligo}" == "Oligo" ];then
     sleepSeconds=1
+elif [ "${FastqOrOligo}" == "Oligo" ];then
+    sleepSeconds=10
 fi
 longSleep=$((${sleepSeconds}*10))
 
@@ -307,7 +311,7 @@ do {
     sleep ${longSleep}
     
     # for testing purposes
-    echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+    # echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
     ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
     echo "That is ${i} running just now" >> allRunsJUSTNOW.txt
     echo >> allRunsJUSTNOW.txt
@@ -363,7 +367,7 @@ do {
     
     # for testing purposes
     date  >> allRunsJUSTNOW.txt
-    echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+    # echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
     ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
     echo "That is ${i} runs started so far" >> allRunsJUSTNOW.txt
     echo >> allRunsJUSTNOW.txt
@@ -387,9 +391,6 @@ while [ "${weStillNeedThisMany}" -gt 0 ]
 do
 {
 
-date >> multitaskLooperAll.log
-echo 'ps --no-headers -p' > multitaskLooperNow.log
-echo 'ps --no-headers -p' >> multitaskLooperAll.log
 countOfThemRunningJustNow=$(($( ps --no-headers -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
 
 checkThis="${countOfThemRunningJustNow}"
@@ -400,14 +401,8 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     
     wePotentiallyStartNew=1
 
-    date >> multitaskLooperAll.log
-    echo 'checkIfDownloadsInProgress' > multitaskLooperNow.log
-    echo 'checkIfDownloadsInProgress' >> multitaskLooperAll.log
     checkIfDownloadsInProgress
 
-    date >> multitaskLooperAll.log
-    echo 'checkIfTooMuchMemUseAlready' > multitaskLooperNow.log
-    echo 'checkIfTooMuchMemUseAlready' >> multitaskLooperAll.log
     checkIfTooMuchMemUseAlready
 
     if [ "${wePotentiallyStartNew}" -eq 1 ];then
@@ -450,14 +445,8 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     
 fi
 
-date >> multitaskLooperAll.log
-echo 'monitorRun' > multitaskLooperNow.log
-echo 'monitorRun' >> multitaskLooperAll.log
 monitorRun
 
-date >> multitaskLooperAll.log
-echo "sleep ${sleepSeconds}" > multitaskLooperNow.log
-echo "sleep ${sleepSeconds}" >> multitaskLooperAll.log
 sleep ${sleepSeconds}
 
 }
@@ -551,7 +540,7 @@ mv ${fastqOrOligo}*_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log qsubLogF
 
 fi
 
-mv allRunsJUSTNOW.txt qsubLogFiles/.
+mv -f allRunsJUSTNOW.txt qsubLogFiles/allRunsRUNTIME.log
 
 echo > maxMemUsages.log
 echo "Maximum cluster TMPDIR memory area usage (during our run) : " > maxMemUsages.log
@@ -567,15 +556,15 @@ mv wholerun* qsubLogFiles/.
 
 echo > maxMemUsages.log
 echo "Maximum cluster TMPDIR memory area usage (for any our qsubs) : " > maxMemUsages.log
-cat qsubLogFiles/wholerunUsage_*.txt | cut -f 3 | grep M | sed 's/M//' \
+cat qsubLogFiles/wholerunUsage*.txt | cut -f 3 | grep M | sed 's/M//' \
 | awk 'BEGIN{m=0}{if($1>m){m=$1}}END{print m}' | sed 's/$/M/' >> maxMemUsages.log
 echo >> maxMemUsages.log
 echo "Maximum work area t1-data memory usage (during our run) : " >> maxMemUsages.log
-cat qsubLogFiles/wholerunUsage_*.txt | cut -f 2 | grep M | sed 's/M//' \
+cat qsubLogFiles/wholerunUsage*.txt | cut -f 2 | grep M | sed 's/M//' \
 | awk 'BEGIN{m=0}{if($1>m){m=$1}}END{print m}' | sed 's/$/M/' >> maxMemUsages.log
 
 echo > qsubLogFiles/a_README.txt
-echo "All the logs have runtime data in intervals of ${sleepMinutes} minutes, i.e ${sleepSeconds} seconds, througout the whole run" >> qsubLogFiles/a_README.txt
+echo "All the logs have runtime data in intervals of ${sleepSeconds} seconds, througout the whole run" >> qsubLogFiles/a_README.txt
 echo >> qsubLogFiles/a_README.txt
 
 # Lastly we empty the TMPDIR
@@ -657,8 +646,19 @@ fi
 }
 
 monitorRun(){
+    
+timepoint=$(date +%H:%M)
 
-# If we are bamcombine run, not doing this at all.    
+# All of these get the top logs.
+top -b -n 1 | head -n 5 > TEMPtop.log
+usedProcsRightNow=$( head -n 1 TEMPtop.log | sed 's/.*load average: //' | sed 's/,.*//' )
+procUsePercentsRightNow=$( head -n 3 TEMPtop.log | tail -n 1 | tr ',' '\t' | tr ':' '\t' | sed 's/\s\s*/\t/g'| cut -f 2,3,5,6 | sed 's/%/\t%/g' )
+freeMemJustNow=$( tail -n 2 TEMPtop.log | head -n 1 | sed 's/.*used,\s*//' | sed 's/...k.*/M/' )
+cachedMemJustNow=$( tail -n 1 TEMPtop.log | sed 's/.*free,\s*//' | sed 's/...k.*/M/' )
+stuffParsedFromTop=" ${usedProcsRightNow} ${procUsePercentsRightNow} ${freeMemJustNow} ${cachedMemJustNow}"
+rm -f TEMPtop.log
+
+# If we are bamcombine run, not doing the complicated parts at all.    
 if [ "${FastqOrOligo}" != "Bamcombine" ]
 then
     
@@ -681,7 +681,6 @@ date > runsJUSTNOW.txt
 # Commenting this out as this is too much. du takes so long time when we have A LOT OF FILES like we have (tens of thousands)
 # localMemoryUsage=$( du -sm ${wholenodeSubmitDir} 2>> /dev/null | cut -f 1 )
 localMemoryUsage="NOTcounted"
-timepoint=$(date +%H:%M)
 
 stuffParsedFromTop=""
 # Override for bamcombining (never in TMPDIR)
@@ -694,12 +693,6 @@ else
         # tempareaMemoryUsage=$( du -sm ${TMPDIR} 2>> /dev/null | cut -f 1 )
         # Not using du in TMPDIR as TMPDIR for each node has its own filesystem, so df can be used instead (tip from Ewan 310718)
         tempareaMemoryUsage=$( df --block-size 1000000 ${TMPDIR} | sed 's/\s\s*/\t/g' | cut -f 3 | tail -n 1 )
-        top -b -n 1 | head -n 5 > TEMPtop.log
-        usedProcsRightNow=$( head -n 1 TEMPtop.log | sed 's/.*load average: //' | sed 's/,.*//' )
-        procUsePercentsRightNow=$( head -n 3 TEMPtop.log | tail -n 1 | tr ',' '\t' | tr ':' '\t' | sed 's/\s\s*/\t/g'| cut -f 2,3,5,6 | sed 's/%/\t%/g' )
-        freeMemJustNow=$( tail -n 2 TEMPtop.log | head -n 1 | sed 's/.*used,\s*//' | sed 's/...k.*/M/' )
-        cachedMemJustNow=$( tail -n 1 TEMPtop.log | sed 's/.*free,\s*//' | sed 's/...k.*/M/' )
-        stuffParsedFromTop=" ${usedProcsRightNow} ${procUsePercentsRightNow} ${freeMemJustNow} ${cachedMemJustNow}"
         
         else
             if [ -s runJustNow_${m}.log.tmpdir ];then
@@ -738,14 +731,6 @@ done
 
 # If we are bamcombine run, only top output, and only once. 
 else
-    timepoint=$(date +%H:%M)
-    
-    top -b -n 1 | head -n 5 > TEMPtop.log
-    usedProcsRightNow=$( head -n 1 TEMPtop.log | sed 's/.*load average: //' | sed 's/,.*//' )
-    procUsePercentsRightNow=$( head -n 3 TEMPtop.log | tail -n 1 | tr ',' '\t' | tr ':' '\t' | sed 's/\s\s*/\t/g'| cut -f 2,3,5,6 | sed 's/%/\t%/g' )
-    freeMemJustNow=$( tail -n 2 TEMPtop.log | head -n 1 | sed 's/.*used,\s*//' | sed 's/...k.*/M/' )
-    cachedMemJustNow=$( tail -n 1 TEMPtop.log | sed 's/.*free,\s*//' | sed 's/...k.*/M/' )
-    stuffParsedFromTop=" ${usedProcsRightNow} ${procUsePercentsRightNow} ${freeMemJustNow} ${cachedMemJustNow}"
     
     usageMessage="${timepoint}${stuffParsedFromTop}"
     echo ${usageMessage} | sed 's/\s/\t/g' >> wholerunUsage.txt
