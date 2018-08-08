@@ -227,9 +227,13 @@ else
     fi
 fi
 
-# memory in Megas - the whole node has this amount. Thou shalt not go over :D
-wholenodemem=300000
-wholenodesafetylimit=$((${wholenodemem}-80000))
+# TMP area memory in Megas - the whole node has this amount. Thou shalt not go over :D
+wholenodeDisk=300000
+wholenodesafetylimitDisk=$((${wholenodeDisk}-80000))
+
+# wholenode RAM memory in Megas - the whole node has this amount. Thou shalt not go over :D
+wholenodeMem=260000
+wholenodesafetylimitMem=$((${wholenodeMem}-80000))
 
 # foundFoldersCount=$(($(ls -1 | grep '^fastq_' | grep -c "")))
 # We default to 24 processors, and are not planning to change this to become a flag instead ..
@@ -238,7 +242,7 @@ askedProcessors=24
 if [ "${FastqOrOligo}" == "Bamcombine" ];then
     askedProcessors=100
 elif [ "${FastqOrOligo}" == "Oligo" ];then
-    askedProcessors=100
+    askedProcessors=40
 fi
 neededQsubsCount=$(($((${foundFoldersCount}/${askedProcessors}))+1))
 
@@ -609,9 +613,36 @@ printToLogFile
 
 
 checkIfTooMuchMemUseAlready(){
-# If we are already quite high in memory usage - we can not start a new one ..
+# If we are already quite high in memory or disk usage - we can not start a new one ..
 
+# ----------------------------------------
 
+weUseThisManyMegas=0
+# All of these get the top logs.
+top -b -n 1 | head -n 5 > TEMPtop.log
+freeMemJustNow=$( tail -n 2 TEMPtop.log | head -n 1 | sed 's/.*used,\s*//' | sed 's/...k.*//' )
+cachedMemJustNow=$( tail -n 1 TEMPtop.log | sed 's/.*free,\s*//' | sed 's/...k.*//' )
+rm -f TEMPtop.log
+
+weUseThisManyMegas=$((${wholenodeMem}-${freeMemJustNow}-${cachedMemJustNow}))
+
+if [ "${weUseThisManyMegas}" -gt "${wholenodesafetylimitMem}" ];then
+
+    echo >> allRunsJUSTNOW.txt
+    date >> allRunsJUSTNOW.txt
+    echo "We currently use ${weUseThisManyMegas}M memory in our node" >> allRunsJUSTNOW.txt
+    echo " and as the safe usage upper limit is ${wholenodesafetylimitMem}M," >> allRunsJUSTNOW.txt
+    echo " we need to wait until the load comes down, before starting new ones .." >> allRunsJUSTNOW.txt
+    
+    wePotentiallyStartNew=0
+    
+    date >> highMemoryTimelog.txt
+    echo "We currently use ${weUseThisManyMegas}M memory in our node" >> highMemoryTimelog.txt
+    
+    
+fi
+
+# ----------------------------------------
 if [ "${useTMPDIRforThis}" -eq 1 ];then
 
 weUseThisManyMegas=0
@@ -627,23 +658,25 @@ else
     fi
 fi
 
-if [ "${weUseThisManyMegas}" -gt "${wholenodesafetylimit}" ];then
+if [ "${weUseThisManyMegas}" -gt "${wholenodesafetylimitDisk}" ];then
 
     echo >> allRunsJUSTNOW.txt
     date >> allRunsJUSTNOW.txt
-    echo "We currently use ${weUseThisManyMegas}M memory in TMPDIR" >> allRunsJUSTNOW.txt
-    echo " and as the safe usage upper limit is ${wholenodesafetylimit}M," >> allRunsJUSTNOW.txt
+    echo "We currently use ${weUseThisManyMegas}M disk space in TMPDIR" >> allRunsJUSTNOW.txt
+    echo " and as the safe usage upper limit is ${wholenodesafetylimitDisk}M," >> allRunsJUSTNOW.txt
     echo " we need to wait until the load comes down, before starting new ones .." >> allRunsJUSTNOW.txt
     
     wePotentiallyStartNew=0
     
-    date >> highMemoryTimelog.txt
-    echo "We currently use ${weUseThisManyMegas}M memory in TMPDIR" >> highMemoryTimelog.txt
+    date >> highTMPdiskUsageTimelog.txt
+    echo "We currently use ${weUseThisManyMegas}M disk space in TMPDIR" >> highTMPdiskUsageTimelog.txt
     
     
 fi
 
 fi
+# ----------------------------------------
+
 }
 
 
