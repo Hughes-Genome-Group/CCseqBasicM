@@ -235,10 +235,10 @@ wholenodesafetylimit=$((${wholenodemem}-80000))
 # We default to 24 processors, and are not planning to change this to become a flag instead ..
 askedProcessors=24
 # Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
-if [ "${FastqOrOligo}" == "Bamcombine" ] || [ "${FastqOrOligo}" == "Oligo" ];then
+if [ "${FastqOrOligo}" == "Bamcombine" ];then
     askedProcessors=100
 elif [ "${FastqOrOligo}" == "Oligo" ];then
-    askedProcessors=30
+    askedProcessors=100
 fi
 neededQsubsCount=$(($((${foundFoldersCount}/${askedProcessors}))+1))
 
@@ -252,11 +252,14 @@ echo
 # -------------------
 
 sleepSeconds=60
+reportEverythismanyRounds=1
 # Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
-if [ "${FastqOrOligo}" == "Bamcombine" ] || [ "${FastqOrOligo}" == "Oligo" ];then
+if [ "${FastqOrOligo}" == "Bamcombine" ];then
     sleepSeconds=1
+    reportEverythismanyRounds=60
 elif [ "${FastqOrOligo}" == "Oligo" ];then
-    sleepSeconds=10
+    sleepSeconds=1
+    reportEverythismanyRounds=60
 fi
 longSleep=$((${sleepSeconds}*10))
 
@@ -393,9 +396,12 @@ weStillNeedThisMany=$((${foundFoldersCount}-${askedProcessors}))
 # This was confusing as inconsistent with above where the looper is ${i}
 # currentFastqNumber=$((${askedProcessors}+1))
 i=$((${askedProcessors}+1))
+repLoop=0
 while [ "${weStillNeedThisMany}" -gt 0 ]
 do
 {
+
+repLoop=$((${repLoop}+1))
 
 countOfThemRunningJustNow=$(($( ps --no-headers -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
 
@@ -436,22 +442,30 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     # currentFastqNumber=$((${currentFastqNumber}+1))
     i=$((${i}+1))
     
-    # for testing purposes
-    date  >> allRunsJUSTNOW.txt
-    # echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
-    ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
-
-    TEMPcountAllNow=$( echo ${allOfTheRunningOnes} | tr ' ' '\n' | grep -c "" )
-    TEMPcountOfThemRunningJustNow=$(($( ps --no-headers -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
-
-    echo "That is ${TEMPcountAllNow} runs started, ${TEMPcountOfThemRunningJustNow} running just now, and we still need to start ${weStillNeedThisMany} runs" >> allRunsJUSTNOW.txt
-    echo >> allRunsJUSTNOW.txt
+    # Not reporting every round, if we are fast-looping (bam or oligo loop)
+    if [ $((${repLoop}%${reportEverythismanyRounds})) -eq 0 ]; then        
+        # for testing purposes
+        date  >> allRunsJUSTNOW.txt
+        # echo ${allOfTheRunningOnes} >> allRunsJUSTNOW.txt
+        ps -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') >> allRunsJUSTNOW.txt
+        
+        TEMPcountAllNow=$( echo ${allOfTheRunningOnes} | tr ' ' '\n' | grep -c "" )
+        TEMPcountOfThemRunningJustNow=$(($( ps --no-headers -p $(echo ${allOfTheRunningOnes} | tr ' ' ',') | grep -c "" )))
+        
+        echo "That is ${TEMPcountAllNow} runs started, ${TEMPcountOfThemRunningJustNow} running just now, and we still need to start ${weStillNeedThisMany} runs" >> allRunsJUSTNOW.txt
+        echo >> allRunsJUSTNOW.txt
+    fi
     
     fi    
     
 fi
 
-monitorRun
+# Not reporting every round, if we are fast-looping (bam or oligo loop)
+if [ $((${repLoop}%${reportEverythismanyRounds})) -eq 0 ]; then
+    monitorRun
+    # Zeroing the counter, to not to go integer overflow in fast looping loops..
+    repLoop=0
+fi
 
 sleep ${sleepSeconds}
 
@@ -714,24 +728,11 @@ fi
 
 #_____________________
 
-# Reporting for all running children
+# Reporting all running children
 
-for (( m=1; m<=${foundFoldersCount}; m++ ))
-do {
-
-
-
-if [ -s runJustNow_${m}.log ];then
-
-usageMessage="runNo ${m} $(cat runJustNow_${m}.log) localmem ${localMemoryUsage}M TEMPDIRmem ${tempareaMemoryUsage}M ${timepoint}"
-echo ${usageMessage} >> runsJUSTNOW.txt
-usageMessage="$(cat runJustNow_${m}.log) ${localMemoryUsage}M ${tempareaMemoryUsage}M ${timepoint}${stuffParsedFromTop}"
-echo ${usageMessage} | sed 's/\s/\t/g' >> wholerunUsage_${m}.txt
-
-fi
-
-}
-done
+cat runJustNow_*.log | tr '\n' ' ' | sed 's/$/\n/' | sed 's/^/'${timepoint}' /' | sed 's/\s/\t/g' >> wholerunTasks.txt
+usageMessage="${localMemoryUsage}M ${tempareaMemoryUsage}M ${timepoint}${stuffParsedFromTop}"
+echo ${usageMessage} | sed 's/\s/\t/g' >> wholerunUsage.txt
 
 
 # If we are bamcombine run, only top output, and only once. 
