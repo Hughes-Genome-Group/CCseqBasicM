@@ -136,3 +136,71 @@ echo "Output folders generated :"
 ls -lht
     
 }
+
+cleanUpRunFolderWhenBLATdisabled(){
+    
+# We want to leave somewhat explore-able structure to the output folder..
+
+# |-- F1_test_040316_G_preCC4
+# |-- F2_RAW_test_040316_G_CC4
+# |-- F3_PREfiltered_test_040316_G_CC4
+# |-- F4_filteringLogFor_test_040316_G_CC4
+# `-- F5_FILTERED_test_040316_G_CC4
+
+printThis="Cleaning up after ourselves - renaming folders and packing files.."
+printToLogFile
+
+# This one is already ready :
+# |-- F1_test_040316_G_preCC4
+
+# Changing names of these three :
+# |-- F2_RAW_test_040316_G_CC4
+# |-- F3_PREfiltered_test_040316_G_CC4
+# |-- F4_filteringLogFor_test_040316_G_CC4
+
+# Packing files.. 
+TEMPcleanupFolder=$(pwd)
+
+cd F1_beforeCCanalyser_${Sample}_${CCversion}
+echo F1_beforeCCanalyser_${Sample}_${CCversion}
+echo "beforeCCanalyser folder contains trimming, flashing, REdigesting, bowtie mapping of the sample" > a_trim_flash_REdigest_bowtie_containing_folder
+
+flashstatus="FLASHED"
+echo "samtools view -hb ${flashstatus}_REdig.sam > ${flashstatus}_REdig.bam"
+samtools view -hb ${flashstatus}_REdig.sam > ${flashstatus}_REdig.bam
+flashstatus="NONFLASHED"
+echo "samtools view -hb ${flashstatus}_REdig.sam > ${flashstatus}_REdig.bam"
+samtools view -hb ${flashstatus}_REdig.sam > ${flashstatus}_REdig.bam
+
+ls -lht FLASHED_REdig.bam
+ls -lht NONFLASHED_REdig.bam
+rm -f FLASHED_REdig.sam NONFLASHED_REdig.sam
+cdCommand='cd ${TEMPcleanupFolder}'
+cdToThis="${TEMPcleanupFolder}"
+checkCdSafety
+cd ${TEMPcleanupFolder}
+
+cd F2_redGraphs_${Sample}_${CCversion}
+echo F2_redGraphs_${Sample}_${CCversion}
+cleanCCfolder
+echo "redGraphs folder is a CCanalyser run where duplicate filter is switched ON" > a_CCanalyser_run_with_duplicate_filter_switched_OFF
+cdCommand='cd ${TEMPcleanupFolder}'
+cdToThis="${TEMPcleanupFolder}"
+checkCdSafety
+cd ${TEMPcleanupFolder}
+
+cd F3_orangeGraphs_${Sample}_${CCversion}
+echo F3_orangeGraphs_${Sample}_${CCversion}
+echo "orangeGraphs folder is a CCanalyser run where duplicate filter is switched ON" > a_CCanalyser_run_with_duplicate_filter_switched_ON
+cleanCCfolder
+cdCommand='cd ${TEMPcleanupFolder}'
+cdToThis="${TEMPcleanupFolder}"
+checkCdSafety
+cd ${TEMPcleanupFolder}
+
+echo
+echo "Output folders generated :"
+
+ls -lht
+    
+}

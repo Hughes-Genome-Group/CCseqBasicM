@@ -895,7 +895,7 @@ do
                 rm -f samtoolsCat.err
             fi
             
-            doQuotaTesting
+            # doQuotaTesting
             
             mkdir ${F1foldername}
             mv FLASHED_REdig.bam ${F1foldername}/.

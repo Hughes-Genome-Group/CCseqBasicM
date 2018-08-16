@@ -776,7 +776,7 @@ C_FOLDER_PATH="$(pwd)/C_combineOligoWise"
 # 7) for each oligo bunch in the list : mainRunner.sh --parallel 2
 
 prepareParallelCCanalyserRun
-doQuotaTesting
+# doQuotaTesting
 
 cd D_analyseOligoWise
 
@@ -798,7 +798,7 @@ runWholenode
 else
 runMultitask
 fi
-doQuotaTesting
+# doQuotaTesting
 
 cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
 cdToThis="${rainbowRunTOPDIR}"

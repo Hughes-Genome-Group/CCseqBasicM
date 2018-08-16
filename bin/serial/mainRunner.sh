@@ -1047,6 +1047,34 @@ cat FLASHED_parameters_for_filtering.log NONFLASHED_parameters_for_filtering.log
 rm -f FLASHED_parameters_for_filtering.log NONFLASHED_parameters_for_filtering.log
 
 
+# TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+# TESTING TIME - disabling blat and rest of the pipe ..
+# if [ "${PARALLEL}" -eq 2 ]; then
+
+# not testing any more -turning this effectively off here : 
+if [ "${PARALLEL}" -eq 2000 ]; then
+    subfolder="PREfiltered"
+    updateCCanalyserDataHub
+    
+    moveCommand='mv -f PREfiltered_${Sample}_${CCversion} F3_orangeGraphs_${Sample}_${CCversion}'
+    moveThis="PREfiltered_${Sample}_${CCversion}"
+    moveToHere="F3_orangeGraphs_${Sample}_${CCversion}"
+    checkMoveSafety
+    mv -f PREfiltered_${Sample}_${CCversion} F3_orangeGraphs_${Sample}_${CCversion}
+
+    cleanUpRunFolderWhenBLATdisabled
+    
+    printThis="TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+    printToLogFile
+    printThis="Testing purposes - exiting run before BLAT and further steps .."
+    printToLogFile
+    printThis="TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+    printToLogFile
+    exit 0
+fi
+# TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+
+
 ##################################
 # Filtering the data..
 

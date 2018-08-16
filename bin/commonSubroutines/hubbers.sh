@@ -825,8 +825,10 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     
     
     
-    # Adding the bigbed track for BLAT-filter-marked RE-fragments :
+    # Adding the bigbed track for BLAT-filter-marked RE-fragments (if there were any) :
 
+    if [ -s filteringLogFor_PREfiltered_${Sample}_${CCversion}/BlatPloidyFilterRun/BLAT_PLOIDY_FILTERED_OUTPUT/blatFilterMarkedREfragments.bed ]; then
+    
     cat filteringLogFor_PREfiltered_${Sample}_${CCversion}/BlatPloidyFilterRun/BLAT_PLOIDY_FILTERED_OUTPUT/blatFilterMarkedREfragments.bed | sort -k1,1 -k2,2n > tempBed.bed
     bedToBigBed -type=bed4 tempBed.bed ${ucscBuild} ${sampleForCCanalyser}_${CCversion}_blatFilterMarkedREfragments.bb
     rm -f tempBed.bed
@@ -851,6 +853,8 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     bigWigSubfolder=""
     
     doRegularTrack
+    
+    fi
     
     writeDescriptionHtml
     

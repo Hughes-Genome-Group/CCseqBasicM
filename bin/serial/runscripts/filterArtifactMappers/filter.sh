@@ -123,6 +123,13 @@ filterSams()
 
 for file in ${datafolder}/${dataprefix}_capture*.sam
 do
+    
+# File name parses in any case ..
+basename=$( echo $file | sed 's/.*'${dataprefix}'_capture_//' | sed 's/\.sam$//' )
+reporterfile=$( echo $file | sed 's/'${dataprefix}'_capture_/'${dataprefix}'_/' )
+    
+# Only if we actually need to filter something !
+if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff" ] ; then
 
 # ${datafolder}
 # 30ghC1_S6_REdig_CC2_Hba-1.sam
@@ -134,10 +141,6 @@ do
 
 # Combined_reads_REdig_CC2_capture_Hba-1.sam
 # Combined_reads_REdig_CC2_Hba-1.sam
-
-
-    basename=$( echo $file | sed 's/.*'${dataprefix}'_capture_//' | sed 's/\.sam$//' )
-    reporterfile=$( echo $file | sed 's/'${dataprefix}'_capture_/'${dataprefix}'_/' )
    
     samDataLineCount1000=$( cat ${file} | head -n 1000 | grep -cv "^@" )
 
@@ -177,7 +180,12 @@ do
             printThis="Sorting the bam file for the filtering..\nsamtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam; samtools index TEMP_sorted.bam"
             printToLogFile
             setStringentFailForTheFollowing
-            samtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam
+            # samtools sort -o TEMP_sorted.bam -O bam -T tempSamtoolsSort TEMP.bam
+            
+            mkdir ${SGE_O_WORKDIR}/tempsort_${dataprefix}_${basename}_$$
+            samtools sort -o TEMP_sorted.bam -O bam -T ${SGE_O_WORKDIR}/tempsort_${dataprefix}_${basename}_$$/tempSamtoolsSort TEMP.bam
+            rm -rf ${SGE_O_WORKDIR}/tempsort_${dataprefix}_${basename}_$$
+            
             stopStringentFailAfterTheAbove
             mv -f TEMP_sorted.bam TEMP.bam
             samtools index TEMP.bam
@@ -200,6 +208,7 @@ do
         setStringentFailForTheFollowing
         overlaps=$( samtools view -c -L TEMP.bed TEMP.bam )
         stopStringentFailAfterTheAbove
+        rm -f TEMP.bed
         
         echo "We will filter ${overlaps} sam fragments which overlap with the PLOIDY regions.."
     
@@ -224,6 +233,7 @@ do
         setStringentFailForTheFollowing
         overlaps=$( samtools view -c -L TEMP.bed TEMP.bam )
         stopStringentFailAfterTheAbove
+        rm -f TEMP.bed
         
         echo "We will filter ${overlaps} sam fragments which overlap with the BLAT-filter regions.."
     
@@ -237,16 +247,31 @@ do
     
     echo
     
-    if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff" ] ; then
-        echo "${basename} ${dataprefix} - filtering for PLOIDY and BLAT regions.."
-        
-        echo "bedtools intersect -v -abam ${file} -b ${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff"
-        setStringentFailForTheFollowing
-        bedtools intersect -v -abam TEMP.bam -b ${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff > TEMPfiltered.bam
-        stopStringentFailAfterTheAbove
-        mv -f TEMPfiltered.bam TEMP.bam
-        
-    fi
+    echo "${basename} ${dataprefix} - filtering for PLOIDY and BLAT regions.."
+    
+    cat ${ucscBuild} | awk '{print $1"\t0\t"$2}' | sort -k1,1 -k2,2 > TEMPfullChrs.bed
+    # Making bed file on the fly, from the gff file
+    cut -f 1,4,5 "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff" | awk '{print $1"\t"$2-1"\t"$3}' | sort -k1,1 -k2,2 > TEMP.bed
+    
+    echo "bedtools subtract -a ${GENOME}.bed -b ${dataprefix}_${basename}_forBlatAndPloidyFiltering.bed > saveTheseRegions.bed"
+    setStringentFailForTheFollowing
+    bedtools subtract -a TEMPfullChrs.bed -b TEMP.bed > TEMPsubtracted.bed
+    stopStringentFailAfterTheAbove
+    rm -f TEMP.bed TEMPfullChrs.bed
+    
+    echo "samtools view -L saveTheseRegions.bed -o ploidyBlatFiltered.bam TEMP.bam"
+    setStringentFailForTheFollowing
+    samtools view -L TEMPsubtracted.bed -o TEMPfiltered.bam TEMP.bam
+    stopStringentFailAfterTheAbove
+    rm -f TEMPsubtracted.bed
+    
+    # echo "bedtools intersect -v -abam ${file} -b ${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff"
+    # setStringentFailForTheFollowing
+    # bedtools intersect -v -abam TEMP.bam -b ${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff > TEMPfiltered.bam
+    # stopStringentFailAfterTheAbove
+    
+    rm -f TEMP.bam
+    mv -f TEMPfiltered.bam TEMP.bam
 
     
     # How many regions remain ?
@@ -315,8 +340,19 @@ do
     stopStringentFailAfterTheAbove
     ls -lht | grep TEMP >> "/dev/stderr"
     rm -f TEMP_sorted.sam
+  
+# If we actually dont' need to filter anything (the _forBlatAndPloidyFiltering.gff was empty) , we can just catenate here ..  
+else
+    printThis="Filtering not needed for reporter ${basename} SAM file ${reporterfile} \n - no reads overlapped the to-be-filtered regions."
+    printToLogFile
+    # Adding to existing file..
+    setStringentFailForTheFollowing
+    cat ${reporterfile} >> TEMP_${dataprefix}_combined.sam
+    stopStringentFailAfterTheAbove        
+fi
 
-    ls -lht | grep combined >> "/dev/stderr"
+# We list them in any case ..
+ls -lht | grep combined >> "/dev/stderr"
 
 done
     
@@ -863,6 +899,7 @@ printThis="Generating blat-excluded regions list for blat filtering.."
 printToLogFile
 
 areWeActuallyHavingGffFiles=$(($( ls TEMPdir2/${dataprefixFLASHED}*PF.gff | grep -c "" )))
+# areWeActuallyHavingGffFiles=0
 if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
     printThis="WARNING : no reported FLASHED fragments found - to apply BLAT-filtered regions to ! "
     printToLogFile    
@@ -880,6 +917,7 @@ done
 fi
 
 areWeActuallyHavingGffFiles=$(($( ls TEMPdir2/${dataprefixNONFLASHED}*PF.gff | grep -c "" )))
+# areWeActuallyHavingGffFiles=0
 if [ "${areWeActuallyHavingGffFiles}" -eq 0 ]; then
     printThis="WARNING : no reported NONFLASHED fragments found - to apply BLAT-filtered regions to ! "
     printToLogFile    
@@ -913,11 +951,35 @@ do
     newname=$( echo $file | sed 's/.*\///' | sed 's/_noPF_noBF.gff$//' | sed 's/_PF_noBF.gff$//' | sed 's/_noPF_BF.gff$//' | sed 's/_PF_BF.gff$//' )
 
     # We have to do grep -v here, as we don't know which of the filter combinations we actually have..
-    setStringentFailForTheFollowing
-    cat $file | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
-    cat $file | grep 'BlatFilteredRegion=TRUE' > ${outputfolder}/${newname}_forBlatFiltering.gff
-    cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
-    stopStringentFailAfterTheAbove
+    doWeHaveanyPloidyREfragments=$((cat $file | grep -c 'PloidyRegion=TRUE'))
+    doWeHaveanyBlatREfragments=$((cat $file | grep -c 'BlatFilteredRegion=TRUE'))
+    
+    doWeHaveanyREfragments=$((cat $file | grep -c '=TRUE'))
+
+    if [ "${doWeHaveanyPloidyREfragments}" -ne 0 ]; then
+        setStringentFailForTheFollowing
+        cat $file | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
+        stopStringentFailAfterTheAbove
+    else
+        echo "" > ${outputfolder}/${newname}_forPloidyFiltering.gff
+    fi
+        
+    if [ "${doWeHaveanyBlatREfragments}" -ne 0 ]; then
+        setStringentFailForTheFollowing
+        cat $file | grep 'BlatFilteredRegion=TRUE' > ${outputfolder}/${newname}_forBlatFiltering.gff
+        stopStringentFailAfterTheAbove
+    else
+        echo "" > ${outputfolder}/${newname}_forBlatFiltering.gff
+    fi
+    
+    # And if we have one or the other, we can also combine and sort them ..
+    if [ "${doWeHaveanyREfragments}" -ne 0 ]; then
+        setStringentFailForTheFollowing    
+        cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+        stopStringentFailAfterTheAbove
+    else
+        echo "" > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+    fi        
     
 done
 
@@ -951,27 +1013,34 @@ filterSams
     
 # Make bed file of all blat-filter-marked DPNII regions..
 
-setStringentFailForTheFollowing
-cat ${outputfolder}/*.gff | grep BlatFilteredRegion=TRUE | cut -f 1,3,4,5 | awk '{ print $1"\t"$3"\t"$4"\t"$2 }' > ${outputfolder}/blatFilterMarkedREfragments.bed
-stopStringentFailAfterTheAbove
+# Only if we actually needed to filter something !
+if [ -s "${outputfolder}/${newname}_forBlatFiltering.gff" ] ; then
+    setStringentFailForTheFollowing
+    cat ${outputfolder}/*.gff | grep BlatFilteredRegion=TRUE | cut -f 1,3,4,5 | awk '{ print $1"\t"$3"\t"$4"\t"$2 }' > ${outputfolder}/blatFilterMarkedREfragments.bed
+    stopStringentFailAfterTheAbove  
 
-printThis="Combined filtered SAM file - final touches.."
-printToLogFile 
+    printThis="Combined filtered SAM file - final touches.."
+    printToLogFile 
+    
+    ls -lht TEMP*.sam
+    ls -lht TEMP*.sam >> "/dev/stderr"
+    
+    dataprefix="${dataprefixFLASHED}"
+    setStringentFailForTheFollowing
+    cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
+    stopStringentFailAfterTheAbove
+    rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
+    
+    dataprefix="${dataprefixNONFLASHED}"
+    
+    setStringentFailForTheFollowing
+    cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
+    stopStringentFailAfterTheAbove
 
-ls -lht TEMP*.sam
-ls -lht TEMP*.sam >> "/dev/stderr"
+else
+    mv -f TEMP_${dataprefix}_combined.sam ${outputfolder}/${dataprefix}_filtered_combined.sam
+fi
 
-dataprefix="${dataprefixFLASHED}"
-setStringentFailForTheFollowing
-cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
-stopStringentFailAfterTheAbove
-rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
-
-dataprefix="${dataprefixNONFLASHED}"
-
-setStringentFailForTheFollowing
-cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
-stopStringentFailAfterTheAbove
 rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
 
 ls -lht ${outputfolder}/*filtered_combined.sam
