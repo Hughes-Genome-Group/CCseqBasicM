@@ -121,6 +121,11 @@ blatGFFoverlap(){
 filterSams()
 {
 
+# If we have a file ..
+find ${datafolder}/${dataprefix}_capture*.sam
+didWeHaveProblemsInFindingSams=$?
+if [ "${didWeHaveProblemsInFindingSams}" -eq 0 ]; then
+
 for file in ${datafolder}/${dataprefix}_capture*.sam
 do
     
@@ -355,6 +360,12 @@ fi
 ls -lht | grep combined >> "/dev/stderr"
 
 done
+
+# If we didn't have a file (we just skip all ! )..
+else
+    printThis="Filtering was not done for reporter ${basename} SAM file \n - SAM file ${reporterfile} was not there (no reads to filter)."
+    printToLogFile    
+fi
     
 }
 
