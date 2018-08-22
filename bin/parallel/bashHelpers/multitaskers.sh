@@ -129,8 +129,8 @@ do {
 # 1) we may be queueuing -  nothing running and no log files yet
 # 2) we may be running - we have log files now
 
-sleepSeconds=60
-# Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
+sleepSeconds=600
+# Override for bamcombining and oligorounds (start more frequently than every 10 minutes)
 if [ "${FastqOrOligo}" == "Bamcombine" ];then
     sleepSeconds=1
 elif [ "${FastqOrOligo}" == "Oligo" ];then
@@ -255,7 +255,7 @@ echo
 
 # -------------------
 
-sleepSeconds=60
+sleepSeconds=600
 reportEverythismanyRounds=1
 # Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
 if [ "${FastqOrOligo}" == "Bamcombine" ];then
@@ -266,6 +266,12 @@ elif [ "${FastqOrOligo}" == "Oligo" ];then
     reportEverythismanyRounds=60
 fi
 longSleep=$((${sleepSeconds}*10))
+# Override for Fastq runs - we want to stagger the whole run every 10min,
+# as we are so prone to oscillate and crash when starting new runs right after we have crashed as TMPdir area got full
+# this leading one TMPdir area full event essentially crashing all subsequent samples like dominoes
+if [ "${FastqOrOligo}" == "Fastq" ];then
+    longSleep=${sleepSeconds}
+fi
 
 echo
 echo "Will be sleeping between starting each of the first 24 runs (to avoid i/o rush hour in downloading ${fastqOrOligo}s) .. "
