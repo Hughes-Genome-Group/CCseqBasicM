@@ -949,12 +949,12 @@ mv -f TEMPheading.sam headingForFutureSams.sam
 cat LOOP5_${flashstatus}_filter.txt | sed 's/^\s\s*//' | grep "Frag count of SAM file when entering" | sed 's/\s.*\s:\s/\t/' | awk '{print $2 >> "TEMPcounts1_"$1".txt"}'
 cat LOOP5_${flashstatus}_filter.txt | sed 's/^\s\s*//' | grep "Filtered SAM fragment count"          | sed 's/\s.*\s:\s/\t/' | awk '{print $2 >> "TEMPcounts2_"$1".txt"}'
 
-echo -e "chr_CAP\tsamFin\tsamFout" > LOOP5_${flashstatus}_filter_table.txt
+echo -e "chr\tsamFin\tsamFout" > LOOP5_${flashstatus}_filter_table.txt
 
 for file in TEMPcounts1_*.txt
 do
     file2=$(echo $file | sed 's/^TEMPcounts1_/TEMPcounts2_/')
-    tempname=$(echo $file | sed 's/^TEMPcounts_//' | sed 's/\.txt$//')
+    tempname=$(echo $file | sed 's/^TEMPcounts1_//' | sed 's/\.txt$//')
     tempcount1=$(cat ${file} | tr '\n' '+' | sed 's/\+$/\n/' | bc -l)
     tempcount2=$(cat ${file2} | tr '\n' '+' | sed 's/\+$/\n/' | bc -l)
     echo -e "${tempname}\t${tempcount1}\t${tempcount2}" >> LOOP5_${flashstatus}_filter_table.txt
@@ -979,6 +979,20 @@ echo
 
 echo '( more data - including CAPTURE-wise counts, in non-table format in here : 'LOOP5_${flashstatus}_filter.txt' )'
 echo
+
+# ------------------------
+
+# Summary of all of them ..
+
+cat LOOP2_${flashstatus}_REdig_onlyOneFragment_table.txt | cut -f 1,2,5 | sort -k1,1 | sed 's/RdOut/MultifragRds/'                               > tempLOOP2.txt 
+cat LOOP3_${flashstatus}_multicaptures_table.txt         | cut -f 1,2,5 | sort -k1,1 | sed 's/RdIn/RdHasCap/' | sed 's/RdOutJoined/RdSingleCap/' > tempLOOP3.txt 
+cat LOOP5_${flashstatus}_filter_table.txt                               | sort -k1,1 | sed 's/samFin/FragInSingleCapRds/' | sed 's/samFout/FragWithinSonicSize/'> tempLOOP5.txt
+
+join -a 1 tempLOOP2.txt tempLOOP3.txt | \
+join -a 1 -             tempLOOP5.txt | \
+sed 's/\s\s*/\t/g' | sed 's/$/\t0\t0\t0\t0\t0\t0/' | cut -f 1-7 > LOOPs1to5_${flashstatus}_table.txt
+
+rm -f tempLOOP2.txt tempLOOP3.txt tempLOOP5.txt
 
 # ------------------------
   
