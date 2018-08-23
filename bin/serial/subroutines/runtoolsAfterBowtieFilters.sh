@@ -1312,7 +1312,7 @@ do
     testedName='LOOP5 ${capname}'
     checkParse    
     
-    thisSamFragCount=$(($( cat LOOP4_${flashstatus}_join.txt | grep "${thisChr} ${capname}" | grep "Frag count of SAM file after join" | sed 's/.*\s:\s//' )))
+    thisSamFragCount=$(($( cat LOOP4_${flashstatus}_join.txt | grep "${thisChr} ${capname}" | grep "Frag count of SAM file after the join" | sed 's/.*\s:\s//' )))
     checkThis=${thisSamFragCount}
     checkedName='LOOP5 ${thisSamFragCount}'
     checkParse
