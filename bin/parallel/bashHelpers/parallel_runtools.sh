@@ -784,33 +784,35 @@ do
     wePrepareThisOligo=1
     # If this oligo is globin oligo - by default no.
     thisIsGlobinRound=0
-    
-    # Hard coding the globin oligos ..    
-    if [ "${thisOligoName}" == "Hba-1" ] || [ "${thisOligoName}" == "Hba-2" ]; then
-        thisOligoName="HbaCombined"
-    elif [ "${thisOligoName}" == "Hbb-b1" ] || [ "${thisOligoName}" == "Hbb-b2" ]; then
-        thisOligoName="HbbCombined"
-    fi
-
-    rm -f D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/run.sh
-    
-    # Hard coding the globin captures here ..
-    if [ "${thisOligoName}" == "HbaCombined" ] || [ "${thisOligoName}" == "HbbCombined" ]; then
-        weSawGlobins=1
-        thisIsGlobinRound=1
-        
-        # We enter these oligos twice, naturally, so doing them only if they aren't there yet ..
-        if [ -d D_analyseOligoWise/${thisOligoChr}/${thisOligoName} ];then
-            wePrepareThisOligo=0
-        fi
-    fi
-
+  
     # ######################################################################    
     # For first round testing - turning the globin combining off !
     # ######################################################################
-    weSawGlobins=0
-    thisIsGlobinRound=0
     
+#    # TO BE ADDED : we need to know if we have --globin set so we don't do this so that we duplicate the tracks.
+#
+#    # Hard coding the globin oligos ..    
+#    if [ "${thisOligoName}" == "Hba-1" ] || [ "${thisOligoName}" == "Hba-2" ]; then
+#        thisOligoName="HbaCombined"
+#    elif [ "${thisOligoName}" == "Hbb-b1" ] || [ "${thisOligoName}" == "Hbb-b2" ]; then
+#        thisOligoName="HbbCombined"
+#    fi
+#
+#    rm -f D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/run.sh
+#    
+#    # Hard coding the globin captures here ..
+#    if [ "${thisOligoName}" == "HbaCombined" ] || [ "${thisOligoName}" == "HbbCombined" ]; then
+#        weSawGlobins=1
+#        thisIsGlobinRound=1
+#        
+#        # We enter these oligos twice, naturally, so doing them only if they aren't there yet ..
+#        if [ -d D_analyseOligoWise/${thisOligoChr}/${thisOligoName} ];then
+#            wePrepareThisOligo=0
+#        fi
+#    fi
+
+   # ######################################################################    
+
     
     # Doing the globin, if need be ..
     if [ "${thisIsGlobinRound}" -eq 1 ]; then

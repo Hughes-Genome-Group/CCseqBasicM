@@ -994,6 +994,11 @@ sed 's/\s\s*/\t/g' | sed 's/$/\t0\t0\t0\t0\t0\t0/' | cut -f 1-7 > LOOPs1to5_${fl
 
 rm -f tempLOOP2.txt tempLOOP3.txt tempLOOP5.txt
 
+head -n 1  LOOPs1to5_${flashstatus}_table.txt > LOOPs1to5_${flashstatus}_total.txt
+tail -n +2 LOOPs1to5_${flashstatus}_table.txt \
+ | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$2;b=b+$3;c=c+$4;d=d+$5;e=e+$6;f=f+$7}END{print a"\t"b"\t"c"\t"d"\t"e"\t"f}'
+>> LOOPs1to5_${flashstatus}_total.txt
+
 # ------------------------
   
 }
