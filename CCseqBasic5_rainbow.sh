@@ -566,6 +566,16 @@ cd ${rainbowRunTOPDIR}
 
 checkFastqRunErrors
 
+# Make summaries
+
+flashstatus="FLASHED"
+makeFastqrunSummaries
+flashstatus="NONFLASHED"
+makeFastqrunSummaries
+
+# Summary of summaries ..
+head B_mapAndDivideFastqs/*FLASHED*.txt > B_fastqSummaryCounts.txt
+
 # ------------------------------
 
 printThis="${CaptureParallelPath}/runscripts/parallel_QC.sh"
@@ -806,6 +816,16 @@ checkCdSafety
 cd ${rainbowRunTOPDIR}
 
 checkParallelCCanalyserErrors
+
+# Make summaries
+
+flashstatus="FLASHED"
+makeOligorunSummaries
+flashstatus="NONFLASHED"
+makeOligorunSummaries
+
+# Summary of summaries ..
+head D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
 
 # -----------------------------------
 

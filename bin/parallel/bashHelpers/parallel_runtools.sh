@@ -47,6 +47,119 @@
 
 # ------------------------------------------
 
+makeFastqrunSummaries(){
+# ------------------------------------------
+
+weWereHereDir=$(pwd)
+cd B_mapAndDivideFastqs
+
+# ###############################
+# LOOPs summary table
+# ###############################
+
+head -n 1 fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt > ${flashstatus}_summaryCounts.txt
+cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^RdIn' \
+ | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}END{print a"\t"b"\t"c"\t"d"\t"e"\t"f}' >> ${flashstatus}_summaryCounts.txt
+
+echo -e 'mappedReadsAs100perc\tmultifrag\thasCap\tsingleCap\twithinSonicSize' > ${flashstatus}_summaryPerc.txt
+cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^RdIn' \
+ | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}END{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}' >> ${flashstatus}_summaryPerc.txt
+
+# ###############################
+# BOWTIEs summary oneliners
+# ###############################
+
+if [ "${flashstatus}" == "FLASHED" ]; then
+    
+ # FLASHED
+head -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads with at least one reported alignment' | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_mappedPerc.txt
+head -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads that failed to align'                 | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_unmappedPerc.txt
+head -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads with alignments suppressed due to -m' | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_mFiltered.txt
+
+else
+
+# NONFLASHED
+tail -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads with at least one reported alignment' | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_mappedPerc.txt
+tail -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads that failed to align'                 | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_unmappedPerc.txt
+tail -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads with alignments suppressed due to -m' | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_mFiltered.txt
+
+fi
+
+paste temp_mappedPerc.txt temp_unmappedPerc.txt temp_mFiltered.txt > temp_mapping.txt
+rm -f temp_mappedPerc.txt temp_unmappedPerc.txt temp_mFiltered.txt    
+
+echo -e 'mappedRds\tunmappedRds\tmFilteredRds' > ${flashstatus}_bowtiePerc.txt
+cat   temp_mapping.txt | awk 'BEGIN{a=0;b=0;c=0}{a=a+$1;b=b+$2;c=c+$3}END{print (a/NR)"\t"(b/NR)"\t"(c/NR)}' >> ${flashstatus}_bowtiePerc.txt
+rm -f temp_mapping.txt
+
+if [ "${flashstatus}" == "FLASHED" ]; then
+
+    # FLASHED
+    head -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads processed' | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' >    FLASHED_readcount.txt
+
+else
+
+    # NONFLASHED
+    tail -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads processed' | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > NONFLASHED_readcount.txt
+ 
+fi
+
+cdCommand='cd ${weWereHereDir}'
+cdToThis="${weWereHereDir}"
+checkCdSafety  
+cd ${weWereHereDir}
+
+# ------------------------------------------
+}
+
+# ------------------------------------------
+
+makeOligorunSummaries(){
+# ------------------------------------------
+
+weWereHereDir=$(pwd)
+cd D_analyseOligoWise
+
+# ###############################
+# Duplicate filtering oneliners
+# ###############################
+
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '11 Total number of reads entering the analysis' \
+| sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_allRds.txt
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '16 Non-duplicated reads' \
+| sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_nondupRds.txt
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '26a Actual reported fragments' \
+| sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_repFragTotal.txt
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '26b Actual reported CIS fragments' \
+| sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_repFragCis.txt
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '26c Actual reported TRANS fragments' \
+| sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_repFragTrans.txt
+
+echo -e "allRds\tnondupRds\trepFragTotal\trepFragCis\trepFragTrans" > ${flashstatus}_dupFiltStats.txt
+
+paste TMP_allRds.txt TMP_nondupRds.txt TMP_repFragTotal.txt TMP_repFragCis.txt TMP_repFragTrans.txt >> ${flashstatus}_dupFiltStats.txt
+rm -f TMP_allRds.txt TMP_nondupRds.txt TMP_repFragTotal.txt TMP_repFragCis.txt TMP_repFragTrans.txt
+
+echo 'Nondup reads %' > ${flashstatus}_percentagesAndFinalCounts.txt
+tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 1-2 | awk '{print ($2/$1)*100}' >>${flashstatus}_percentages.txt
+echo '' >> ${flashstatus}_percentages.txt
+echo 'Total cisreps/allrepfrags  %' >>${flashstatus}_percentages.txt
+tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 3-4 | awk '{print ($2/$1)*100}' >>${flashstatus}_percentages.txt
+echo '' >> ${flashstatus}_percentages.txt
+echo 'Average reporter fragment count per read (final count)' >>${flashstatus}_percentages.txt
+tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 2-3 | awk '{print ($2/$1)}' >>${flashstatus}_percentages.txt
+echo '' >> ${flashstatus}_percentages.txt
+ 
+cdCommand='cd ${weWereHereDir}'
+cdToThis="${weWereHereDir}"
+checkCdSafety  
+cd ${weWereHereDir}
+ 
+# ------------------------------------------
+}
+
+# ------------------------------------------
+
 checkFastqRunErrors(){
 # ------------------------------------------
 
