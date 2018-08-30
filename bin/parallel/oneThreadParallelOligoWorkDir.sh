@@ -97,30 +97,6 @@ echo "" >> "/dev/stderr"
     
 }
 
-doQuotaTesting(){
-        
-    echo
-    echo "Local disk usage for THIS RUN - at the moment (check you don't go over your t1-data area quota) :"
-    du -sh ${SGE_O_WORKDIR} 2>> /dev/null
-    echo "TMPDIR cluster temp area usage - check you don't go over 12GB (normal queue) or 200GB (largemem queue) :"
-    du -sh ${TMPDIR} 2>> /dev/null
-
-#_____________________
-# For testing purposes
-
-# echo $0
-
-free -m
-# df -m 
-# du -m 
-# ps T
-
-#_____________________
-    
-    
-}
-
-
 # -----------------------------------------
 
 # Normal runs (not only help request) starts here ..
@@ -177,8 +153,6 @@ printNewChapterToLogFile
         
       }
       fi  
-    
-    doQuotaTesting
     
     printThis="runOK ${runOK}"
     printToLogFile

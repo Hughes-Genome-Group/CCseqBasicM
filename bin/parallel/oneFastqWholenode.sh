@@ -96,31 +96,6 @@ echo "" >> "/dev/stderr"
     
 }
 
-doQuotaTesting(){
-        
-    echo
-    echo "Local disk usage for THIS RUN - at the moment (check you don't go over your t1-data area quota) :"
-    du -sh ${wholenodeSubmitDir} 2>> /dev/null
-    echo "TMPDIR cluster temp area usage - check you don't go too close to 300GB :"
-    # Not using du in TMPDIR as TMPDIR for each node has its own filesystem, so df can be used instead (tip from Ewan 310718)
-    df --block-size 1000000 ${TMPDIR}
-    # du -sh ${TMPDIR} 2>> /dev/null
-    
-#_____________________
-# For testing purposes
-
-# echo $0
-
-# free -m
-# df -m 
-# du -m 
-# ps T
-
-#_____________________
-    
-    
-}
-
 # -----------------------------------------
 
 # Normal runs (not only help request) starts here ..
@@ -247,8 +222,6 @@ printNewChapterToLogFile
     
     cat TMPareaBeforeMovingBack.log  | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -k2,2 -k1,1 | grep -v Moving > forDiff1.txt
     cat TMPareaDataAfterMovingItBackHere.log   | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -k2,2 -k1,1 | grep -v Moving > forDiff2.txt
-
-    doQuotaTesting
     
     printThis="checking that all got moved properly"
     printToLogFile

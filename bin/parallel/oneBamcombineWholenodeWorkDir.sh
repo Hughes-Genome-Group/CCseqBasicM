@@ -81,29 +81,6 @@ echo "" >> "/dev/stderr"
     
 }
 
-doQuotaTesting(){
-        
-    echo
-    echo "Local disk usage for THIS RUN - at the moment (check you don't go over your t1-data area quota) :"
-    du -sh ${wholenodeSubmitDir} 2>> /dev/null
-    echo "TMPDIR cluster temp area usage - check you don't go too near to 300GB :"
-    du -sh ${TMPDIR} 2>> /dev/null
-
-#_____________________
-# For testing purposes
-
-# echo $0
-
-# free -m
-# df -m 
-# du -m 
-# ps T
-
-#_____________________
-    
-    
-    
-}
 
 # -----------------------------------------
 
@@ -188,8 +165,6 @@ printNewChapterToLogFile
     else
         rm -f samtoolsCat.err
     fi
-    
-    doQuotaTesting
     
     printThis="FLASHEDin ${finCount} FLASHEDout ${finCount} NONFLASHEDin ${nfinCount} NONFLASHEDout ${nfoutCount} runOK ${runOK}"
     printToLogFile
