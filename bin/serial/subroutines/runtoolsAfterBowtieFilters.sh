@@ -1329,9 +1329,9 @@ do
     capname=$(basename $file | sed 's/'${flashstatus}'_//' | sed 's/_'possibleCaptures.bam'//')
     testThis="${capname}"
     testedName='LOOP5 ${capname}'
-    checkParse    
+    checkParse
     
-    thisSamFragCount=$(($( cat LOOP4_${flashstatus}_join.txt | grep "${thisChr} ${capname}" | grep "Frag count of SAM file after the join" | sed 's/.*\s:\s//' )))
+    thisSamFragCount=$(($( cat LOOP4_${flashstatus}_join.txt | '^'"${thisChr} ${capname}"'\s' | grep "Frag count of SAM file after the join" | sed 's/.*\s:\s//' )))
     checkThis=${thisSamFragCount}
     checkedName='LOOP5 ${thisSamFragCount}'
     checkParse
