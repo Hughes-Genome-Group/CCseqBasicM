@@ -160,11 +160,60 @@ cd ${weWereHereDir}
 
 # ------------------------------------------
 
+checkRunCrashes(){
+# ------------------------------------------
+
+# If we crashed uncontrollably, we will have runJustNow_*.log file(s) for the crashed run(s) still present.
+
+howManyCrashes=0
+howManyCrashes=$(($( ls -1 runJustNow_*.log 2>/dev/null | grep -c "" )))
+checkThis="${howManyCrashes}"
+checkedName='${howManyCrashes}'
+checkParse
+
+if [ "${howManyCrashes}" -ne 0 ]; then
+  
+  printThis="Some runs crashed UNCONTROLLABLY during the analysis \n ( this is most probably a bug - save your crashed output files and report to Jelena )."
+  printNewChapterToLogFile
+  
+  printThis="In total ${howManyCrashes} of your ${fastqOrOligo} runs crashed."
+  printToLogFile
+  
+  printThis="These ${fastqOrOligo}s crashed :"
+  printToLogFile
+
+  printThis=$( ls -1 runJustNow_*.log | sed 's/runJustNow_//' | sed 's/.log//' | tr '\n' ' ') 
+  printToLogFile
+  
+  printThis="They crashed in these steps :"
+  printToLogFile
+
+  printThis=$( cat runJustNow_*.log | sort | uniq -c ) 
+  printToLogFile  
+  
+  printThis="EXITING ! "
+  printToLogFile  
+  exit 1
+    
+else
+  printThis="OK - Checked for run crashes (due to bugs in code) - found none. Continuing. "
+  printToLogFile   
+fi
+
+
+}
+
+# ------------------------------------------
+
 checkFastqRunErrors(){
 # ------------------------------------------
 
 weWereHereDir=$(pwd)
 cd B_mapAndDivideFastqs
+
+# Check that no run crashes.
+
+checkRunCrashes
 
 # Check that no errors.
 
@@ -380,6 +429,11 @@ cdCommand='cd ${checkBamsOfThisDir}'
 cdToThis="${checkBamsOfThisDir}"
 checkCdSafety  
 cd ${checkBamsOfThisDir}
+
+# Check that no run crashes.
+
+checkRunCrashes
+
 
 # Check that no errors.
 
@@ -780,6 +834,11 @@ checkParallelCCanalyserErrors(){
 
 weWereHereDir=$(pwd)
 cd D_analyseOligoWise
+
+# Check that no run crashes.
+
+checkRunCrashes
+
 
 # Check that no errors.
 
