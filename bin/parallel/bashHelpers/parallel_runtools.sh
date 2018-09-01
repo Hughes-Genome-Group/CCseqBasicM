@@ -104,6 +104,32 @@ else
  
 fi
 
+# ###############################
+# Usage reports
+# ###############################
+
+if [ "${useWholenodeQueue}" -eq 1 ]; then 
+
+mkdir usageReports
+mkdir usageReports/makingOf
+cp qsubLogFiles/wholerun* usageReports/makingOf/.
+cp qsubLogFiles/allRunsRUNTIME.log usageReports/.
+
+cat usageReports/makingOf/wholerunTasks.txt | sed 's/\s\s*/\t/g' \
+| sed 's/_f//g' | sed 's/_nf//g' \
+| sed 's/countRds/LOOPs/g' | sed 's/LOOP1/LOOPs/g' | sed 's/LOOP2to5/LOOPs/g' \
+| sed 's/fetchFastq/FastqIn/g'  | sed 's/inspectFastq/FastqIn/g'  | sed 's/SetParams/FastqIn/g' \
+> usageReports/makingOf/wholerunTasksParsed.txt
+
+cat usageReports/makingOf/wholerunUsage.txt | sed 's/M\s/\t/g' | sed 's/M$//'> usageReports/wholerunUsageForExcel.txt
+cat usageReports/makingOf/wholerunTasksParsed.txt \
+|  awk '{a["FastqIn"]=0;a["FastQC"]=0;a["Trim"]=0;a["Flash"]=0;a["REdig"]=0;a["BOWTIE"]=0;a["LOOPs"]=0;\
+for(i=2;i<=NF;i++){a[$i]=a[$i]+1}; \
+print $1"\tFastqIn\t"a["FastqIn"]"\tFastQC\t"a["FastQC"]"\tTrim\t"a["Trim"]"\tFlash\t"a["Flash"]"\tREdig\t"a["REdig"]"\tBOWTIE\t"a["BOWTIE"]"\tLOOPs\t"a["LOOPs"]}' \
+> usageReports/wholerunTasksForExcel.txt
+
+fi
+
 cdCommand='cd ${weWereHereDir}'
 cdToThis="${weWereHereDir}"
 checkCdSafety  
@@ -149,6 +175,31 @@ echo '' >> ${flashstatus}_percentages.txt
 echo 'Average reporter fragment count per read (final count)' >>${flashstatus}_percentages.txt
 tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 2-3 | awk '{print ($2/$1)}' >>${flashstatus}_percentages.txt
 echo '' >> ${flashstatus}_percentages.txt
+ 
+# ###############################
+# Usage reports
+# ###############################
+
+if [ "${useWholenodeQueue}" -eq 1 ]; then 
+
+mkdir usageReports
+mkdir usageReports/makingOf
+cp qsubLogFiles/wholerun* usageReports/makingOf/.
+cp qsubLogFiles/allRunsRUNTIME.log usageReports/.
+
+cat usageReports/makingOf/wholerunTasks.txt | sed 's/\s\s*/\t/g' | \
+sed 's/_fl//g' | sed 's/_nonfl//g' \
+| sed 's/publicFiles/public/g' | sed 's/ReDigest/prepF1/g' | sed 's/SetParams/prepF1/g' \
+| sed 's/bamToSam/prepF1/g' | sed 's/F6_cc/F6/g' | sed 's/F6_samcomb/F6/g' \
+> usageReports/makingOf/wholerunTasksParsed.txt
+
+cat usageReports/makingOf/wholerunUsage.txt | sed 's/M\s/\t/g' | sed 's/M$//'> usageReports/wholerunUsageForExcel.txt
+cat usageReports/makingOf/wholerunTasksParsed.txt \
+|  awk '{a["prepF1"]=0;a["F2"]=0;a["F3"]=0;a["F5"]=0;a["F6"]=0;a["public"]=0;for(i=2;i<=NF;i++){a[$i]=a[$i]+1}; \
+print $1"\tprepF1\t"a["prepF1"]"\tF2\t"a["F2"]"\tF3\t"a["F3"]"\tF5\t"a["F5"]"\tF6\t"a["F6"]"\tpublic\t"a["public"]}' \
+> usageReports/wholerunTasksForExcel.txt
+
+fi
  
 cdCommand='cd ${weWereHereDir}'
 cdToThis="${weWereHereDir}"
@@ -200,7 +251,7 @@ else
   printToLogFile   
 fi
 
-
+# ------------------------------------------
 }
 
 # ------------------------------------------
