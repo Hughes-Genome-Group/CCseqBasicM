@@ -996,7 +996,7 @@ rm -f tempLOOP2.txt tempLOOP3.txt tempLOOP5.txt
 
 head -n 1  LOOPs1to5_${flashstatus}_table.txt > LOOPs1to5_${flashstatus}_total.txt
 tail -n +2 LOOPs1to5_${flashstatus}_table.txt \
- | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$2;b=b+$3;c=c+$4;d=d+$5;e=e+$6;f=f+$7}END{print a"\t"b"\t"c"\t"d"\t"e"\t"f}'
+ | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$2;b=b+$3;c=c+$4;d=d+$5;e=e+$6;f=f+$7}END{print a"\t"b"\t"c"\t"d"\t"e"\t"f}' \
 >> LOOPs1to5_${flashstatus}_total.txt
 
 # ------------------------
@@ -1214,7 +1214,7 @@ echo "thisCapFile ${thisCapFile}"
 echo "thisSamFile ${thisSamFile}"
 echo "thisCapReadCount ${thisCapReadCount}"
 echo "thisSamReadCount ${thisSamReadCount}"
-echo "thisSamFragCount ${thisSamReadCount}"
+echo "thisSamFragCount ${thisSamFragCount}"
 echo "flashstatus ${flashstatus}"
 echo -n "TEMPheadLineCount ${TEMPheadLineCount} , i.e. "
 cat TEMPheading.sam | grep -c ""
@@ -1331,7 +1331,7 @@ do
     testedName='LOOP5 ${capname}'
     checkParse
     
-    thisSamFragCount=$(($( cat LOOP4_${flashstatus}_join.txt | '^'"${thisChr} ${capname}"'\s' | grep "Frag count of SAM file after the join" | sed 's/.*\s:\s//' )))
+    thisSamFragCount=$(($( cat LOOP4_${flashstatus}_join.txt | grep '^'"${thisChr} ${capname}"'\s' | grep "Frag count of SAM file after the join" | sed 's/.*\s:\s//' )))
     checkThis=${thisSamFragCount}
     checkedName='LOOP5 ${thisSamFragCount}'
     checkParse
