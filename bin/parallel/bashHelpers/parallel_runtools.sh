@@ -266,6 +266,30 @@ cd B_mapAndDivideFastqs
 
 checkRunCrashes
 
+# Double check that no crashes ..
+
+TEMPoriginalCount=$(($( cat ../PIPE_fastqPaths.txt | grep -c "" )))
+TEMPfinishedFineCount=$(($( cat fastq_*/fastqRoundSuccess.log | grep " prepareOK 1 runOK 1$" | uniq -c )))
+folderCountOK=1
+
+if [ "${TEMPoriginalCount}" -ne "${TEMPfinishedFineCount}" ]; then
+   
+  folderCountOK=0 
+
+  printThis="Some FASTQs crashed during first steps of analysis. (details below)"
+  printNewChapterToLogFile
+  
+  printThis="We had ${TEMPoriginalCount} fastqs starting the run.\nBut only ${TEMPfinishedFineCount} of them report finishing fine :"
+  printToLogFile
+  
+  cat fastq_*/fastqRoundSuccess.log | uniq -c 
+  cat fastq_*/fastqRoundSuccess.log | uniq -c >> "/dev/stderr"
+  
+  echo ""
+  echo ""  >> "/dev/stderr"
+  
+fi
+
 # Check that no errors.
 
 rm -f fastqRoundSuccess.log
@@ -279,15 +303,17 @@ checkThis="${howManyErrors}"
 checkedName='${howManyErrors}'
 checkParse
 
-if [ "${howManyErrors}" -ne 0 ]; then
+if [ "${howManyErrors}" -ne 0 ] || [ "${folderCountOK}" -eq 0 ]  ; then
   
   printThis="Some fastqs crashed during first steps of analysis ( possibly quota issues ? )."
   printNewChapterToLogFile
   
-  echo "These samples had errors :"
-  echo
+  printThis="These samples had runtime errors :"
+  printToLogFile
   cat fastqRoundSuccess.log | grep -v '^#' | grep -v '\s1$'
-  echo
+  cat fastqRoundSuccess.log | grep -v '^#' | grep -v '\s1$' >> "/dev/stderr"
+  echo ""
+  echo "" >> "/dev/stderr"
   
   head -n 1 fastqRoundSuccess.log > failedFastqsList.log
   cat fastqRoundSuccess.log | grep -v '^#' | grep -v '\s1$' >> failedFastqsList.log
@@ -472,6 +498,160 @@ cd ${weWereHereDir}
     
 }
 
+checkBamprepcombineErrors(){
+# ------------------------------------------
+
+weWereHereDir=$(pwd)
+cdCommand='cd ${checkBamsOfThisDir}'
+cdToThis="${checkBamsOfThisDir}"
+checkCdSafety  
+cd ${checkBamsOfThisDir}
+
+# Double check that no crashes ..
+
+TEMPoriginalCount=$(($( ls -1 ../A_prepareForRun/OLIGOSindividualFiles/*/* | grep -c oligoFileOneliner.txt )))
+TEMPfinishedFineCount=$(($( cat bamcombineprepSuccess.log | grep -v '^#' | cut -f 2 | grep -c '^1$' )))
+folderCountOK=1
+
+if [ "${TEMPoriginalCount}" -ne "${TEMPfinishedFineCount}" ]; then
+   
+  folderCountOK=0 
+
+  printThis="Some oligos crashed when preparing the BAM file combining. (details below)"
+  printNewChapterToLogFile
+  
+  printThis="We had ${TEMPoriginalCount} oligos starting the combine preparation.\nBut only ${TEMPfinishedFineCount} of them report finishing fine :"
+  printToLogFile
+  
+  cat bamcombineprepSuccess.log | grep -v '^#' | sort | uniq -c 
+  cat bamcombineprepSuccess.log | grep -v '^#' | sort | uniq -c >> "/dev/stderr"
+  
+  echo ""
+  echo ""  >> "/dev/stderr"
+  
+fi
+
+# Check that no errors.
+
+howManyErrors=$(($( cat bamcombineprepSuccess.log | grep -v '^#' | cut -f 2 | grep -cv '^1$' )))
+checkThis="${howManyErrors}"
+checkedName='${howManyErrors}'
+checkParse
+
+if [ "${howManyErrors}" -ne 0 ] || [ "${folderCountOK}" -eq 0 ]; then
+  
+  printThis="Couldn't prepare some oligos in ${checkBamsOfThisDir} for the bam combining."
+  printNewChapterToLogFile
+  
+  echo "These oligos had errors :"
+  echo
+  cat bamcombineprepSuccess.log | grep -v '^#' | grep -v '\s1\s'
+  echo
+
+  cat bamcombineprepSuccess.log | grep -v '^#' | grep -v '\s1\s' >> failedBamcombineprepList.log
+  
+  printThis="Check which oligos failed, and why : $(pwd)/failedBamcombineprepList.log ! "
+  printToLogFile
+  printThis="Detailed rerun instructions (to rescue failed oligos and restart the run) : $(pwd)/rerunInstructions.txt "
+  printToLogFile
+  
+  writeRerunInstructionsFile
+  # writes rerunInstructions.txt to $pwd
+
+  
+# The list being all the fastqs in the original PIPE_fastqPaths.txt ,
+# or if repair broken fastqs run, all the fastqs in PIPE_fastqPaths.txt which have FAILED in the previous run
+# This allows editing PIPE_fastqPaths.txt in-between runs, to remove corrupted fastqs from the analysis.
+# In this case the folder is just deleted and skipped in further analysis stages (have to make sure the latter stages don't go in numerical order, but rather in 'for folder in *' )
+  
+  
+  printThis="EXITING ! "
+  printToLogFile  
+  exit 1
+    
+else
+  printThis="All bamcombining preparations of ${checkBamsOfThisDir} were made ! - moving to actually combining the bam files .."
+  printNewChapterToLogFile   
+fi
+
+cdCommand='cd ${weWereHereDir}'
+cdToThis="${weWereHereDir}"
+checkCdSafety  
+cd ${weWereHereDir}
+
+# ------------------------------------------
+}
+
+bamCombinePrepareRun(){
+
+# ------------------------------------------
+
+weWereHereDir=$(pwd)
+cd C_combineOligoWise
+
+echo "# Bam combine - preparing for run - 1 (prepare finished without errors) , 0 (prepare finished with errors)" > bamcombineprepSuccess.log
+
+# We are supposed to have oneliner oligo files of structure :
+# C_combineOligoWise/chr1/Hba-1/oligoFileOneliner.txt
+
+# Copy over the folder structure - for the log files
+mkdir bamlistings
+cp -r * bamlistings/. 2> "/dev/null"
+rmdir bamlistings/bamlistings
+rm -f bamlistings/bamcombineprepSuccess.log
+
+mkdir runlistings
+
+F1foldername="F1_beforeCCanalyser_${samplename}_${CCversion}"
+B_subfolderWhereBamsAre="${F1foldername}/LOOP5_filteredSams"
+
+printThis="B_FOLDER_PATH ${B_FOLDER_PATH}\nB_subfolderWhereBamsAre ${B_subfolderWhereBamsAre}\nF1foldername ${F1foldername}"
+printToLogFile
+
+oligofileCount=1
+for oligoFolder in chr*/*
+do
+{
+    printThis="${oligoFolder}"
+    printToLogFile
+    thisOligoName=$( basename ${oligoFolder} )
+    checkThis="${thisOligoName}"
+    checkedName='${thisOligoName}'
+    checkParse
+    thisChr=$( dirname ${oligoFolder} )
+    checkThis="${thisChr}"
+    checkedName='${thisChr}'
+    checkParse
+    echo -n "${thisChr}_${thisOligoName}" >> bamcombineprepSuccess.log
+    thisBunchIsFine=1
+    thisBunchAlreadyReportedFailure=0
+    
+    inputbamstringFlashed="${B_FOLDER_PATH}/fastq_*/${B_subfolderWhereBamsAre}/${thisChr}/FLASHED_${thisOligoName}_possibleCaptures.bam"
+    inputbamstringNonflashed="${B_FOLDER_PATH}/fastq_*/${B_subfolderWhereBamsAre}/${thisChr}/NONFLASHED_${thisOligoName}_possibleCaptures.bam"
+    firstflashedfile=$( ls -1 ${inputbamstringFlashed} | head -n 1 )
+    firstnonflashedfile=$( ls -1 ${inputbamstringNonflashed} | head -n 1 )
+    outputbamsfolder="${thisChr}/${thisOligoName}"
+    outputlogsfolder="."
+    
+    bamCombineInnerSub
+    
+    # Run list update
+    echo "${thisChr}/${thisOligoName}" >> runlist.txt
+    echo "${thisChr}/${thisOligoName}" > runlistings/oligo${oligofileCount}.txt
+    
+    oligofileCount=$((${oligofileCount}+1))
+
+}
+done
+
+cdCommand='cd ${weWereHereDir}'
+cdToThis="${weWereHereDir}"
+checkCdSafety  
+cd ${weWereHereDir}
+
+# ------------------------------------------
+}
+
 checkBamcombineErrors(){
 # ------------------------------------------
 
@@ -485,11 +665,34 @@ cd ${checkBamsOfThisDir}
 
 checkRunCrashes
 
+# Double check that no crashes ..
+
+TEMPoriginalCount=$(($( ls -1 ../A_prepareForRun/OLIGOSindividualFiles/*/* | grep -c oligoFileOneliner.txt )))
+TEMPfinishedFineCount=$(($( cat chr*/*/bamcombineSuccess.log | grep -c '\s1$' )))
+folderCountOK=1
+
+if [ "${TEMPoriginalCount}" -ne "${TEMPfinishedFineCount}" ]; then
+   
+  folderCountOK=0 
+
+  printThis="Some oligos crashed during the BAM file combining. (details below)"
+  printNewChapterToLogFile
+  
+  printThis="We had ${TEMPoriginalCount} oligos starting the combine.\nBut only ${TEMPfinishedFineCount} of them report finishing fine :"
+  printToLogFile
+  
+  cat chr*/*/bamcombineSuccess.log | sed 's/.* runOK/runOK/' | sort | uniq -c  
+  cat chr*/*/bamcombineSuccess.log | sed 's/.* runOK/runOK/' | sort | uniq -c >> "/dev/stderr"
+  
+  echo ""
+  echo ""  >> "/dev/stderr"
+  
+fi
 
 # Check that no errors.
 
 rm -f bamcombineSuccess.log
-for file in */*/bamcombineSuccess.log
+for file in chr*/*/bamcombineSuccess.log
 do
     
     thisOligoName=$( basename $( dirname ${file} ))
@@ -554,64 +757,53 @@ cd ${weWereHereDir}
 # ------------------------------------------
 }
 
-checkBamprepcombineErrors(){
-# ------------------------------------------
-
-weWereHereDir=$(pwd)
-cdCommand='cd ${checkBamsOfThisDir}'
-cdToThis="${checkBamsOfThisDir}"
-checkCdSafety  
-cd ${checkBamsOfThisDir}
-
-# Check that no errors.
-
-howManyErrors=$(($( cat bamcombineprepSuccess.log | grep -v '^#' | cut -f 2 | grep -cv '^1$' )))
-checkThis="${howManyErrors}"
-checkedName='${howManyErrors}'
-checkParse
-
-if [ "${howManyErrors}" -ne 0 ]; then
-  
-  printThis="Couldn't prepare some oligo bunches in ${checkBamsOfThisDir} for the bam combining."
-  printNewChapterToLogFile
-  
-  echo "These oligo bunches had errors :"
-  echo
-  cat bamcombineprepSuccess.log | grep -v '^#' | grep -v '\s1\s'
-  echo
-
-  cat bamcombineprepSuccess.log | grep -v '^#' | grep -v '\s1\s' >> failedBamcombineprepList.log
-  
-  printThis="Check which samples failed, and why : $(pwd)/failedBamcombineprepList.log ! "
-  printToLogFile
-  printThis="Detailed rerun instructions (to rescue failed fastqs and restart the run) : $(pwd)/rerunInstructions.txt "
-  printToLogFile
-  
-  writeRerunInstructionsFile
-  # writes rerunInstructions.txt to $pwd
-
-  
-# The list being all the fastqs in the original PIPE_fastqPaths.txt ,
-# or if repair broken fastqs run, all the fastqs in PIPE_fastqPaths.txt which have FAILED in the previous run
-# This allows editing PIPE_fastqPaths.txt in-between runs, to remove corrupted fastqs from the analysis.
-# In this case the folder is just deleted and skipped in further analysis stages (have to make sure the latter stages don't go in numerical order, but rather in 'for folder in *' )
-  
-  
-  printThis="EXITING ! "
-  printToLogFile  
-  exit 1
+bamCombineChecksSaveThisForFuturePurposes(){
     
-else
-  printThis="All bamcombining preparations of ${checkBamsOfThisDir} were made ! - moving to actually combining the bam files .."
-  printNewChapterToLogFile   
-fi
+# This sub is not used (but saved for possible later scavenging purposes)
+    
+    ls -lht ${outputbamsfolder}/FLASHED_REdig.bam
+    if [ $? != 0 ]; then thisBunchIsFine=0;fi
+    # ls -lht ${outputbamsfolder}/NONFLASHED_REdig.bam
+    if [ $? != 0 ]; then thisBunchIsFine=0;fi
 
-cdCommand='cd ${weWereHereDir}'
-cdToThis="${weWereHereDir}"
-checkCdSafety  
-cd ${weWereHereDir}
-
-# ------------------------------------------
+    if [ "${thisBunchIsFine}" -eq 0 ] && [ "${thisBunchAlreadyReportedFailure}" -eq 0 ]; then
+    {
+     echo -e "\t0\tsamtools_cat_output_bams_dont_exist" >> ${outputlogsfolder}/bamcombineSuccess.log
+     thisBunchAlreadyReportedFailure=1
+    }
+    fi
+    
+    if [ ! -s "${outputbamsfolder}/FLASHED_REdig.bam" ]
+    then thisBunchIsFine=0;fi
+    if [ ! -s "${outputbamsfolder}/NONFLASHED_REdig.bam" ]
+    then thisBunchIsFine=0;fi
+    
+    if [ "${thisBunchAlreadyReportedFailure}" -eq 0 ];then
+    
+    if [ "${thisBunchIsFine}" -eq 0 ]; then
+    {
+     echo -e "\t0\tsamtools_cat_output_bams_are_empty_files" >> ${outputlogsfolder}/bamcombineSuccess.log
+    }
+    else
+    {
+     echo -en "\t1\tbamCombine_succeeded" >> ${outputlogsfolder}/bamcombineSuccess.log
+     
+     TEMPflashedCount=$( samtools view -c ${outputbamsfolder}/FLASHED_REdig.bam )
+     TEMPnonflashedCount=$( samtools view -c ${outputbamsfolder}/NONFLASHED_REdig.bam )
+     
+     echo -e "\tFlashedreadCount:${TEMPflashedCount}\tNonflashedreadCount:${TEMPnonflashedCount}" >> ${outputlogsfolder}/bamcombineSuccess.log
+     
+     # Globin combining doesn't get the very detailed counters - so asking if detailed counters folder exists ..
+     if [ -d  bamlistings ];then
+     echo -e "Combined count :\t${TEMPflashedCount}" >> bamlistings/bamlisting_FLASHED_chr${thisOligoName}.txt
+     echo -e "Combined count :\t${TEMPnonflashedCount}" >> bamlistings/bamlisting_NONFLASHED_chr${thisOligoName}.txt
+     fi 
+     
+    }
+    fi
+    
+    fi
+    
 }
 
 bamCombineInnerSub(){
@@ -761,123 +953,6 @@ bamCombineInnerSub(){
     chmod u+x ${outputbamsfolder}/echoer_for_SunGridEngine_environment.sh
 
     
-}
-
-bamCombineChecksSaveThisForFuturePurposes(){
-    
-    ls -lht ${outputbamsfolder}/FLASHED_REdig.bam
-    if [ $? != 0 ]; then thisBunchIsFine=0;fi
-    # ls -lht ${outputbamsfolder}/NONFLASHED_REdig.bam
-    if [ $? != 0 ]; then thisBunchIsFine=0;fi
-
-    if [ "${thisBunchIsFine}" -eq 0 ] && [ "${thisBunchAlreadyReportedFailure}" -eq 0 ]; then
-    {
-     echo -e "\t0\tsamtools_cat_output_bams_dont_exist" >> ${outputlogsfolder}/bamcombineSuccess.log
-     thisBunchAlreadyReportedFailure=1
-    }
-    fi
-    
-    if [ ! -s "${outputbamsfolder}/FLASHED_REdig.bam" ]
-    then thisBunchIsFine=0;fi
-    if [ ! -s "${outputbamsfolder}/NONFLASHED_REdig.bam" ]
-    then thisBunchIsFine=0;fi
-    
-    if [ "${thisBunchAlreadyReportedFailure}" -eq 0 ];then
-    
-    if [ "${thisBunchIsFine}" -eq 0 ]; then
-    {
-     echo -e "\t0\tsamtools_cat_output_bams_are_empty_files" >> ${outputlogsfolder}/bamcombineSuccess.log
-    }
-    else
-    {
-     echo -en "\t1\tbamCombine_succeeded" >> ${outputlogsfolder}/bamcombineSuccess.log
-     
-     TEMPflashedCount=$( samtools view -c ${outputbamsfolder}/FLASHED_REdig.bam )
-     TEMPnonflashedCount=$( samtools view -c ${outputbamsfolder}/NONFLASHED_REdig.bam )
-     
-     echo -e "\tFlashedreadCount:${TEMPflashedCount}\tNonflashedreadCount:${TEMPnonflashedCount}" >> ${outputlogsfolder}/bamcombineSuccess.log
-     
-     # Globin combining doesn't get the very detailed counters - so asking if detailed counters folder exists ..
-     if [ -d  bamlistings ];then
-     echo -e "Combined count :\t${TEMPflashedCount}" >> bamlistings/bamlisting_FLASHED_chr${thisOligoName}.txt
-     echo -e "Combined count :\t${TEMPnonflashedCount}" >> bamlistings/bamlisting_NONFLASHED_chr${thisOligoName}.txt
-     fi 
-     
-    }
-    fi
-    
-    fi
-    
-}
-
-bamCombinePrepareRun(){
-
-# ------------------------------------------
-
-weWereHereDir=$(pwd)
-cd C_combineOligoWise
-
-echo "# Bam combine - preparing for run - 1 (prepare finished without errors) , 0 (prepare finished with errors)" > bamcombineprepSuccess.log
-
-# We are supposed to have oneliner oligo files of structure :
-# C_combineOligoWise/chr1/Hba-1/oligoFileOneliner.txt
-
-# Copy over the folder structure - for the log files
-mkdir bamlistings
-cp -r * bamlistings/. 2> "/dev/null"
-rmdir bamlistings/bamlistings
-rm -f bamlistings/bamcombineprepSuccess.log
-
-mkdir runlistings
-
-F1foldername="F1_beforeCCanalyser_${samplename}_${CCversion}"
-B_subfolderWhereBamsAre="${F1foldername}/LOOP5_filteredSams"
-
-printThis="B_FOLDER_PATH ${B_FOLDER_PATH}\nB_subfolderWhereBamsAre ${B_subfolderWhereBamsAre}\nF1foldername ${F1foldername}"
-printToLogFile
-
-oligofileCount=1
-for oligoFolder in chr*/*
-do
-{
-    printThis="${oligoFolder}"
-    printToLogFile
-    thisOligoName=$( basename ${oligoFolder} )
-    checkThis="${thisOligoName}"
-    checkedName='${thisOligoName}'
-    checkParse
-    thisChr=$( dirname ${oligoFolder} )
-    checkThis="${thisChr}"
-    checkedName='${thisChr}'
-    checkParse
-    echo -n "${thisChr}_${thisOligoName}" >> bamcombineprepSuccess.log
-    thisBunchIsFine=1
-    thisBunchAlreadyReportedFailure=0
-    
-    inputbamstringFlashed="${B_FOLDER_PATH}/fastq_*/${B_subfolderWhereBamsAre}/${thisChr}/FLASHED_${thisOligoName}_possibleCaptures.bam"
-    inputbamstringNonflashed="${B_FOLDER_PATH}/fastq_*/${B_subfolderWhereBamsAre}/${thisChr}/NONFLASHED_${thisOligoName}_possibleCaptures.bam"
-    firstflashedfile=$( ls -1 ${inputbamstringFlashed} | head -n 1 )
-    firstnonflashedfile=$( ls -1 ${inputbamstringNonflashed} | head -n 1 )
-    outputbamsfolder="${thisChr}/${thisOligoName}"
-    outputlogsfolder="."
-    
-    bamCombineInnerSub
-    
-    # Run list update
-    echo "${thisChr}/${thisOligoName}" >> runlist.txt
-    echo "${thisChr}/${thisOligoName}" > runlistings/oligo${oligofileCount}.txt
-    
-    oligofileCount=$((${oligofileCount}+1))
-
-}
-done
-
-cdCommand='cd ${weWereHereDir}'
-cdToThis="${weWereHereDir}"
-checkCdSafety  
-cd ${weWereHereDir}
-
-# ------------------------------------------
 }
 
 checkParallelCCanalyserErrors(){
