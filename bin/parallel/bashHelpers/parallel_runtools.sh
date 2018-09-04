@@ -58,11 +58,11 @@ cd B_mapAndDivideFastqs
 # ###############################
 
 head -n 1 fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt > ${flashstatus}_summaryCounts.txt
-cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^RdIn' \
+cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^chr\s' \
  | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}END{print a"\t"b"\t"c"\t"d"\t"e"\t"f}' >> ${flashstatus}_summaryCounts.txt
 
 echo -e 'mappedReadsAs100perc\tmultifrag\thasCap\tsingleCap\twithinSonicSize' > ${flashstatus}_summaryPerc.txt
-cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^RdIn' \
+cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^chr\s' \
  | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}END{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}' >> ${flashstatus}_summaryPerc.txt
 
 # ###############################
@@ -166,7 +166,7 @@ echo -e "allRds\tnondupRds\trepFragTotal\trepFragCis\trepFragTrans" > ${flashsta
 paste TMP_allRds.txt TMP_nondupRds.txt TMP_repFragTotal.txt TMP_repFragCis.txt TMP_repFragTrans.txt >> ${flashstatus}_dupFiltStats.txt
 rm -f TMP_allRds.txt TMP_nondupRds.txt TMP_repFragTotal.txt TMP_repFragCis.txt TMP_repFragTrans.txt
 
-echo 'Nondup reads %' > ${flashstatus}_percentagesAndFinalCounts.txt
+echo 'Nondup reads %' > ${flashstatus}_percentages.txt
 tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 1-2 | awk '{print ($2/$1)*100}' >>${flashstatus}_percentages.txt
 echo '' >> ${flashstatus}_percentages.txt
 echo 'Total cisreps/allrepfrags  %' >>${flashstatus}_percentages.txt
