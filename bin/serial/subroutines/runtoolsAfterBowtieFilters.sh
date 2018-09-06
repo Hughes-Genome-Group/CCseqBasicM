@@ -1083,8 +1083,8 @@ if(substr($2,1,1)=="@"){h=h+$1;p=-1;hl=hl+1}\
 else{if ($1 <=1){p=-1;c=c+1}}\
 for (i=0;i<$1;i++){ printf("%0'${TEMPintSizeForSort}'d\n", p);f=f+1 }\
 }\
-END{print "'${thisChr}' Total reads : " NR "\n'${thisChr}' Total fragments : " f "\n'${thisChr}' Only one fragment in read (filtered) : " c "\n'${thisChr}' Remaining reads : " NR-c "\n'${thisChr}' Remaining fragments : " f-c "\n'${thisChr}' Heading line count : " h "\n" >> "LOOP2_'${flashstatus}'_REdig_onlyOneFragment.txt"}' \
-| paste - ${thisSamFile} | tail -n +$((${TEMPheadLineCount}+1)) | grep -v '^-' | awk '{print $1":"$2"\t"$0 }' | cut -f 2-3 --complement | cat TEMPheading.sam - \
+END{print "'${thisChr}' Total reads : " NR "\n'${thisChr}' Total fragments : " f "\n'${thisChr}' Only one fragment in read (filtered) : " c "\n'${thisChr}' Remaining reads : " NR-hl-c "\n'${thisChr}' Remaining fragments : " f-h-c "\n'${thisChr}' Heading line count : " h "\n" >> "LOOP2_'${flashstatus}'_REdig_onlyOneFragment.txt"}' \
+| paste - ${thisSamFile} | tail -n +$((${TEMPheadLineCount}+1)) | awk '{if($1>0){print $1":"$2"\t"$0} }' | cut -f 2-3 --complement | cat TEMPheading.sam - \
 > LOOP2_${flashstatus}_${thisChr}_REdig_prefiltered_ChrCounts.sam
 
 # ------------------------

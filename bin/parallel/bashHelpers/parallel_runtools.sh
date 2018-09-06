@@ -242,9 +242,7 @@ if [ "${howManyCrashes}" -ne 0 ]; then
   printThis=$( cat runJustNow_*.log | sort | uniq -c ) 
   printToLogFile  
   
-  printThis="EXITING ! "
-  printToLogFile  
-  exit 1
+  weWillExitAfterThis=1
     
 else
   printThis="OK - Checked for run crashes (due to bugs in code) - found none. Continuing. "
@@ -264,7 +262,9 @@ cd B_mapAndDivideFastqs
 
 # Check that no run crashes.
 
+weWillExitAfterThis=0;
 checkRunCrashes
+
 
 # Double check that no crashes ..
 
@@ -334,14 +334,17 @@ if [ "${howManyErrors}" -ne 0 ] || [ "${folderCountOK}" -eq 0 ]  ; then
 # This allows editing PIPE_fastqPaths.txt in-between runs, to remove corrupted fastqs from the analysis.
 # In this case the folder is just deleted and skipped in further analysis stages (have to make sure the latter stages don't go in numerical order, but rather in 'for folder in *' )
   
-  
-  printThis="EXITING ! "
-  printToLogFile  
-  exit 1
+  weWillExitAfterThis=1
     
 else
   printThis="All fastqs finished first steps of analysis ! - moving on to analyse sam files .."
   printNewChapterToLogFile   
+fi
+
+if [ "${weWillExitAfterThis}" -eq 1 ]
+  printThis="EXITING ! "
+  printToLogFile  
+  weWillExitAfterThis=1
 fi
 
 cdCommand='cd ${weWereHereDir}'
@@ -663,7 +666,9 @@ cd ${checkBamsOfThisDir}
 
 # Check that no run crashes.
 
+weWillExitAfterThis=0;
 checkRunCrashes
+
 
 # Double check that no crashes ..
 
@@ -739,15 +744,20 @@ if [ "${howManyErrors}" -ne 0 ]; then
 # This allows editing PIPE_fastqPaths.txt in-between runs, to remove corrupted fastqs from the analysis.
 # In this case the folder is just deleted and skipped in further analysis stages (have to make sure the latter stages don't go in numerical order, but rather in 'for folder in *' )
   
-  
-  printThis="EXITING ! "
-  printToLogFile  
-  exit 1
+  weWillExitAfterThis=1
+
     
 else
   printThis="All bams of ${checkBamsOfThisDir} were combined ! - moving to bam-wise analysis steps .."
   printNewChapterToLogFile   
 fi
+
+if [ "${weWillExitAfterThis}" -eq 1 ]
+  printThis="EXITING ! "
+  printToLogFile  
+  weWillExitAfterThis=1
+fi
+
 
 cdCommand='cd ${weWereHereDir}'
 cdToThis="${weWereHereDir}"
@@ -963,6 +973,7 @@ cd D_analyseOligoWise
 
 # Check that no run crashes.
 
+weWillExitAfterThis=0;
 checkRunCrashes
 
 
@@ -1017,14 +1028,19 @@ if [ "${howManyErrors}" -ne 0 ]; then
 # In this case the folder is just deleted and skipped in further analysis stages (have to make sure the latter stages don't go in numerical order, but rather in 'for folder in *' )
   
   
-  printThis="EXITING ! "
-  printToLogFile  
-  exit 1
+  weWillExitAfterThis=1
     
 else
   printThis="All oligo-bunch-wise runs finished - moving on .."
   printNewChapterToLogFile   
 fi
+
+if [ "${weWillExitAfterThis}" -eq 1 ]
+  printThis="EXITING ! "
+  printToLogFile  
+  weWillExitAfterThis=1
+fi
+
 
 cdCommand='cd ${weWereHereDir}'
 cdToThis="${weWereHereDir}"
