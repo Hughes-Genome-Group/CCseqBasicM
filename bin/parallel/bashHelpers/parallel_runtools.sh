@@ -341,7 +341,7 @@ else
   printNewChapterToLogFile   
 fi
 
-if [ "${weWillExitAfterThis}" -eq 1 ]
+if [ "${weWillExitAfterThis}" -eq 1 ]; then
   printThis="EXITING ! "
   printToLogFile  
   weWillExitAfterThis=1
