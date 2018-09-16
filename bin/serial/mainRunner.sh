@@ -463,7 +463,7 @@ setUCSCgenomeName
 # Visualisation genome sizes file
 setUCSCgenomeSizes
 
-echo "ucscBuild ${ucscBuild}" >> parameters_capc.log
+echo "ucscBuildName ${ucscBuildName}" >> parameters_capc.log
 echo "ucscBuild ${ucscBuild}" >> parameters_capc.log
 
 #------------------------------------------

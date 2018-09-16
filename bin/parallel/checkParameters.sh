@@ -395,7 +395,14 @@ parameterList=$( cat TEMP.param )
        echo onlyCCanalyser >> TEMP.mainparam
        removeMacsParam
    fi
-   
+
+   macsflag='--onlyHub'
+   macsOnOff
+   if [ "${macsHasThisFlag}" -ne 0 ];then
+       echo onlyHub >> TEMP.mainparam
+       removeMacsParam
+   fi
+
    macsflag='-s'
    macsOnOff
    if [ "${macsHasThisFlag}" -ne 0 ];then

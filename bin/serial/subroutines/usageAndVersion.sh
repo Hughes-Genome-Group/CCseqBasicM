@@ -156,9 +156,8 @@ echo "    Remember to check (if you crashed during blat) - that all your blat ou
 echo "    NOTE !!! if you combine this with --onlyCCanalyser : As the blat results live inside folder F4, --onlyCCanalyser will delete these files before re-starting the run (all folders but F1 get deleted)."
 echo "        you need to COPY the REUSE_blat folder outside the original run folder, and point to that copied folder here. "
 echo
-# echo "--onlyHub  : runs the tracks.txt generation again. Assumes that the whole pipe ran correctly, but the tracks were written wrongly to the output tracks.txt for the data hub "
-# echo "This is mainly for debugging (only Jelena should need to use to this one)"
-# echo
+echo "--onlyHub  : generates the summary counts, description html page and data hubs (overwrites existing ones). Should be ran in 1 processor only. "
+echo
 echo "RESTRICTION ENZYME SETTINGS"
 echo "--dpn  (default) : dpnII is the RE of the experiment"
 echo "--nla  : nlaIII is the RE of the experiment"

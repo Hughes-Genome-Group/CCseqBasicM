@@ -44,6 +44,17 @@
 
 # Steps 1-2 will be in same script "prepare.sh"
 
+# ------------------------------------------
+
+. ${CaptureParallelPath}/bashHelpers/rainbowHubHelpers.sh
+
+. ${CaptureCommonHelpersPath}/genomeSetters.sh
+
+# From where to call the CONFIGURATION script..
+confFolder="${MainScriptPath}/conf"
+
+. ${confFolder}/genomeBuildSetup.sh
+. ${confFolder}/loadNeededTools.sh
 
 # ------------------------------------------
 
@@ -63,7 +74,12 @@ cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstat
 
 echo -e 'mappedReadsAs100perc\tmultifrag\thasCap\tsingleCap\twithinSonicSize' > ${flashstatus}_summaryPerc.txt
 cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^chr\s' \
- | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}END{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}' >> ${flashstatus}_summaryPerc.txt
+| awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}\
+END{\
+if(a==0){print "0\t0\t0\t0\t0"}
+elsif(e==0){print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t0"}
+else{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}\
+}' >> ${flashstatus}_summaryPerc.txt
 
 # ###############################
 # BOWTIEs summary oneliners
@@ -140,6 +156,44 @@ cd ${weWereHereDir}
 
 # ------------------------------------------
 
+makeCombinedBamVisualisation(){
+# ------------------------------------------
+
+printThis="Making combined statistics counters and summary figure .. "
+printNewChapterToLogFile
+
+rm -rf C_visualiseCombined
+mkdir C_visualiseCombined
+
+weWereHereDir=$(pwd)
+cd C_visualiseCombined
+
+step8middir=$(pwd)
+
+# Here the command
+
+# publicfolder
+# samplename
+# CCversion
+# REenzyme
+
+# For the time being, not doing this ..
+
+echo
+echo "SKIPPING THE FOLLOWING : summary fastq visualisations (as these not supported without the pre-round CCanalyser ..)"
+echo
+
+cdCommand='cd ${weWereHereDir}'
+cdToThis="${weWereHereDir}"
+checkCdSafety  
+cd ${weWereHereDir}
+ 
+
+# ------------------------------------------
+}
+
+# ------------------------------------------
+
 makeOligorunSummaries(){
 # ------------------------------------------
 
@@ -175,6 +229,8 @@ echo '' >> ${flashstatus}_percentages.txt
 echo 'Average reporter fragment count per read (final count)' >>${flashstatus}_percentages.txt
 tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 2-3 | awk '{print ($2/$1)}' >>${flashstatus}_percentages.txt
 echo '' >> ${flashstatus}_percentages.txt
+
+cat ${flashstatus}_percentages.txt ${flashstatus}_dupFiltStats.txt > ${flashstatus}_percentagesAndFinalCounts.txt
  
 # ###############################
 # Usage reports
@@ -269,7 +325,7 @@ checkRunCrashes
 # Double check that no crashes ..
 
 TEMPoriginalCount=$(($( cat ../PIPE_fastqPaths.txt | grep -c "" )))
-TEMPfinishedFineCount=$(($( cat fastq_*/fastqRoundSuccess.log | grep " prepareOK 1 runOK 1$" | uniq -c )))
+TEMPfinishedFineCount=$(($( cat fastq_*/fastqRoundSuccess.log | grep "^prepareOK 1 runOK 1$" | uniq -c )))
 folderCountOK=1
 
 if [ "${TEMPoriginalCount}" -ne "${TEMPfinishedFineCount}" ]; then
@@ -1579,4 +1635,250 @@ checkCdSafety
 cd ${step6topdir}
     
 # ------------------------------------------    
+}
+
+# ------------------------------------------    
+
+symlinkBigwigsFlashSeparated(){
+# ------------------------------------------
+
+echo -n "- ${thisHubSubfolder} ${flashstatus} "
+echo -n "- ${thisHubSubfolder} ${flashstatus} " >> "/dev/stderr"
+mkdir ${folder}/${thisHubSubfolder}_${flashstatus}
+cd ${folder}/${thisHubSubfolder}_${flashstatus}
+ln -s ../../../${folder}/*/PERMANENT_BIGWIGS_do_not_move/${thisHubSubfolder}/${flashstatus}*.bw .
+cd ${weWereHereDir}
+
+# ------------------------------------------    
+}
+
+# ------------------------------------------    
+
+generateDataHub(){
+# ------------------------------------------    
+
+listOfChromosomes=$( ls A_prepareForRun/OLIGOSindividualFiles )
+checkThis="${listOfChromosomes}"
+checkedName='${listOfChromosomes}'
+checkParse
+
+cd D_analyseOligoWise
+
+rm -rf data_hubs
+mkdir data_hubs
+cd data_hubs
+
+hubTopDir=$(pwd)
+
+printThis="Making description html page .."
+printToLogFile
+
+mkdir description_page
+echo '<pre>' > description_page/description.html
+cat ../../B_fastqSummaryCounts.txt >> description_page/description.html
+echo  >> description_page/description.html
+echo  >> description_page/description.html
+cat ../../D_analysisSummaryCounts.txt >> description_page/description.html
+echo  >> description_page/description.html
+echo  >> description_page/description.html
+echo '<\pre>' >> description_page/description.html
+ln -s description_page/description.html .
+
+printThis="Making folders for each chromosome .."
+printToLogFile
+
+mkdir ${listOfChromosomes}
+
+printThis="Symlinks to bigwig files .."
+printToLogFile
+
+weWereHereDir=$(pwd)
+
+for folder in ${listOfChromosomes}
+do
+{
+echo -n "${folder} "
+echo -n "${folder} " >> "/dev/stderr"
+pwd
+
+thisHubSubfolder="COMBINED"
+
+echo -n "- ${thisHubSubfolder} "
+echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
+mkdir ${folder}/${thisHubSubfolder}
+cd ${folder}/${thisHubSubfolder}
+ln -s ../../../${folder}/*/PERMANENT_BIGWIGS_do_not_move/${thisHubSubfolder}/*.bw .
+cd ${weWereHereDir}
+
+thisHubSubfolder="FILTERED"
+flashstatus="FLASHED"
+symlinkBigwigsFlashSeparated
+flashstatus="NONFLASHED"
+symlinkBigwigsFlashSeparated
+
+thisHubSubfolder="PREfiltered"
+flashstatus="FLASHED"
+symlinkBigwigsFlashSeparated
+flashstatus="NONFLASHED"
+symlinkBigwigsFlashSeparated
+
+thisHubSubfolder="RAW"
+flashstatus="FLASHED"
+symlinkBigwigsFlashSeparated
+flashstatus="NONFLASHED"
+symlinkBigwigsFlashSeparated
+
+echo ""
+echo "" >> "/dev/stderr"
+
+}
+done
+
+# ---------------------------------------
+
+# Color key and tracks, hub, genomes ..
+
+#------------------------------------------
+
+# This needs access to UCSC genome sizes, as well as UCSCtools tool locations ..
+
+echo
+echo "CaptureTopPath ${CaptureTopPath}"
+echo "confFolder ${confFolder}"
+echo "CapturePipePath ${CapturePipePath}"
+echo "CaptureCommonHelpersPath ${CaptureCommonHelpersPath}"
+echo
+
+supportedGenomes=()
+UCSC=()
+
+setPathsForPipe
+setGenomeLocations
+
+GENOME="UNDEFINDED"
+GENOME=$( cat $( ls -1 ${PublicPath}/bunches/*genomes.txt | head -n 1 ) | grep '^genome\s' | sed 's/genome\s*//' )
+echo "GENOME ${GENOME}"
+
+# If the visualisation genome name differs from the asked genome name : masked genomes
+setUCSCgenomeName
+# Visualisation genome sizes file
+setUCSCgenomeSizes
+
+echo "ucscBuildName ${ucscBuildName}" >> parameters_capc.log
+echo "ucscBuild ${ucscBuild}" >> parameters_capc.log
+
+# --------------------------------------
+
+# Now preparing for hub generation ..
+
+cd ${hubTopDir}
+
+cat ../../A_prepareForRun/OLIGOFILE/oligofile_sorted.txt | sort -k2,2 -k3,3n > oligofile_sorted.txt
+
+# ------------------------
+
+printThis="Color key generation : bed track for oligos and exclusions .."
+printToLogFile
+
+# making the key (excl and oligo added to the bed and last bigbed
+
+rm -f oligoExclColored_allReps.bed
+
+counter=1
+for (( i=0; i<${#oligolist[@]}; i++ ))
+do
+doOneBedExclOligo
+done
+
+echo
+
+# making bigbed ..
+
+sort -k1,1 -k2,2n oligoExclColored_allReps.bed > oligoExclColored_allReps_sorted.bed
+bedToBigBed -type=bed9 -tab oligoExclColored_allReps_sorted.bed ${ucscBuild} oligosAndExclusions_allReps.bb
+
+# -----------------------------------------
+
+printThis="Tracks, hub and genomes files .."
+printToLogFile
+
+weWereHereDir=$(pwd)
+
+for folder in ${listOfChromosomes}
+do
+{
+echo -n "${folder} "
+echo -n "${folder} " >> "/dev/stderr"
+pwd
+
+thisHubSubfolder="COMBINED"
+${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+thisHubSubfolder="FILTERED_FLASHED"
+${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+thisHubSubfolder="FILTERED_NONFLASHED"
+${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+thisHubSubfolder="PREfiltered_FLASHED"
+${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+thisHubSubfolder="PREfiltered_NONFLASHED"
+${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+thisHubSubfolder="RAW_FLASHED"
+${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+thisHubSubfolder="RAW_NONFLASHED"
+${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+
+}
+done
+
+# Symlink to all hub files into public ..
+cd ${hubTopDir}
+mkdir hubAddresses
+
+if [ ! -d "${publicfolder}/${samplename}/${CCversion}_${REenzyme}" ];then
+  mkdir -p ${publicfolder}/${samplename}/${CCversion}_${REenzyme}  
+fi
+cd  ${publicfolder}/${samplename}/${CCversion}_${REenzyme}/
+ln -s ${hubTopDir} .
+
+thisHubSubfolder="COMBINED"
+for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
+thisHubSubfolder="FILTERED_FLASHED"
+for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
+thisHubSubfolder="FILTERED_NONFLASHED"
+for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
+thisHubSubfolder="PREfiltered_FLASHED"
+for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
+thisHubSubfolder="PREfiltered_NONFLASHED"
+for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
+thisHubSubfolder="RAW_FLASHED"
+for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
+thisHubSubfolder="RAW_NONFLASHED"
+for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
+
+printThis="Hub addresses generated"
+printToLogFile
+
+echo "Each chromosome has 7 hubs, see all addresses here :"
+echo
+
+echo > E_hubAddresses.txt
+echo "Each chromosome has 7 hubs, see all addresses here :" >> E_hubAddresses.txt
+echo >> E_hubAddresses.txt
+
+cd ${hubTopDir}/hubAddresses
+for file in *
+do
+    fp ${file}
+    fp ${file} >> E_hubAddresses.txt
+done
+
+echo
+echo >> E_hubAddresses.txt
+
+cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
+cdToThis="${rainbowRunTOPDIR}"
+checkCdSafety  
+cd ${rainbowRunTOPDIR}
+
+    
+# ------------------------------------------        
 }

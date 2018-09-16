@@ -33,6 +33,9 @@ echo "Log files copied !" >> "/dev/stderr"
 }
 
 function finish {
+    
+cp ${CaptureParallelPath}/E_cleanupScript_toUse_afterSuccesfull_Run.sh .
+chmod u=rwx E_cleanupScript_toUse_afterSuccesfull_Run.sh
 
 if [ $? != "0" ]; then
 
@@ -298,6 +301,7 @@ stopAfterFolderB=$(($( cat TEMP.mainparam | grep -c stopAfterFolderB )))
 startAfterFolderB=$(($( cat TEMP.mainparam | grep -c startAfterFolderB )))
 stopAfterBamCombining=$(($( cat TEMP.mainparam | grep -c stopAfterBamCombining )))
 onlyCCanalyser=$(($( cat TEMP.mainparam | grep -c onlyCCanalyser )))
+onlyHub=$(($( cat TEMP.mainparam | grep -c onlyHub )))
 
 echo
 echo "Parameters after parsing :"
@@ -319,10 +323,56 @@ echo "stopAfterFolderB ${stopAfterFolderB}"
 echo "startAfterFolderB ${startAfterFolderB}"
 echo "stopAfterBamCombining ${stopAfterBamCombining}"
 echo "onlyCCanalyser ${onlyCCanalyser}"
+echo "onlyHub ${onlyHub}"
 echo
 
 rm -f TEMP.param TEMP.mainparam
 if [ "${exitStatus}" -ne 0 ]; then { exit 1 ; }; fi
+
+# --------------------------------------
+# OnlyHub ..
+
+if [ "${onlyHub}" -eq 1 ] ; then
+    
+  printThis="Only generating summary counts and data hub - as user states --onlyHub  .. "
+  printNewChapterToLogFile
+
+  printThis="Fastq summary counts  .. "
+  printNewChapterToLogFile
+
+  flashstatus="FLASHED"
+  makeFastqrunSummaries
+  flashstatus="NONFLASHED"
+  makeFastqrunSummaries
+  
+  # Summary of summaries ..
+  head B_mapAndDivideFastqs/*FLASHED*.txt > B_fastqSummaryCounts.txt
+  
+  printThis="Combined bam visualisations  .. "
+  printNewChapterToLogFile
+
+  makeCombinedBamVisualisation
+  
+  printThis="Oligo summary counts .. "
+  printNewChapterToLogFile
+  
+  flashstatus="FLASHED"
+  makeOligorunSummaries
+  flashstatus="NONFLASHED"
+  makeOligorunSummaries
+
+  # Summary of summaries ..
+  head -n 20 D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
+
+  printThis="Generate data hub .. "
+  printNewChapterToLogFile
+  
+  generateDataHub
+  
+  copyRainbowLogFiles 
+  exit 0
+
+fi
 
 # --------------------------------------
 # If we are to skip the whole folders A and B : we enter after succesfully rescuing our fastq analysis stages,
@@ -564,8 +614,6 @@ cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety  
 cd ${rainbowRunTOPDIR}
 
-checkFastqRunErrors
-
 # Make summaries
 
 flashstatus="FLASHED"
@@ -575,6 +623,10 @@ makeFastqrunSummaries
 
 # Summary of summaries ..
 head B_mapAndDivideFastqs/*FLASHED*.txt > B_fastqSummaryCounts.txt
+
+# Check for errors ..
+
+checkFastqRunErrors
 
 # ------------------------------
 
@@ -688,27 +740,7 @@ fi
 
 # 8) visualise
 
-printThis="Making combined statistics counters and summary figure .. "
-printNewChapterToLogFile
-
-rm -rf C_visualiseCombined
-mkdir C_visualiseCombined
-cd C_visualiseCombined
-
-step8middir=$(pwd)
-
-# Here the command
-
-# publicfolder
-# samplename
-# CCversion
-# REenzyme
-
-# For the time being, not doing this ..
-
-echo
-echo "SKIPPING THE FOLLOWING : summary fastq visualisations (as these not supported without the pre-round CCanalyser ..)"
-echo
+makeCombinedBamVisualisation
 
 # echo "${CaptureParallelPath}/parallelVisualisationLogs.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme} ${inputgenomename} ${tiled} $(basename ${B_FOLDER_PATH}) $(basename ${C_FOLDER_PATH}) ${oligofile}"
 # ${CaptureParallelPath}/parallelVisualisationLogs.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme} ${inputgenomename} ${tiled} $(basename ${B_FOLDER_PATH}) $(basename ${C_FOLDER_PATH}) ${oligofile}
@@ -815,8 +847,6 @@ cdToThis="${rainbowRunTOPDIR}"
 checkCdSafety  
 cd ${rainbowRunTOPDIR}
 
-checkParallelCCanalyserErrors
-
 # Make summaries
 
 flashstatus="FLASHED"
@@ -825,39 +855,23 @@ flashstatus="NONFLASHED"
 makeOligorunSummaries
 
 # Summary of summaries ..
-head D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
+head -n 20 D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
+
+# Check for errors
+
+checkParallelCCanalyserErrors
 
 # -----------------------------------
-
- # Temporary exit ..
-
-printThis="Reached tester end in CCseqBasic5_rainbow.sh"
-printToLogFile
-date
-echo
-exit 0
-
-# -----------------------------------
-
 
 # 8) visualise
 
 printThis="Making rainbow tracks and data hub .. "
 printNewChapterToLogFile
 
-cd E_visualise
-
-stepEmiddir=$(pwd)
-
-# Here the command
-
-# publicfolder
-# samplename
-# CCversion
-# REenzyme
-
-echo "${CaptureParallelPath}/parallelVisualisation.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme}"
-${CaptureParallelPath}/parallelVisualisation.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme}
+printThis="Generate data hub .. "
+printNewChapterToLogFile
+  
+generateDataHub
 
 cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
 cdToThis="${rainbowRunTOPDIR}"
@@ -867,6 +881,7 @@ cd ${rainbowRunTOPDIR}
 # -----------------------------------------
 
 copyRainbowLogFiles
+
 exit 0
 
 
