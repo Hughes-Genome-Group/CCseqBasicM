@@ -76,8 +76,8 @@ echo -e 'mappedReadsAs100perc\tmultifrag\thasCap\tsingleCap\twithinSonicSize' > 
 cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^chr\s' \
 | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}\
 END{\
-if(a==0){print "0\t0\t0\t0\t0"}
-elsif(e==0){print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t0"}
+if(a==0){print "0\t0\t0\t0\t0"}\
+elsif(e==0){print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t0"}\
 else{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}\
 }' >> ${flashstatus}_summaryPerc.txt
 
@@ -1697,8 +1697,8 @@ weWereHereDir=$(pwd)
 for folder in ${listOfChromosomes}
 do
 {
-echo -n "${folder} "
-echo -n "${folder} " >> "/dev/stderr"
+echo -en "${folder}\t"
+echo -en "${folder}\t" >> "/dev/stderr"
 pwd
 
 thisHubSubfolder="COMBINED"
@@ -1743,10 +1743,7 @@ done
 # This needs access to UCSC genome sizes, as well as UCSCtools tool locations ..
 
 echo
-echo "CaptureTopPath ${CaptureTopPath}"
 echo "confFolder ${confFolder}"
-echo "CapturePipePath ${CapturePipePath}"
-echo "CaptureCommonHelpersPath ${CaptureCommonHelpersPath}"
 echo
 
 supportedGenomes=()
@@ -1756,7 +1753,7 @@ setPathsForPipe
 setGenomeLocations
 
 GENOME="UNDEFINDED"
-GENOME=$( cat $( ls -1 ${PublicPath}/bunches/*genomes.txt | head -n 1 ) | grep '^genome\s' | sed 's/genome\s*//' )
+GENOME=${inputgenomename}
 echo "GENOME ${GENOME}"
 
 # If the visualisation genome name differs from the asked genome name : masked genomes
@@ -1764,8 +1761,8 @@ setUCSCgenomeName
 # Visualisation genome sizes file
 setUCSCgenomeSizes
 
-echo "ucscBuildName ${ucscBuildName}" >> parameters_capc.log
-echo "ucscBuild ${ucscBuild}" >> parameters_capc.log
+echo "ucscBuildName ${ucscBuildName}"
+echo "ucscBuild ${ucscBuild}"
 
 # --------------------------------------
 
@@ -1784,10 +1781,18 @@ printToLogFile
 
 rm -f oligoExclColored_allReps.bed
 
+oligolist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
+oligoListSetter
+
+for thisChr in ${listOfChromosomes}
+do
+{
 counter=1
 for (( i=0; i<${#oligolist[@]}; i++ ))
 do
 doOneBedExclOligo
+done
+}
 done
 
 echo
@@ -1812,19 +1817,19 @@ echo -n "${folder} " >> "/dev/stderr"
 pwd
 
 thisHubSubfolder="COMBINED"
-${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
 thisHubSubfolder="FILTERED_FLASHED"
-${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
 thisHubSubfolder="FILTERED_NONFLASHED"
-${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
 thisHubSubfolder="PREfiltered_FLASHED"
-${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
 thisHubSubfolder="PREfiltered_NONFLASHED"
-${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
 thisHubSubfolder="RAW_FLASHED"
-${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
 thisHubSubfolder="RAW_NONFLASHED"
-${CaptureParallelPath}/makeRainbowHubs ${folder} ${thisHubSubfolder}
+${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
 
 }
 done
