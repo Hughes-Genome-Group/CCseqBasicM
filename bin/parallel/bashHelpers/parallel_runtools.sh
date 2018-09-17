@@ -1705,10 +1705,9 @@ thisHubSubfolder="COMBINED"
 
 echo -n "- ${thisHubSubfolder} "
 echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
-mkdir ${folder}/bigwigs
-mkdir ${folder}/bigwigs/${thisHubSubfolder}
-cd ${folder}/bigwigs/${thisHubSubfolder}
-ln -s ../../../../${folder}/*/PERMANENT_BIGWIGS_do_not_move/${thisHubSubfolder}/*.bw .
+mkdir ${folder}/${thisHubSubfolder}
+cd ${folder}/${thisHubSubfolder}
+ln -s ../../../${folder}/*/PERMANENT_BIGWIGS_do_not_move/${thisHubSubfolder}/*.bw .
 cd ${weWereHereDir}
 
 thisHubSubfolder="FILTERED"
@@ -1785,9 +1784,10 @@ rm -f oligoExclColored_allReps.bed
 oligolist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
 oligoListSetter
 
-for thisChr in ${listOfChromosomes}
+for folder in ${listOfChromosomes}
 do
 {
+oligoListSetter
 counter=1
 for (( i=0; i<${#oligolist[@]}; i++ ))
 do
@@ -1818,34 +1818,21 @@ echo -n "${folder} "
 echo -n "${folder} " >> "/dev/stderr"
 
 thisHubSubfolder="COMBINED"
-echo -n "- ${thisHubSubfolder} "
-echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "full"
 thisHubSubfolder="FILTERED_FLASHED"
-echo -n "- ${thisHubSubfolder} "
-echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="FILTERED_NONFLASHED"
-echo -n "- ${thisHubSubfolder} "
-echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="PREfiltered_FLASHED"
-echo -n "- ${thisHubSubfolder} "
-echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="PREfiltered_NONFLASHED"
-echo -n "- ${thisHubSubfolder} "
-echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="RAW_FLASHED"
-echo -n "- ${thisHubSubfolder} "
-echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="RAW_NONFLASHED"
-echo -n "- ${thisHubSubfolder} "
-echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 
+rm -rf ${folder}/makingOfTracks
 mkdir ${folder}/makingOfTracks
 mv ${folder}_*_tracks.txt ${folder}/makingOfTracks/.
 cat ${folder}/makingOfTracks/* > ${folder}_tracks.txt
@@ -1862,48 +1849,35 @@ done
 
 # Symlink to all hub files into public ..
 cd ${hubTopDir}
-mkdir hubAddresses
 
 if [ ! -d "${publicfolder}/${samplename}/${CCversion}_${REenzyme}" ];then
   mkdir -p ${publicfolder}/${samplename}/${CCversion}_${REenzyme}  
 fi
 cd  ${publicfolder}/${samplename}/${CCversion}_${REenzyme}/
+rm -f data_hubs
 ln -s ${hubTopDir} .
 
-thisHubSubfolder="COMBINED"
-for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
-thisHubSubfolder="FILTERED_FLASHED"
-for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
-thisHubSubfolder="FILTERED_NONFLASHED"
-for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
-thisHubSubfolder="PREfiltered_FLASHED"
-for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
-thisHubSubfolder="PREfiltered_NONFLASHED"
-for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
-thisHubSubfolder="RAW_FLASHED"
-for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
-thisHubSubfolder="RAW_NONFLASHED"
-for file in  */hub_${thisHubSubFolder}_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses/${thisHubSubFolder}.txt
+for file in  data_hubs/hub_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses.txt
+
+cd ${hubTopDir}
 
 printThis="Hub addresses generated"
 printToLogFile
 
-echo "Each chromosome has 7 hubs, see all addresses here :"
 echo
-
 echo > E_hubAddresses.txt
-echo "Each chromosome has 7 hubs, see all addresses here :" >> E_hubAddresses.txt
+echo "Each chromosome has a data hub, see all addresses here :"
+echo "Each chromosome has a data hub, see all addresses here :" >> E_hubAddresses.txt
+echo
 echo >> E_hubAddresses.txt
 
-cd ${hubTopDir}/hubAddresses
-for file in *
-do
-    fp ${file}
-    fp ${file} >> E_hubAddresses.txt
-done
+cat hubAddresses.txt
+cat hubAddresses.txt >> E_hubAddresses.txt
 
 echo
 echo >> E_hubAddresses.txt
+
+mv -f E_hubAddresses.txt ${rainbowRunTOPDIR}/.
 
 cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
 cdToThis="${rainbowRunTOPDIR}"

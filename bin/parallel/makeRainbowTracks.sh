@@ -21,7 +21,8 @@ subfolder=$2
 visibility=$3
 
 parentname="${folder}_${subfolder}"
-echo ${parentname}
+echo -n "- ${parentname} "
+echo -n "- ${parentname} " >> "/dev/stderr"
 
 rm -f ${parentname}_tracks.txt
 doOneParent
