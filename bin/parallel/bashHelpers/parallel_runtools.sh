@@ -1814,23 +1814,28 @@ for folder in ${listOfChromosomes}
 do
 {
 pwd
-echo -n "${folder} "
-echo -n "${folder} " >> "/dev/stderr"
+echo -en "${folder}\t"
+echo -en "${folder}\t" >> "/dev/stderr"
 
+bigwigPrefix="COMBINED"
 thisHubSubfolder="COMBINED"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "full"
-thisHubSubfolder="FILTERED_FLASHED"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
-thisHubSubfolder="FILTERED_NONFLASHED"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
-thisHubSubfolder="PREfiltered_FLASHED"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
-thisHubSubfolder="PREfiltered_NONFLASHED"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
-thisHubSubfolder="RAW_FLASHED"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
-thisHubSubfolder="RAW_NONFLASHED"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "full"
+
+bigwigPrefix="FLASHED"
+thisHubSubfolder="FILTERED_${bigwigPrefix}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+thisHubSubfolder="PREfiltered_${bigwigPrefix}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+thisHubSubfolder="RAW_${bigwigPrefix}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+
+bigwigPrefix="NONFLASHED"
+thisHubSubfolder="FILTERED_${bigwigPrefix}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+thisHubSubfolder="PREfiltered_${bigwigPrefix}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+thisHubSubfolder="RAW_${bigwigPrefix}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
 
 rm -rf ${folder}/makingOfTracks
 mkdir ${folder}/makingOfTracks

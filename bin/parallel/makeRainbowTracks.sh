@@ -18,11 +18,13 @@ thisScriptName=$(echo $0 | sed 's/\s.*//')
 
 folder=$1
 subfolder=$2
-visibility=$3
+bwprefix=$3
+visibility=$4
+
+echo -n "- ${subfolder} "
+echo -n "- ${subfolder} " >> "/dev/stderr"
 
 parentname="${folder}_${subfolder}"
-echo -n "- ${parentname} "
-echo -n "- ${parentname} " >> "/dev/stderr"
 
 rm -f ${parentname}_tracks.txt
 doOneParent
@@ -36,7 +38,7 @@ for (( i=0; i<${#oligolist[@]}; i++ ))
 do
 
 # echo track_symlinks/chr${folder}/${folder}/${subfolder}_CM5_${oligolist[i]}_1.bw
-if [ -s "chr${folder}/${folder}_${subfolder}_CM5_${oligolist[i]}_1.bw" ]; then
+if [ -s "${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}_1.bw" ]; then
   doOneChild
 fi
 

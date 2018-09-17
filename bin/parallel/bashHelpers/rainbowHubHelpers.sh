@@ -76,7 +76,7 @@ excstplist=($(cut -f 2,7 oligofile_sorted.txt | grep '^'${folder}'\s' | cut -f 2
 doOneBedExclOligo(){
 
 name=${oligolist[i]}
-chr=${thisChr}
+chr=${folder}
 # for making the key - the oligo coordinates (for bed file)
 olistr=${olistrlist[i]}
 olistp=${olistplist[i]}
