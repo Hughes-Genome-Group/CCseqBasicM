@@ -22,7 +22,7 @@ echo type bigWig >> ${parentname}_tracks.txt
 echo container multiWig >> ${parentname}_tracks.txt
 echo aggregate transparentOverlay >> ${parentname}_tracks.txt
 echo showSubtrackColorOnUi on >> ${parentname}_tracks.txt
-echo visibility full >> ${parentname}_tracks.txt
+echo visibility ${visibility} >> ${parentname}_tracks.txt
 echo windowingFunction maximum >> ${parentname}_tracks.txt
 echo html description >> ${parentname}_tracks.txt
 echo autoScale on >> ${parentname}_tracks.txt

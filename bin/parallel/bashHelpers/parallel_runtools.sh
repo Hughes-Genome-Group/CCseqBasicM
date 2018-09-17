@@ -77,7 +77,7 @@ cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstat
 | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}\
 END{\
 if(a==0){print "0\t0\t0\t0\t0"}\
-elsif(e==0){print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t0"}\
+else if(e==0){print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t0"}\
 else{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}\
 }' >> ${flashstatus}_summaryPerc.txt
 
@@ -1705,9 +1705,10 @@ thisHubSubfolder="COMBINED"
 
 echo -n "- ${thisHubSubfolder} "
 echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
-mkdir ${folder}/${thisHubSubfolder}
-cd ${folder}/${thisHubSubfolder}
-ln -s ../../../${folder}/*/PERMANENT_BIGWIGS_do_not_move/${thisHubSubfolder}/*.bw .
+mkdir ${folder}/bigwigs
+mkdir ${folder}/bigwigs/${thisHubSubfolder}
+cd ${folder}/bigwigs/${thisHubSubfolder}
+ln -s ../../../../${folder}/*/PERMANENT_BIGWIGS_do_not_move/${thisHubSubfolder}/*.bw .
 cd ${weWereHereDir}
 
 thisHubSubfolder="FILTERED"
@@ -1812,24 +1813,49 @@ weWereHereDir=$(pwd)
 for folder in ${listOfChromosomes}
 do
 {
+pwd
 echo -n "${folder} "
 echo -n "${folder} " >> "/dev/stderr"
-pwd
 
 thisHubSubfolder="COMBINED"
-${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
+echo -n "- ${thisHubSubfolder} "
+echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "full"
 thisHubSubfolder="FILTERED_FLASHED"
-${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
+echo -n "- ${thisHubSubfolder} "
+echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="FILTERED_NONFLASHED"
-${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
+echo -n "- ${thisHubSubfolder} "
+echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="PREfiltered_FLASHED"
-${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
+echo -n "- ${thisHubSubfolder} "
+echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="PREfiltered_NONFLASHED"
-${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
+echo -n "- ${thisHubSubfolder} "
+echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="RAW_FLASHED"
-${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
+echo -n "- ${thisHubSubfolder} "
+echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
 thisHubSubfolder="RAW_NONFLASHED"
-${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${thisHubSubfolder}
+echo -n "- ${thisHubSubfolder} "
+echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} "hide"
+
+mkdir ${folder}/makingOfTracks
+mv ${folder}_*_tracks.txt ${folder}/makingOfTracks/.
+cat ${folder}/makingOfTracks/* > ${folder}_tracks.txt
+
+echo -n "- hubAndGenome "
+echo -n "- hubAndGenome " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${ucscBuildName}
+
+echo ''
+echo '' >> "/dev/stderr"
 
 }
 done
