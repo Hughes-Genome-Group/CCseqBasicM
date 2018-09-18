@@ -1675,6 +1675,8 @@ printToLogFile
 
 mkdir description_page
 echo '<pre>' > description_page/description.html
+echo 'The statistics below are for the WHOLE experiment - over all chromosomes' >> description_page/description.html
+echo '' >> description_page/description.html
 cat ../../B_fastqSummaryCounts.txt >> description_page/description.html
 echo  >> description_page/description.html
 echo  >> description_page/description.html

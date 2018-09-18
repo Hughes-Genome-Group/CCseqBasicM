@@ -1040,18 +1040,22 @@ if [ -s "${outputfolder}/${newname}_forBlatFiltering.gff" ] ; then
     setStringentFailForTheFollowing
     cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
     stopStringentFailAfterTheAbove
-    rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
     
-    dataprefix="${dataprefixNONFLASHED}"
-    
+    dataprefix="${dataprefixNONFLASHED}"    
     setStringentFailForTheFollowing
     cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
     stopStringentFailAfterTheAbove
 
 else
+    dataprefix="${dataprefixFLASHED}"
+    mv -f TEMP_${dataprefix}_combined.sam ${outputfolder}/${dataprefix}_filtered_combined.sam
+    dataprefix="${dataprefixNONFLASHED}"
     mv -f TEMP_${dataprefix}_combined.sam ${outputfolder}/${dataprefix}_filtered_combined.sam
 fi
 
+dataprefix="${dataprefixFLASHED}"
+rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
+dataprefix="${dataprefixNONFLASHED}"
 rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
 
 ls -lht ${outputfolder}/*filtered_combined.sam
