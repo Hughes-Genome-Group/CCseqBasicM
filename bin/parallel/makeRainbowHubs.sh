@@ -16,8 +16,9 @@ thisScriptName=$(echo $0 | sed 's/\s.*//')
 # COMBINED has only one run - so can skip folder (didn't make subs to differentiate as COMBINED is only one we want)
 # and we don't have subfolder any more.
 
-parentname=$1
-ucscBuildName=$2
+hubsamplename=$1
+parentname=$2
+ucscBuildName=$3
 
 doGenomeAndHub
 

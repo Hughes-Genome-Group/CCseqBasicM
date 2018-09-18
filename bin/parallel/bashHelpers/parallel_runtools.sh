@@ -1861,7 +1861,7 @@ cat ${folder}/makingOfTracks/* > ${folder}_tracks.txt
 
 echo -n "- hubAndGenome "
 echo -n "- hubAndGenome " >> "/dev/stderr"
-${CaptureParallelPath}/makeRainbowHubs.sh ${folder} ${ucscBuildName}
+${CaptureParallelPath}/makeRainbowHubs.sh ${samplename} ${folder} ${ucscBuildName}
 
 echo ''
 echo '' >> "/dev/stderr"

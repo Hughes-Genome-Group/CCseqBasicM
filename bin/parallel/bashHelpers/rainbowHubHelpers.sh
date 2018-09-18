@@ -2,9 +2,9 @@
 
 doGenomeAndHub(){
 
-echo "hub ${parentname}" > hub_${parentname}.txt
-echo "shortLabel ${parentname}" >> hub_${parentname}.txt
-echo "longLabel ${parentname}" >> hub_${parentname}.txt
+echo "hub ${hubsamplename}_${parentname}" > hub_${parentname}.txt
+echo "shortLabel ${hubsamplename}_${parentname}" >> hub_${parentname}.txt
+echo "longLabel ${hubsamplename}_${parentname}" >> hub_${parentname}.txt
 echo "genomesFile genomes_${parentname}.txt" >> hub_${parentname}.txt
 echo 'email jelena.telenius@gmail.com' >> hub_${parentname}.txt
 
