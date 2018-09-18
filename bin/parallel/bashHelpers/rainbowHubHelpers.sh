@@ -38,12 +38,11 @@ doOneChild(){
 # FLASHED_REdig_CM5_1190007I07Rik_L_R.bw
 # track_symlinks/${folder}/${subfolder}_REdig_CM5_${oligolist[i]}.bw
 
-name=${oligolist[i]}
-chr="chr${chrlist[j]}"
+name="${oligolist[i]}_${abbrev}"
 
 echo track ${name} >> ${parentname}_tracks.txt
 echo parent ${parentname} >> ${parentname}_tracks.txt
-echo bigDataUrl ${folder}/${subfolder}_CM5_${name}_1.bw >> ${parentname}_tracks.txt
+echo bigDataUrl ${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}.bw >> ${parentname}_tracks.txt
 echo shortLabel ${name} >> ${parentname}_tracks.txt
 echo longLabel ${name} >> ${parentname}_tracks.txt
 echo type bigWig >> ${parentname}_tracks.txt
@@ -89,7 +88,7 @@ excstp=${excstplist[i]}
 # chrY    621869  623257  Ddx3y_R 1       +       621869  623257  133,0,122
 
 # For testing purposes :
-echo "${chr} ${olistr} ${olistp} OLIGO_${name} 1 + ${olistr} ${olistp} ${color[$((i%19+1))]}" | tr ' ' '\t'
+# echo "${chr} ${olistr} ${olistp} OLIGO_${name} 1 + ${olistr} ${olistp} ${color[$((i%19+1))]}" | tr ' ' '\t'
 
 echo "${chr} ${olistr} ${olistp} OLIGO_${name} 1 + ${olistr} ${olistp} ${color[$((i%19+1))]}" | tr ' ' '\t' >> oligoExclColored_allReps.bed
 echo "${chr} ${excstr} ${excstp} EXCL_${name} 1 + ${excstr} ${excstp} ${color[$((i%19+1))]}" | tr ' ' '\t' >> oligoExclColored_allReps.bed

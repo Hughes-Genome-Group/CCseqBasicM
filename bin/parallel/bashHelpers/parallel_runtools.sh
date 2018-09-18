@@ -1681,7 +1681,7 @@ echo  >> description_page/description.html
 cat ../../D_analysisSummaryCounts.txt >> description_page/description.html
 echo  >> description_page/description.html
 echo  >> description_page/description.html
-echo '<\pre>' >> description_page/description.html
+echo '</pre>' >> description_page/description.html
 ln -s description_page/description.html .
 
 printThis="Making folders for each chromosome .."
@@ -1707,7 +1707,11 @@ echo -n "- ${thisHubSubfolder} "
 echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
 mkdir ${folder}/${thisHubSubfolder}
 cd ${folder}/${thisHubSubfolder}
-ln -s ../../../${folder}/*/PERMANENT_BIGWIGS_do_not_move/${thisHubSubfolder}/*.bw .
+for prelNamFile in ../../../${folder}/*/PERMANENT_BIGWIGS_do_not_move/${thisHubSubfolder}/*.bw
+do
+  newname=$(basename ${prelNamFile} | sed 's/_1.bw$/.bw/')  
+  ln -s ${prelNamFile} ${newname}
+done
 cd ${weWereHereDir}
 
 thisHubSubfolder="FILTERED"
@@ -1822,26 +1826,33 @@ echo -en "${folder}\t"
 echo -en "${folder}\t" >> "/dev/stderr"
 
 bigwigPrefix="COMBINED"
+trackAbbrev="COMB"
 thisHubSubfolder="COMBINED"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "full"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${trackAbbrev} "full"
 
 flashstatus="FLASHED"
 bigwigPrefix="FLASHED_REdig"
+trackAbbrev="filtF"
 thisHubSubfolder="FILTERED_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${trackAbbrev} "hide"
+trackAbbrev="prefiltF"
 thisHubSubfolder="PREfiltered_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${trackAbbrev} "hide"
+trackAbbrev="rawF"
 thisHubSubfolder="RAW_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${trackAbbrev} "hide"
 
 flashstatus="NONFLASHED"
 bigwigPrefix="NONFLASHED_REdig"
+trackAbbrev="filtNF"
 thisHubSubfolder="FILTERED_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${trackAbbrev} "hide"
+trackAbbrev="prefiltNF"
 thisHubSubfolder="PREfiltered_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${trackAbbrev} "hide"
+trackAbbrev="rawNF"
 thisHubSubfolder="RAW_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${trackAbbrev} "hide"
 
 rm -rf ${folder}/makingOfTracks
 mkdir ${folder}/makingOfTracks
