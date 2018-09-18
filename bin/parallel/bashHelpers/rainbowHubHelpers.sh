@@ -43,7 +43,7 @@ chr="chr${chrlist[j]}"
 
 echo track ${name} >> ${parentname}_tracks.txt
 echo parent ${parentname} >> ${parentname}_tracks.txt
-echo bigDataUrl ${folder}/${subfolder}_CM5_${name}.bw >> ${parentname}_tracks.txt
+echo bigDataUrl ${folder}/${subfolder}_CM5_${name}_1.bw >> ${parentname}_tracks.txt
 echo shortLabel ${name} >> ${parentname}_tracks.txt
 echo longLabel ${name} >> ${parentname}_tracks.txt
 echo type bigWig >> ${parentname}_tracks.txt
@@ -62,14 +62,16 @@ oligoListSetter(){
 
 # Ddx3y_R Y       621870  623257  Y       620870  624257  1       A
 
+folderWithoutChr=$(echo "${folder}" | sed 's/^chr//')
+
 # For the bigwig tracks 
-oligolist=($(cut -f 1,2 oligofile_sorted.txt | grep '\s'${folder}'$' | cut -f 1))
+oligolist=($(cut -f 1,2 oligofile_sorted.txt | grep '\s'${folderWithoutChr}'$' | cut -f 1))
 
 # For matching the colors of the oligo and exclusion zone tracks too.
-olistrlist=($(cut -f 2,3 oligofile_sorted.txt | grep '^'${folder}'\s' | cut -f 2 | awk '{print $1-1}'))
-olistplist=($(cut -f 2,4 oligofile_sorted.txt | grep '^'${folder}'\s' | cut -f 2))
-excstrlist=($(cut -f 2,6 oligofile_sorted.txt | grep '^'${folder}'\s' | cut -f 2 | awk '{print $1-1}'))
-excstplist=($(cut -f 2,7 oligofile_sorted.txt | grep '^'${folder}'\s' | cut -f 2))
+olistrlist=($(cut -f 2,3 oligofile_sorted.txt | grep '^'${folderWithoutChr}'\s' | cut -f 2 | awk '{print $1-1}'))
+olistplist=($(cut -f 2,4 oligofile_sorted.txt | grep '^'${folderWithoutChr}'\s' | cut -f 2))
+excstrlist=($(cut -f 2,6 oligofile_sorted.txt | grep '^'${folderWithoutChr}'\s' | cut -f 2 | awk '{print $1-1}'))
+excstplist=($(cut -f 2,7 oligofile_sorted.txt | grep '^'${folderWithoutChr}'\s' | cut -f 2))
     
 }
 
@@ -85,6 +87,9 @@ excstp=${excstplist[i]}
 
 # Making the key - i.e. the bed lines of the oligo and exclusion with the same color that was given above ..
 # chrY    621869  623257  Ddx3y_R 1       +       621869  623257  133,0,122
+
+# For testing purposes :
+echo "${chr} ${olistr} ${olistp} OLIGO_${name} 1 + ${olistr} ${olistp} ${color[$((i%19+1))]}" | tr ' ' '\t'
 
 echo "${chr} ${olistr} ${olistp} OLIGO_${name} 1 + ${olistr} ${olistp} ${color[$((i%19+1))]}" | tr ' ' '\t' >> oligoExclColored_allReps.bed
 echo "${chr} ${excstr} ${excstp} EXCL_${name} 1 + ${excstr} ${excstp} ${color[$((i%19+1))]}" | tr ' ' '\t' >> oligoExclColored_allReps.bed

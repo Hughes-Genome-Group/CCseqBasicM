@@ -1781,13 +1781,17 @@ printToLogFile
 
 rm -f oligoExclColored_allReps.bed
 
-oligolist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
-oligoListSetter
 
 for folder in ${listOfChromosomes}
 do
 {
+color=(); oligolist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
+
 oligoListSetter
+echo -n "${#oligolist[@]} oligos found "
+setRainbowColors
+echo -n "using ${#color[@]} colors "
+
 counter=1
 for (( i=0; i<${#oligolist[@]}; i++ ))
 do
@@ -1821,20 +1825,22 @@ bigwigPrefix="COMBINED"
 thisHubSubfolder="COMBINED"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "full"
 
-bigwigPrefix="FLASHED"
-thisHubSubfolder="FILTERED_${bigwigPrefix}"
+flashstatus="FLASHED"
+bigwigPrefix="FLASHED_REdig"
+thisHubSubfolder="FILTERED_${flashstatus}"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
-thisHubSubfolder="PREfiltered_${bigwigPrefix}"
+thisHubSubfolder="PREfiltered_${flashstatus}"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
-thisHubSubfolder="RAW_${bigwigPrefix}"
+thisHubSubfolder="RAW_${flashstatus}"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
 
-bigwigPrefix="NONFLASHED"
-thisHubSubfolder="FILTERED_${bigwigPrefix}"
+flashstatus="NONFLASHED"
+bigwigPrefix="NONFLASHED_REdig"
+thisHubSubfolder="FILTERED_${flashstatus}"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
-thisHubSubfolder="PREfiltered_${bigwigPrefix}"
+thisHubSubfolder="PREfiltered_${flashstatus}"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
-thisHubSubfolder="RAW_${bigwigPrefix}"
+thisHubSubfolder="RAW_${flashstatus}"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} "hide"
 
 rm -rf ${folder}/makingOfTracks

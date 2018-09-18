@@ -29,17 +29,27 @@ parentname="${folder}_${subfolder}"
 rm -f ${parentname}_tracks.txt
 doOneParent
 
-oligolist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
+color=(); oligolist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
+
 oligoListSetter
+echo -n "${#oligolist[@]} oligos found, "
+setRainbowColors
+echo -n "using ${#color[@]} colors "
 
 counter=1
 # track_symlinks/${chr}/${folder}/${subfolder}_REdig_CM5_*.bw
 for (( i=0; i<${#oligolist[@]}; i++ ))
 do
 
+# to get error if no file found :
+ls ${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}_1.bw >> "/dev/null"
+
 # echo track_symlinks/chr${folder}/${folder}/${subfolder}_CM5_${oligolist[i]}_1.bw
 if [ -s "${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}_1.bw" ]; then
   doOneChild
+else
+  echo -n "( skipping ${oligolist[i]} as no data found ) "
+  echo -n "( skipping ${oligolist[i]} as no data found ) " >> "/dev/null"
 fi
 
 done
