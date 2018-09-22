@@ -68,7 +68,7 @@ cd B_mapAndDivideFastqs
 # LOOPs summary table
 # ###############################
 
-head -n 1 fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt > ${flashstatus}_summaryCounts.txt
+head -n 1 fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | sed 's/^chr\s\s*//' > ${flashstatus}_summaryCounts.txt
 cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^chr\s' \
  | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}END{print a"\t"b"\t"c"\t"d"\t"e"\t"f}' >> ${flashstatus}_summaryCounts.txt
 
