@@ -325,7 +325,7 @@ checkRunCrashes
 # Double check that no crashes ..
 
 TEMPoriginalCount=$(($( cat ../PIPE_fastqPaths.txt | grep -c "" )))
-TEMPfinishedFineCount=$(($( cat fastq_*/fastqRoundSuccess.log | grep "^prepareOK 1 runOK 1$" | uniq -c )))
+TEMPfinishedFineCount=$(($( cat fastq_*/fastqRoundSuccess.log | grep -c "^prepareOK 1 runOK 1$" )))
 folderCountOK=1
 
 if [ "${TEMPoriginalCount}" -ne "${TEMPfinishedFineCount}" ]; then

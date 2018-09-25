@@ -70,10 +70,19 @@ fi
 cp ${CaptureParallelPath}/${qsubScriptToBeUsed} .
 chmod u+x ${qsubScriptToBeUsed}
 
+# First five parallel units we put in without hesitation :
+
 thisIsFirstRound=1
 firstfolderThisround=1
 stillneedThismany=${foundFoldersCount}
-for (( i=1; i<=${neededQsubsCount}; i++ ))
+
+# five or all ?
+fiveFirstRounds=${neededQsubsCount}
+if [ ${neededQsubsCount} -gt "5" ]; then
+    fiveFirstRounds=5
+fi
+    
+for (( i=1; i<=${fiveFirstRounds}; i++ ))
 do {
     # If we are fine with these.
     if [ "${stillneedThismany}" -le "${askedProcessors}" ]; then
@@ -124,10 +133,7 @@ do {
    }
    done
    
-# Now - monitoring the little ones while they are running :)
-
-# 1) we may be queueuing -  nothing running and no log files yet
-# 2) we may be running - we have log files now
+# After the first five parallel units we want to keep nice image - not to crowd the visual of the queue with endless hqw jobs :
 
 sleepSeconds=600
 # Override for bamcombining and oligorounds (start more frequently than every 10 minutes)
@@ -137,6 +143,68 @@ elif [ "${FastqOrOligo}" == "Oligo" ];then
     sleepSeconds=10
 fi
 
+if [ ${neededQsubsCount} -gt "5" ]; then
+    
+printThis="After the first five parallel units submit, submitting once the previous runs have advanced."
+printToLogFile
+printThis="Starting this with parameter values : neededQsubsCount=${neededQsubsCount}  firstfolderThisround=${firstfolderThisround}  stillneedThismany=${stillneedThismany} "
+printToLogFile
+
+for (( i=6; i<=${neededQsubsCount}; i++ ))
+do {
+    
+    wePotentiallyStartNew=1
+    # qstat shows first 10 letters of the job name - parsing for this :
+    weAreLookingForThis=$( echo ${CCversion}_$$_${fqOrOL} | awk '{print substr($1,1,10)}' )
+    
+    if [ $(($( qstat | sed 's/\s\s*/\t/g' | cut -f 3,5 | grep -c '^'${weAreLookingForThis}'\shqw$' ))) -ge 5 ]; then
+        wePotentiallyStartNew=0
+    fi
+    
+    while [ ${wePotentiallyStartNew} -eq 0 ]
+    do
+        wePotentiallyStartNew=1
+        if [ $(($( qstat | sed 's/\s\s*/\t/g' | cut -f 3,5 | grep -c '^'${weAreLookingForThis}'\shqw$' ))) -ge 5 ]; then
+            wePotentiallyStartNew=0
+        fi
+        sleep ${sleepSeconds}
+    done
+    
+    # If we are fine with these.
+    if [ "${stillneedThismany}" -le "${askedProcessors}" ]; then
+        # not first round, but it is enough, submitting all, with hold_jid
+        printThis="Submitting runs ${firstfolderThisround}-$((${firstfolderThisround}+${stillneedThismany}-1)) \n in $(pwd) with hold_jid as more runs than requested processors : "
+        printToLogFile
+        printThis="qsub -cwd -q batchq -t ${firstfolderThisround}-$((${firstfolderThisround}+${stillneedThismany}-1)) -N ${CCversion}_$$_${fqOrOL}${i} -hold_jid ${CCversion}_$$_${fqOrOL}$((${i}-1)) ./${qsubScriptToBeUsed}"
+        printToLogFile
+        qsub -cwd -q batchq -t ${firstfolderThisround}-$((${firstfolderThisround}+${stillneedThismany}-1)) -N ${CCversion}_$$_${fqOrOL}${i} -hold_jid ${CCversion}_$$_${fqOrOL}$((${i}-1)) ./${qsubScriptToBeUsed}
+        break # this is enough now, exiting loop
+    
+    # If we need to do more ..
+    else
+        # not first round, and it is not enough, submitting a batch, with hold_jid
+        printThis="Submitting runs ${firstfolderThisround}-$((${firstfolderThisround}+${askedProcessors}-1)) \n in $(pwd) with hold_jid as more runs than requested processors : "
+        printToLogFile
+        printThis="qsub -cwd -q batchq -t ${firstfolderThisround}-$((${firstfolderThisround}+${askedProcessors}-1)) -N ${CCversion}_$$_${fqOrOL}${i} -hold_jid ${CCversion}_$$_${fqOrOL}$((${i}-1)) ./${qsubScriptToBeUsed}"
+        printToLogFile
+        qsub -cwd -q batchq -t ${firstfolderThisround}-$((${firstfolderThisround}+${askedProcessors}-1)) -N ${CCversion}_$$_${fqOrOL}${i} -hold_jid ${CCversion}_$$_${fqOrOL}$((${i}-1)) ./${qsubScriptToBeUsed}       
+        stillneedThismany=$((${stillneedThismany}-${askedProcessors}))
+    fi
+    
+    # Sending different numbers in taskID..
+    firstfolderThisround=$((${firstfolderThisround}+${askedProcessors}))
+    
+   }
+   done
+
+fi
+   
+# Now - monitoring the little ones while they are running :)
+
+# 1) we may be queueuing -  nothing running and no log files yet
+# 2) we may be running - we have log files now
+
+sleepSeconds=60
 
 echo
 echo "Will be monitoring the runs in $(pwd)/allRunsJUSTNOW.txt "
@@ -150,10 +218,10 @@ do
 monitorRun
 
 # For threaded jobs ..
-qstat | grep ${CCversion}_$$ >> allRunsJUSTNOW.txt
+qstat | grep ${CCversion}_$$_${fqOrOL} >> allRunsJUSTNOW.txt
 
 # For testing purposes (threaded jobs)
-qstat | grep ${CCversion}_$$ >> wholerunQstatMessages.txt
+qstat | grep ${CCversion}_$$_${fqOrOL} >> wholerunQstatMessages.txt
 
 sleep ${sleepSeconds}
 }

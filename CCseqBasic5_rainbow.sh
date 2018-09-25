@@ -34,8 +34,8 @@ echo "Log files copied !" >> "/dev/stderr"
 
 function finish {
     
-cp ${CaptureParallelPath}/E_cleanupScript_toUse_afterSuccesfull_Run.sh .
-chmod u=rwx E_cleanupScript_toUse_afterSuccesfull_Run.sh
+cp ${CaptureParallelPath}/E_cleanupScript_toUse_afterSuccesfull_Run.sh ${HOME}/.
+chmod u=rwx ${HOME}/E_cleanupScript_toUse_afterSuccesfull_Run.sh
 
 if [ $? != "0" ]; then
 
