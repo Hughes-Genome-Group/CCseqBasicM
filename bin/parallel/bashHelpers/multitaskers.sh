@@ -41,7 +41,7 @@ printToLogFile
 # foundFoldersCount=$(($(ls -1 | grep '^fastq_' | grep -c "")))
 # We default to 8 processors, and are not planning to change this to become a flag instead ..
 # askedProcessors=8
-askedProcessors=2
+askedProcessors=${threadCount}
 neededQsubsCount=$(($((${foundFoldersCount}/${askedProcessors}))+1))
 
 echo

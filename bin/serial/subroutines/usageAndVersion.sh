@@ -139,16 +139,13 @@ echo "  Globin  16 	0	1500000	16	0	1500000	1	A"
 echo ""
 echo "RE-RUNNING PARTS OF THE PIPE (in the case something went wrong)"
 echo
-echo "For PARALLEL or RAINBOW RUN rerun options - see the generated rerunInstructions.txt file in this folder"
-writeRerunInstructionsFile
-echo "Includes flags --repairBrokenFastqs  --stopAfterFolderB  --startAfterFolderB  --onlyCCanalyser"
-echo "The flag --onlyBlat (below) works the same way for both serial and parallel pipe : see below."
-echo
-echo "Below the NOT-RAINBOW RUN rerun options :"
+echo "--stopAfterFolderB      : RAINBOW runs only - stop the run after fastq-wise analysis (don't proceed to bam combining and oligo-wise analysis)"
+echo "--startAfterFolderB     : RAINBOW runs only - restart the run from folder C onwards. "
+echo "--stopAfterBamCombining : RAINBOW runs only - stop after folder C (bam combining). don't proceed to oligo-wise analysis "
 echo
 echo "--onlyBlat : Don't analyse the fastq data, or generate public hubs. hust run the blat generation based on the oligo coordinate file and genome build. "
 echo "--onlyCCanalyser : Start the analysis from the CCanalyser script (deletes folders F2 --> and the output public folder, and restarts the run from there "
-echo "     : assumes fully completed F1 folder with intact sam files ) . "
+echo "     : assumes fully completed F1 folder with intact sam files ) . In RAINBOW runs this reruns folder D and data hub. "
 echo
 echo "--BLATforREUSEfolderPath /full/path/to/previous/F4_blatPloidyFilteringLog_CC4/BlatPloidyFilterRun/REUSE_blat folder"
 echo "    if run crashes during or after blatting : point to the crashed folder's blat results, and avoid running blat again ! "
@@ -157,6 +154,15 @@ echo "    NOTE !!! if you combine this with --onlyCCanalyser : As the blat resul
 echo "        you need to COPY the REUSE_blat folder outside the original run folder, and point to that copied folder here. "
 echo
 echo "--onlyHub  : generates the summary counts, description html page and data hubs (overwrites existing ones). Should be ran in 1 processor only. "
+echo
+echo "PARALLEL RUN OPTIONS (only for RAINBOW pipe runs)"
+echo
+echo "-p 2 : parallel threads (processors) the run will ask in the queue. Run the job normally. "
+echo
+echo "--wholenode24 : special run mode - only to be used with 'qsub -q wholenodeq' . Turns on the run in 'wholenode mode' - a highly optimised run mode for 24 processors."
+echo "--useClusterDiskArea : if you have --wholenode24 set (see above), you can use the node's own disk area to store the temporary files : this speeds up the run. "
+echo "     Make sure your fastq.gz files are each ~ 1G in size : larger files may cause some of your fastqs crash during the run. "
+
 echo
 echo "RESTRICTION ENZYME SETTINGS"
 echo "--dpn  (default) : dpnII is the RE of the experiment"

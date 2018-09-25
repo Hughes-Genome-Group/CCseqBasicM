@@ -354,6 +354,14 @@ parameterList=$( cat TEMP.param )
        removeMacsParamAndValue
    fi  
 
+   macsflag='-p'
+   macsOnOff
+   if [ "${macsHasThisFlag}" -ne 0 ];then
+       macsParam
+       echo "threads ${macsvalue}" >> TEMP.mainparam
+       removeMacsParamAndValue
+   fi  
+
    macsflag='--onlyBlat'
    macsOnOff
    if [ "${macsHasThisFlag}" -ne 0 ];then

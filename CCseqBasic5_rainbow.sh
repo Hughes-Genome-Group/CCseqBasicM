@@ -158,6 +158,8 @@ onlyblat=0
 
 reuseblatpath='.'
 
+threadCount=2
+
 rainbowRunTOPDIR=$(pwd)
 echo "rainbowRunTOPDIR ${rainbowRunTOPDIR}"
 echo
@@ -283,8 +285,13 @@ if [ "${useWholenodeQueue}" -eq 0 ]; then
     useTMPDIRforThis=0
 fi
 
+# Forcing using symlinks - this is rainbow run, and thus visualisations will not work otherwise ..
+
+parameterList="${parameterList} --useSymbolicLinks"
+
 isReuseBlatPathGiven=$(($( cat TEMP.mainparam | grep -c '^reuseblatpath\s' )))
 isCCversionGiven=$(($( cat TEMP.mainparam | grep -c '^CCversion\s' )))
+isThreadcountGiven=$(($( cat TEMP.mainparam | grep -c '^threads\s' )))
 
 if [ "${isReuseBlatPathGiven}" -ne 0 ]; then
 reuseblatpath=$( cat TEMP.mainparam | grep '^reuseblatpath\s' | sed 's/\s\s*/\t/' | cut -f 2 )
@@ -292,12 +299,18 @@ fi
 if [ "${isCCversionGiven}" -ne 0 ]; then
 CCversion=$( cat TEMP.mainparam | grep '^CCversion\s' | sed 's/\s\s*/\t/' | cut -f 2 )
 fi
+if [ "${isCCversionGiven}" -ne 0 ]; then
+threadCount=$( cat TEMP.mainparam | grep '^threads\s' | sed 's/\s\s*/\t/' | cut -f 2 )
+fi
 
 checkThis="${reuseblatpath}"
 checkedName='reuseblatpath'
 checkParse
 checkThis="${CCversion}"
 checkedName='CCversion'
+checkParse
+checkThis="${threadCount}"
+checkedName='threadCount'
 checkParse
 
 onlyblat=$(($( cat TEMP.mainparam | grep -c onlyBlat )))
@@ -322,6 +335,7 @@ echo "CCversion ${CCversion}"
 echo "publicfolder ${publicfolder}"
 echo "tiled ${tiled}"
 echo "useWholenodeQueue ${useWholenodeQueue}"
+echo "threadCount ${threadCount}"
 echo "useTMPDIRforThis ${useTMPDIRforThis}"
 echo "rerunBrokenFastqs ${rerunBrokenFastqs}"
 echo "stopAfterFolderB ${stopAfterFolderB}"
