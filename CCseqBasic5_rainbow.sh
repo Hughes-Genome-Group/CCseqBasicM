@@ -278,6 +278,11 @@ checkParse
 #     useTMPDIRforThis=1
 # fi
 
+# Overwriting "using TMPDIR" in situation that we are normal threaded job.
+if [ "${useWholenodeQueue}" -eq 0 ]; then
+    useTMPDIRforThis=0
+fi
+
 isReuseBlatPathGiven=$(($( cat TEMP.mainparam | grep -c '^reuseblatpath\s' )))
 isCCversionGiven=$(($( cat TEMP.mainparam | grep -c '^CCversion\s' )))
 

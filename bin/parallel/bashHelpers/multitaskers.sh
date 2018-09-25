@@ -211,17 +211,19 @@ echo "Will be monitoring the runs in $(pwd)/allRunsJUSTNOW.txt "
 echo "every ${sleepSeconds} seconds"
 echo
 
-while [ $(($( qstat | grep -c ${CCversion}_$$ ))) -gt 0 ]
+weAreLookingForThis=$( echo ${CCversion}_$$_${fqOrOL} | awk '{print substr($1,1,10)}' )
+
+while [ $(($( qstat | sed 's/\s\s*/\t/g' | cut -f 3 | grep -c '^'${weAreLookingForThis}'$' ))) -gt 0 ]
 do
 {
 
 monitorRun
 
 # For threaded jobs ..
-qstat | grep ${CCversion}_$$_${fqOrOL} >> allRunsJUSTNOW.txt
+qstat | grep ${weAreLookingForThis} >> allRunsJUSTNOW.txt
 
 # For testing purposes (threaded jobs)
-qstat | grep ${CCversion}_$$_${fqOrOL} >> wholerunQstatMessages.txt
+qstat | grep ${weAreLookingForThis} >> wholerunQstatMessages.txt
 
 sleep ${sleepSeconds}
 }

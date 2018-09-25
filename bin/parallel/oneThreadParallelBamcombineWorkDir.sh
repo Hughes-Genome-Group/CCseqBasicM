@@ -93,6 +93,10 @@ echo "Script located at"
 echo "$0"
 echo
 
+threadedrunSubmitDir=$(pwd)
+echo "threadedrunSubmitDir ${threadedrunSubmitDir}"
+
+
 echo "RUNNING IN MACHINE : "
 hostname --long
 
@@ -168,7 +172,7 @@ printNewChapterToLogFile
 # ----------------------------------------
 # All done !
 
-cd ${wholenodeSubmitDir}
+cd ${threadedrunSubmitDir}
 
 rm -f runJustNow_${oligoCounter}.log
 

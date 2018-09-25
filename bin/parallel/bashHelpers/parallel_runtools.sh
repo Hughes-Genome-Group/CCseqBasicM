@@ -400,7 +400,7 @@ fi
 if [ "${weWillExitAfterThis}" -eq 1 ]; then
   printThis="EXITING ! "
   printToLogFile  
-  weWillExitAfterThis=1
+  exit 1
 fi
 
 cdCommand='cd ${weWereHereDir}'
@@ -811,7 +811,7 @@ fi
 if [ "${weWillExitAfterThis}" -eq 1 ]; then
   printThis="EXITING ! "
   printToLogFile  
-  weWillExitAfterThis=1
+  exit 1
 fi
 
 
@@ -1094,7 +1094,7 @@ fi
 if [ "${weWillExitAfterThis}" -eq 1  ]; then
   printThis="EXITING ! "
   printToLogFile  
-  weWillExitAfterThis=1
+  exit 1
 fi
 
 
