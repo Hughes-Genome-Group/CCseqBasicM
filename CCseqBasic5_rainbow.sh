@@ -299,7 +299,7 @@ fi
 if [ "${isCCversionGiven}" -ne 0 ]; then
 CCversion=$( cat TEMP.mainparam | grep '^CCversion\s' | sed 's/\s\s*/\t/' | cut -f 2 )
 fi
-if [ "${isCCversionGiven}" -ne 0 ]; then
+if [ "${isThreadcountGiven}" -ne 0 ]; then
 threadCount=$( cat TEMP.mainparam | grep '^threads\s' | sed 's/\s\s*/\t/' | cut -f 2 )
 fi
 
