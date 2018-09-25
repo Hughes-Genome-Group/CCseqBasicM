@@ -1703,8 +1703,9 @@ echo -en "${folder}\t"
 echo -en "${folder}\t" >> "/dev/stderr"
 pwd
 
-thisHubSubfolder="COMBINED"
+mkdir ${folder}
 
+thisHubSubfolder="COMBINED"
 echo -n "- ${thisHubSubfolder} "
 echo -n "- ${thisHubSubfolder} " >> "/dev/stderr"
 mkdir ${folder}/${thisHubSubfolder}
