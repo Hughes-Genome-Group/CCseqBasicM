@@ -215,6 +215,51 @@ cat chr*/*/F6_greenGraphs_combined_${samplename}_${CCversion}/COMBINED_report_${
 echo -e "oligo\tCaptureFrags\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
 cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
 
+tail -n +2 COMBINED_allFinalCounts_table.txt | \
+awk 'BEGIN{cap=0;r=0;c=0;t=0;cap2=0;r2=0;c2=0;t2=0;N=0}\
+{ N+=1; cap+=$2; r+=$3; c+=$4; t+=$5; cap2+=$2*$2; r2+=$3*$3; c2+=$4*$4; t2+=$5*$5;}\
+END{\
+capM=cap/N;rM=r/N;cM=c/N;tM=t/N;\
+print"Mean   CaptureFrags count :\t"capM"\t with std of :\t"sqrt((cap2-capM*capM*N)/(N-1))"\tand min/upperQuart/median/lowerQuart/max of:";\
+print"Mean Total repFrags count :\t"rM"\t with std of :\t"sqrt((r2-rM*rM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
+print"Mean   CIS repFrags count :\t"cM"\t with std of :\t"sqrt((c2-cM*cM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
+print"Mean TRANS repFrags count :\t"tM"\t with std of :\t"sqrt((t2-tM*tM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
+}' \
+> TEMP_meansAndStds.txt
+
+# Median and quartiles - this is not exact, but close enough.
+
+oligoCountHalf=$(($(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c "")))/2))
+oligoCountOneFourth=$(($(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c "")))/4))
+
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n 1 >  TEMP_min.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n 1 >> TEMP_min.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | head -n 1 >> TEMP_min.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | head -n 1 >> TEMP_min.txt
+
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | tail -n 1 >  TEMP_max.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | tail -n 1 >> TEMP_max.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | tail -n 1 >> TEMP_max.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | tail -n 1 >> TEMP_max.txt
+
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >  TEMP_medians.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >> TEMP_medians.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >> TEMP_medians.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >> TEMP_medians.txt
+
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >  TEMP_lower.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >> TEMP_lower.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >> TEMP_lower.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >> TEMP_lower.txt
+
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >  TEMP_upper.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
+
+paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt > COMBINED_meanStdMedian_overOligos.txt
+rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt
+
 # ###############################
 # Duplicate filtering oneliners
 # ###############################
@@ -1688,18 +1733,57 @@ hubTopDir=$(pwd)
 printThis="Making description html page .."
 printToLogFile
 
-mkdir description_page
-echo '<pre>' > description_page/description.html
-echo 'The statistics below are for the WHOLE experiment - over all chromosomes' >> description_page/description.html
-echo '' >> description_page/description.html
-cat ../../B_fastqSummaryCounts.txt >> description_page/description.html
-echo  >> description_page/description.html
-echo  >> description_page/description.html
-cat ../../D_analysisSummaryCounts.txt >> description_page/description.html
-echo  >> description_page/description.html
-echo  >> description_page/description.html
-echo '</pre>' >> description_page/description.html
-ln -s description_page/description.html .
+echo "<!DOCTYPE HTML PUBLIC -//W3C//DTD HTML 4.01//EN" > description.html
+echo "http://www.w3.org/TR/html4/strict.dtd" >> description.html
+echo ">" >> description.html
+echo " <html lang=en>" >> description.html
+echo " <head>" >> description.html
+echo " <title> ${hubNameList[0]} data hub in ${GENOME} </title>" >> description.html
+echo " </head>" >> description.html
+echo " <body>" >> description.html
+
+# Generating TimeStamp 
+TimeStamp=($( date | sed 's/[: ]/_/g' ))
+DateTime="$(date)"
+
+echo "<p>Data produced ${DateTime} with CapC pipeline (coded by James Davies, pipelined and parallelised by Jelena Telenius, located in ${CapturePipePath} )</p>" >> description.html
+
+echo "<hr />" >> description.html
+echo "Restriction enzyme and genome build : ( ${REenzyme} ) ( ${GENOME} )" >> description.html
+echo "<hr />" >> description.html
+echo "Data located in : ${HOME}" >> description.html
+echo "<hr />" >> description.html
+
+mkdir description_page_files
+
+ln -s ../../COMBINED_allFinalCounts.txt description_page_files/.
+ln -s ../../COMBINED_allFinalCounts_table.txt description_page_files/.
+
+echo "Oligo-wise counts (table) : <br>" >> description.html
+echo "<a target="_blank" href=\"description_page_files/COMBINED_allFinalCounts_table.txt\" >COMBINED_allFinalCounts_table.txt</a>" >> description.html
+echo "<hr />" >> description.html
+echo "Oligo-wise counts (raw list) : <br>" >> description.html
+echo "<a target="_blank" href=\"description_page_files/COMBINED_allFinalCounts.txt\" >COMBINED_allFinalCounts.txt</a>" >> description.html
+echo "<hr />" >> description.html
+echo "Run output log (main log) : <br>" >> description.html
+echo "<a target="_blank" href=\"../qsub.out\" >qsub.out</a>" >> description.html
+echo "<hr />" >> description.html
+echo "Run error log (main log) : <br>" >> description.html
+echo "<a target="_blank" href=\"../qsub.err\" >qsub.err</a>" >> description.html
+echo "<hr />" >> description.html
+
+echo '<pre>' > description.html
+echo 'The statistics below are for the WHOLE experiment - over all chromosomes' >> description.html
+echo '' >> description.html
+cat ../../B_fastqSummaryCounts.txt >> description.html
+echo  >> description.html
+echo  >> description.html
+cat ../../D_analysisSummaryCounts.txt >> description.html
+echo  >> description.html
+echo  >> description.html
+echo '</pre>' >> description.html
+
+# ----------------------------------
 
 printThis="Making folders for each chromosome .."
 printToLogFile

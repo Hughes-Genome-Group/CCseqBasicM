@@ -875,6 +875,8 @@ makeOligorunSummaries
 
 # Summary of summaries ..
 head -n 20 D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
+echo "" >> D_analysisSummaryCounts.txt
+head -n 20 D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> D_analysisSummaryCounts.txt
 
 # Check for errors
 
