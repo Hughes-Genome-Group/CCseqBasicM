@@ -201,18 +201,33 @@ weWereHereDir=$(pwd)
 cd D_analyseOligoWise
 
 # ###############################
+# Oligo final counts master table
+# ###############################
+
+# All counts - just a list, not in table format
+cat chr*/*/F6_greenGraphs_combined_${samplename}_${CCversion}/COMBINED_report_${CCversion}.txt | grep '(final count)' > COMBINED_allFinalCounts.txt
+
+# 3110002H16Rik_L_R 15 Capture fragments (final count):   1039
+# 3110002H16Rik_L_R 17a Reporter fragments (final count) :        812
+# 3110002H16Rik_L_R 17b Reporter fragments CIS (final count) :    461
+# 3110002H16Rik_L_R 17c Reporter fragments TRANS (final count) :  351
+
+echo -e "oligo\tCaptureFrags\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
+cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
+
+# ###############################
 # Duplicate filtering oneliners
 # ###############################
 
-cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '11 Total number of reads entering the analysis' \
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_${CCversion}.txt | grep '11 Total number of reads entering the analysis' \
 | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_allRds.txt
-cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '16 Non-duplicated reads' \
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_${CCversion}.txt | grep '16 Non-duplicated reads' \
 | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_nondupRds.txt
-cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '26a Actual reported fragments' \
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_${CCversion}.txt | grep '26a Actual reported fragments' \
 | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_repFragTotal.txt
-cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '26b Actual reported CIS fragments' \
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_${CCversion}.txt | grep '26b Actual reported CIS fragments' \
 | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_repFragCis.txt
-cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_CM5.txt | grep '26c Actual reported TRANS fragments' \
+cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_${CCversion}.txt | grep '26c Actual reported TRANS fragments' \
 | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_repFragTrans.txt
 
 echo -e "allRds\tnondupRds\trepFragTotal\trepFragCis\trepFragTrans" > ${flashstatus}_dupFiltStats.txt
@@ -1882,6 +1897,9 @@ ln -s ${hubTopDir} .
 
 for file in  data_hubs/hub_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses.txt
 
+trackDescriptionLine='track type=bigBed name="CaptureC_oligos" description="CaptureC_oligos" visibility="pack" itemRgb=On exonArrows=off bigDataUrl='
+echo ${trackDescriptionLine}'http://userweb.molbiol.ox.ac.uk'$( fp data_hubs/oligosAndExclusions_allReps.bb) > ${hubTopDir}/hubColorKeyBigbed.txt
+
 cd ${hubTopDir}
 
 printThis="Hub addresses generated"
@@ -1889,6 +1907,29 @@ printToLogFile
 
 echo
 echo > E_hubAddresses.txt
+echo "DATA HUB ADDRESSES"
+echo "DATA HUB ADDRESSES" >> E_hubAddresses.txt
+
+echo
+echo >> E_hubAddresses.txt
+echo "Color key (oligo and exclusion coordinates track) :"
+echo "Color key (oligo and exclusion coordinates track) :" >> E_hubAddresses.txt
+echo
+echo >> E_hubAddresses.txt
+cat hubColorKeyBigbed.txt
+cat hubColorKeyBigbed.txt >> E_hubAddresses.txt
+echo
+echo >> E_hubAddresses.txt
+echo "(load the above as UCSC custom track)"
+echo "(load the above as UCSC custom track)" >> E_hubAddresses.txt
+
+echo
+echo >> E_hubAddresses.txt
+echo
+echo '_______________________________' >> E_hubAddresses.txt
+echo '_______________________________'
+echo >> E_hubAddresses.txt
+
 echo "Each chromosome has a data hub, see all addresses here :"
 echo "Each chromosome has a data hub, see all addresses here :" >> E_hubAddresses.txt
 echo

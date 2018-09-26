@@ -158,7 +158,7 @@ onlyblat=0
 
 reuseblatpath='.'
 
-threadCount=2
+threadCount=4
 
 rainbowRunTOPDIR=$(pwd)
 echo "rainbowRunTOPDIR ${rainbowRunTOPDIR}"

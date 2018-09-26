@@ -175,9 +175,8 @@ my $only_divide_oligos = 0;
 # If first step of tiled analysis :
 my $tiled_analysis = 0;
 
-# If the bigwigs are to be color marked - parallel run last stage, to enable visualisation in rainbow overlay.
-my $color_mark_bigwigs = 0;
-my $how_many_colors = 18;
+# If the normalised bigwigs are to be generated as well - parallel run last stage.
+my $normalised_tracks = 0;
 
 # Code excecution start values :
 my $analysis_read;
@@ -261,7 +260,7 @@ print STDOUT "\n" ;
  "onlyoligofile"=>\ $only_divide_oligos,    # Just mark the oligos belonging to different oligo bunch - parallel run blat preparation
  "tiled"=>\ $tiled_analysis,                # Tiled capture analysis : do not filter stuff which contains only capture fragments (each tile is to be given as one region) - these are valid fragments 
  "oligosperbunch=i"=>\ $oligos_per_bunch,   # When the above $only_divide_bams is in action - how many oligos per visualisation unit (i.e. parallelisation unit i.e. output folder). Default 100.
- "colormarkbigwigs"=>\ $color_mark_bigwigs, # Mark bigwigs with color number - parallel run last step : to enable rainbow track plotting
+ "normalisedtracks"=>\ $normalised_tracks,  # Make also normalised bigwigs - parallel run last step
  "symlinks"=>\ $use_symlinks,	            # -symlinks	To make symlinks to bigwigs into the public area, instead of actually storing the bigwigs there.
  "cutter=s"=>\ $cutter_type,	            # If we have fourcutter (symmetric fourcutter like dpnII or nlaIII - this is default), if we have sixcutter (asymmetric sixcutter 1:5 like hindIII)
 
@@ -325,8 +324,7 @@ print STDOUT "stringent $stringent \n";
 print STDOUT "only_cis $only_cis \n";
 print STDOUT "use_umi $use_umi \n";
 print STDOUT "wobble_bin_width $wobble_bin_width \n";
-print STDOUT "color_mark_bigwigs $color_mark_bigwigs \n";
-print STDOUT "how_many_colors $how_many_colors \n";
+print STDOUT "normalised_tracks $normalised_tracks \n";
 
 }
 
@@ -1483,6 +1481,10 @@ output_hash_sam(\%cap_samhash, $outputfilename."_capture_".$oligo_data[$i][0],$o
 for (my $i=0; $i< (scalar (@oligo_data)); $i++)
 {
 frag_to_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0]);
+
+frag_to_wigout_normto100k(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0],$counters{$i." 17a Reporter fragments (final count) :"});
+frag_to_wigout_normto100k(\%fraghash, $outputfilename."_".$oligo_data[$i][0]."_CIS","full",$oligo_data[$i][0],$counters{$i." 17b Reporter fragments CIS (final count) :"});
+
 frag_to_windowed_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0], $window, $increment);
 frag_to_migout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0]);
 # frag_to_migout(\%fraghash, $outputfilename."_".$oligo_data[$i][0]."_CIS","cis",$oligo_data[$i][0]);
@@ -1572,30 +1574,21 @@ for (my$i=0; $i< (scalar (@oligo_data)); $i++)
 {
   my $filename_out = $outputfilename."_".$oligo_data[$i][0].".wig";
   my $filesize = 0;
-  my $color =($i+1) % $how_many_colors;
   if ( -f $filename_out ){ $filesize = -s $filename_out; }# checks the filesize
   print "$filename_out\t$filesize\n";
   
   #if ($filesize >1000)	# ensures that wigtobigwig is not run on files containing no data
   if ($filesize >0)	# ensures that wigtobigwig is not run on files containing no data
   {
-    if ($color_mark_bigwigs) {
-      wigtocolormarkedbigwig($color, $outputfilename."_".$oligo_data[$i][0], \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-      wigtocolormarkedbigwig($color, $outputfilename."_".$oligo_data[$i][0]."_win", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-    }
-    else{
-      wigtobigwig($outputfilename."_".$oligo_data[$i][0], \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_win", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+    wigtobigwig($outputfilename."_".$oligo_data[$i][0], \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+    wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_win", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+
+    if ($normalised_tracks) {
+      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_normTo100k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_CIS_normTo100k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
     }
     
     my $short_filename = $outputfilename."_".$oligo_data[$i][0];
-    
-    my $end_of_name = "";
-    if ($color_mark_bigwigs) {
-      $end_of_name="_".$color ;
-    }
-    
-    print "end_of_name $end_of_name \n";
     
     if ($short_filename =~ /(.*)\/(\V++)/) {$short_filename = $2};
     my $flashstatus="_NOTSET";
@@ -1610,7 +1603,7 @@ for (my$i=0; $i< (scalar (@oligo_data)); $i++)
 type bigWig
 longLabel CC_$sample\_$oligo_data[$i][0]$flashstatus
 shortLabel $sample\_$oligo_data[$i][0]$flashstatus
-bigDataUrl $public_folder/$short_filename$end_of_name.bw
+bigDataUrl $public_folder/$short_filename.bw
 visibility hide
 priority 200
 color 0,0,0
@@ -1621,7 +1614,29 @@ track win_$sample\_$oligo_data[$i][0]$flashstatus
 type bigWig
 longLabel CC_win_$sample\_$oligo_data[$i][0]$flashstatus
 shortLabel win_$sample\_$oligo_data[$i][0]$flashstatus
-bigDataUrl $public_folder/$short_filename\_win$end_of_name.bw
+bigDataUrl $public_folder/$short_filename\_win.bw
+visibility hide
+priority 200
+color 0,0,0
+autoScale on
+alwaysZero on
+
+track norm100k_$sample\_$oligo_data[$i][0]$flashstatus
+type bigWig
+longLabel CC_norm100k_$sample\_$oligo_data[$i][0]$flashstatus
+shortLabel norm100k_$sample\_$oligo_data[$i][0]$flashstatus
+bigDataUrl $public_folder/$short_filename\_norm100k.bw
+visibility hide
+priority 200
+color 0,0,0
+autoScale on
+alwaysZero on
+
+track norm100k_CIS_$sample\_$oligo_data[$i][0]$flashstatus
+type bigWig
+longLabel CC_CISnorm100k_$sample\_$oligo_data[$i][0]$flashstatus
+shortLabel CIS_norm100k_$sample\_$oligo_data[$i][0]$flashstatus
+bigDataUrl $public_folder/$short_filename\_CIS_norm100k.bw
 visibility hide
 priority 200
 color 0,0,0
@@ -2476,6 +2491,57 @@ sub frag_to_wigout
     }
 }
 
+# This subroutine outputs the data from a hash of dpnII fragments of format %hash{$fragtype}{$capture}{$chr}{$fragment_start}{"end"/"value"} to wig format
+sub frag_to_wigout_normto100k  
+{
+    my ($hashref, $filenameout, $fragtype, $capture, $fragCountToNorm) = @_;
+    
+    if (keys %{$$hashref{$fragtype}{$capture}})
+    {
+    
+    unless (open(WIGOUTPUT, ">$filenameout\_normTo100k.wig")){print STDERR "Cannot open file $filenameout.wig\n";}
+    foreach my $storedChr (sort keys %{$$hashref{$fragtype}{$capture}})  
+    {
+    
+    
+    #if ($use_parp==0){ 
+    print WIGOUTPUT "variableStep  chrom=chr$storedChr\n";
+    
+    foreach my $storedposition (sort keys %{$$hashref{$fragtype}{$capture}{$storedChr}})
+        {   
+        for (my $i=$storedposition; $i<=$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"end"}; $i++)
+            {
+            my $normalisedValue=0
+            if ($fragCountToNorm != 0) {
+              $normalisedValue=int(($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}/$fragCountToNorm)*100000)
+            }
+            
+            
+            print WIGOUTPUT "$i\t".$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}."\n";
+            }
+        }
+    #}
+    
+    #elsif($storedChr !="PARP")
+    #{ 
+    #print WIGOUTPUT "variableStep  chrom=chr$storedChr\n";
+   # 
+   # foreach my $storedposition (sort keys %{$$hashref{$fragtype}{$capture}{$storedChr}})
+   #     {
+   #     for (my $i=$storedposition; $i<=$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"end"}; $i++)
+   #         {
+   #         print WIGOUTPUT "$i\t".$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}."\n";
+   #         }
+   #     }
+   # }    
+        
+        
+    }
+    
+    close WIGOUTPUT ;
+    
+    }
+}
 
 #This subroutine generates a mig/gff file (hash reference, reference to the array of the information for the 9th column, output filename)
 sub migout
@@ -2541,27 +2607,6 @@ sub wigtobigwig
     my $short_filename = $filename.".bw";
     if ($short_filename =~ /(.*)\/(\V++)/) {$short_filename = $2};
     system ("mv $filename.bw $store_bigwigs_here_folder/$short_filename") == 0 or print STDOUT "couldn't move $genome file $filename\n";		
-    # system ("chmod 755 $public_folder/$short_filename") == 0 or print STDOUT "couldn't chmod $genome file $filename\n";
-    
-    # If these are not the same - we have symlink run
-    if ( $store_bigwigs_here_folder ne $public_folder )
-    {
-      print STDOUT "ln -fs \$\(pwd\)/$store_bigwigs_here_folder/$short_filename $public_folder/$short_filename\n";
-      system("ln -fs \$\(pwd\)/$store_bigwigs_here_folder/$short_filename $public_folder/$short_filename") == 0 or print STDOUT "couldn't symlink $genome file $filename\n";
-      system("ls -lh $public_folder/$short_filename") == 0 or print STDOUT "couldn't list generated symlink $genome file $public_folder/$short_filename\n";
-    }
-}
-
-sub wigtocolormarkedbigwig 
-{
-    my ($color, $filename, $report_filehandle, $store_bigwigs_here_folder, $public_folder, $public_url, $description) = @_;
-    print $report_filehandle "track type=bigWig name=\"$filename\" description=\"$description\" bigDataUrl=http://$public_url/$filename\_$color.bw\n";
-    print "track type=bigWig name=\"$filename\" description=\"$description\" bigDataUrl=http://$public_url/$filename\_$color.bw\n";
-    
-    system ("wigToBigWig -clip $filename.wig $ucscsizes $filename\_$color.bw") == 0 or print STDOUT "couldn't bigwig $genome file $filename\n";
-    my $short_filename = $filename."_".$color.".bw";
-    if ($short_filename =~ /(.*)\/(\V++)/) {$short_filename = $2};
-    system ("mv $filename\_$color.bw $store_bigwigs_here_folder/$short_filename") == 0 or print STDOUT "couldn't move $genome file $filename\n";		
     # system ("chmod 755 $public_folder/$short_filename") == 0 or print STDOUT "couldn't chmod $genome file $filename\n";
     
     # If these are not the same - we have symlink run

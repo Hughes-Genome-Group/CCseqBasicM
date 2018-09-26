@@ -1318,7 +1318,7 @@ FLASHED=-1
 DUPLFILTER=0
 
 if [ "${PARALLEL}" -eq 2 ]; then
-  otherParameters="${otherParameters} --colormarkbigwigs "
+  otherParameters="${otherParameters} --normalisedtracks "
 fi
 
 if [ "${tempFileFine}" -eq 1 ]; then
