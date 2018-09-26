@@ -1754,6 +1754,11 @@ echo "<hr />" >> description.html
 echo "Data located in : ${HOME}" >> description.html
 echo "<hr />" >> description.html
 
+ln -s ../../E_hubAddresses.txt .
+
+echo "All data hubs : <br>" >> description.html
+echo "<a target="_blank" href=\"E_hubAddresses.txt\" >E_hubAddresses.txt</a>" >> description.html
+
 mkdir description_page_files
 
 ln -s ../../COMBINED_allFinalCounts.txt description_page_files/.
