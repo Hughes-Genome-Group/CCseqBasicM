@@ -42,7 +42,7 @@ name="${oligolist[i]}_${abbrev}"
 
 echo track ${name} >> ${parentname}_tracks.txt
 echo parent ${parentname} >> ${parentname}_tracks.txt
-echo bigDataUrl ${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}.bw >> ${parentname}_tracks.txt
+echo bigDataUrl ${folder}/${subfolder}/${bwprefix}_${ccversion}_${oligolist[i]}${bwsuffix}.bw >> ${parentname}_tracks.txt
 echo shortLabel ${name} >> ${parentname}_tracks.txt
 echo longLabel ${name} >> ${parentname}_tracks.txt
 echo type bigWig >> ${parentname}_tracks.txt

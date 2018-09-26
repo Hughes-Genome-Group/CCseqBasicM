@@ -19,8 +19,10 @@ thisScriptName=$(echo $0 | sed 's/\s.*//')
 folder=$1
 subfolder=$2
 bwprefix=$3
-abbrev=$4
-visibility=$5
+bwsuffix=$4
+abbrev=$5
+visibility=$6
+ccversion=$7
 
 echo -n "- ${subfolder} "
 echo -n "- ${subfolder} " >> "/dev/stderr"
@@ -46,7 +48,7 @@ do
 # ls ${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}.bw >> "/dev/null"
 
 # echo track_symlinks/chr${folder}/${folder}/${subfolder}_CM5_${oligolist[i]}_1.bw
-if [ -s "${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}.bw" ]; then
+if [ -s "${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}${bwsuffix}.bw" ]; then
   doOneChild
 else
   echo -n "( skipping ${oligolist[i]} as no data found ) "
