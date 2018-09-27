@@ -1482,7 +1482,9 @@ for (my $i=0; $i< (scalar (@oligo_data)); $i++)
 {
 frag_to_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0]);
 
+print $counters{$i." 17a Reporter fragments (final count) :"};
 frag_to_wigout_normto100k(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0],$counters{$i." 17a Reporter fragments (final count) :"});
+print $counters{$i." 17b Reporter fragments CIS (final count) :"};
 frag_to_wigout_normto100k(\%fraghash, $outputfilename."_".$oligo_data[$i][0]."_CIS","full",$oligo_data[$i][0],$counters{$i." 17b Reporter fragments CIS (final count) :"});
 
 frag_to_windowed_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0], $window, $increment);
@@ -2457,8 +2459,6 @@ sub frag_to_wigout
     foreach my $storedChr (sort keys %{$$hashref{$fragtype}{$capture}})  
     {
     
-    
-    #if ($use_parp==0){ 
     print WIGOUTPUT "variableStep  chrom=chr$storedChr\n";
     
     foreach my $storedposition (sort keys %{$$hashref{$fragtype}{$capture}{$storedChr}})
@@ -2468,22 +2468,6 @@ sub frag_to_wigout
             print WIGOUTPUT "$i\t".$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}."\n";
             }
         }
-    #}
-    
-    #elsif($storedChr !="PARP")
-    #{ 
-    #print WIGOUTPUT "variableStep  chrom=chr$storedChr\n";
-   # 
-   # foreach my $storedposition (sort keys %{$$hashref{$fragtype}{$capture}{$storedChr}})
-   #     {
-   #     for (my $i=$storedposition; $i<=$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"end"}; $i++)
-   #         {
-   #         print WIGOUTPUT "$i\t".$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}."\n";
-   #         }
-   #     }
-   # }    
-        
-        
     }
     
     close WIGOUTPUT ;
@@ -2496,46 +2480,29 @@ sub frag_to_wigout_normto100k
 {
     my ($hashref, $filenameout, $fragtype, $capture, $fragCountToNorm) = @_;
     
+    print $fragCountToNorm;
+    
     if (keys %{$$hashref{$fragtype}{$capture}})
     {
     
-    unless (open(WIGOUTPUT, ">$filenameout\_normTo100k.wig")){print STDERR "Cannot open file $filenameout.wig\n";}
+    unless (open(WIGOUTPUT, ">$filenameout\_normTo100k.wig")){print STDERR "Cannot open file $filenameout\_normTo100k.wig\n";}
     foreach my $storedChr (sort keys %{$$hashref{$fragtype}{$capture}})  
     {
     
-    
-    #if ($use_parp==0){ 
     print WIGOUTPUT "variableStep  chrom=chr$storedChr\n";
     
     foreach my $storedposition (sort keys %{$$hashref{$fragtype}{$capture}{$storedChr}})
         {   
         for (my $i=$storedposition; $i<=$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"end"}; $i++)
             {
-            my $normalisedValue=0
-            if ($fragCountToNorm != 0) {
-              $normalisedValue=int(($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}/$fragCountToNorm)*100000)
-            }
-            
-            
-            print WIGOUTPUT "$i\t".$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}."\n";
+            my $normalisedValue=0;
+            if ($fragCountToNorm != 0)
+              {
+              $normalisedValue=int(($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}/$fragCountToNorm)*100000);
+              }
+            print WIGOUTPUT "$i\t".$normalisedValue."\n";
             }
         }
-    #}
-    
-    #elsif($storedChr !="PARP")
-    #{ 
-    #print WIGOUTPUT "variableStep  chrom=chr$storedChr\n";
-   # 
-   # foreach my $storedposition (sort keys %{$$hashref{$fragtype}{$capture}{$storedChr}})
-   #     {
-   #     for (my $i=$storedposition; $i<=$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"end"}; $i++)
-   #         {
-   #         print WIGOUTPUT "$i\t".$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}."\n";
-   #         }
-   #     }
-   # }    
-        
-        
     }
     
     close WIGOUTPUT ;
@@ -2543,7 +2510,7 @@ sub frag_to_wigout_normto100k
     }
 }
 
-#This subroutine generates a mig/gff file (hash reference, reference to the array of the information for the 9th column, output filename)
+# This subroutine generates a mig/gff file (hash reference, reference to the array of the information for the 9th column, output filename)
 sub migout
 {
     my ($hashref, $refarray, $filenameout) = @_;
@@ -2551,7 +2518,7 @@ sub migout
     #if (keys %{$$hashref{$fragtype}{$capture}})
     #{
     
-    unless (open(MIGOUTPUT, ">$filenameout.gff")){print STDERR "Cannot open file $filenameout.mig\n";}
+    unless (open(MIGOUTPUT, ">$filenameout.gff")){print STDERR "Cannot open file $filenameout.gff\n";}
     foreach my $storedChr (sort keys %$hashref)  #{ $hash{$b} <=> $hash{$a} }  { {$hash{$storedChr}{$b}} <=> {$hash{$storedChr}{$a}} }
     {
     foreach my $storedposition (sort keys %{$$hashref{$storedChr}})
@@ -2624,7 +2591,7 @@ sub wigtobigwig
 sub output_hash_sam
 {
   my ($hashref, $filenameout, $capture, $samheadder_arrayref) = @_;
-  unless (open(HASHOUTPUT, ">$filenameout.sam")){print STDERR "Cannot open file $filenameout\n";}
+  unless (open(HASHOUTPUT, ">$filenameout.sam")){print STDERR "Cannot open file $filenameout.sam\n";}
   for (my $i=0; $i < scalar @$samheadder_arrayref; $i++){print HASHOUTPUT $$samheadder_arrayref[$i]."\n";}  #Prints out the headder from the original sam file
     foreach my $value (@{$$hashref{$capture}})
     {

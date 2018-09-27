@@ -709,6 +709,9 @@ exitCode=$(( ${exitCode} + $? ))
 bedToBigBed      2>&1 | head -n 1
 which bedToBigBed      >> /dev/null
 exitCode=$(( ${exitCode} + $? ))
+bedGraphToBigWig      2>&1 | head -n 1
+which bedGraphToBigWig      >> /dev/null
+exitCode=$(( ${exitCode} + $? ))
 echo
 
 sleep 3

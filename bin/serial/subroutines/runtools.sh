@@ -802,6 +802,9 @@ echo "countRds_f" > ${JustNowLogFile}
 countReadsAfterBowtie
 # above also sets TEMPintSizeForSort
 
+# Make bigwig track of the raw file (100b bins - start of each fragment) ..
+makeRawsamBigwig
+
 echo "LOOP1_f" > ${JustNowLogFile}
 
 if [ "${onlyCis}" -eq 1 ]; then
@@ -863,6 +866,9 @@ echo "countRds_f" > ${JustNowLogFile}
 
 countReadsAfterBowtie
 # above also sets TEMPintSizeForSort
+
+# Make bigwig track of the raw file (100b bins - start of each fragment) ..
+makeRawsamBigwig
 
 echo "LOOP1_f" > ${JustNowLogFile}
 

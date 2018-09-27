@@ -32,8 +32,6 @@ doOneParent
 for fastqBwfile in ${folder}/fastq_*${bwsuffix}.bw
 do
   doOneRawsamChild
-fi
-
 done
 
 

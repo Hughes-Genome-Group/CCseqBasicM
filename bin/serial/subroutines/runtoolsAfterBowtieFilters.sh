@@ -24,6 +24,39 @@
 
 ################################################################
 
+makeRawsamBigwig(){
+# ---------------------------------
+# Make bigwig track of the raw file (100b bins - start of each fragment) ..
+
+thisIsWhereIam=$( pwd )
+printThis="Starting to sort ${flashstatus}_REdig_unfiltered.sam BIG time - will save temporary files in ${thisIsWhereIam}"
+printToLogFile
+
+cut -f 2,3 ${flashstatus}_REdig_unfiltered.sam | grep '^chr' > intoSorting.txt
+
+sortParams='-k1,1 -k2,2n'
+sortIn1E6bunches
+# needs these to be set :
+# thisIsWhereIam=$( pwd )
+# sortParams="-k1,1 -k2,2n"  or sortParams="-n" etc
+# input in intoSorting.txt
+# outputs TEMPsortedMerged.txt
+
+# If all went well, we delete original file. If not, we complain here (but will not die).
+sortResultInfo
+rm -f intoSorting.txt
+
+cat TEMPsortedMerged.txt \
+| awk '{print $1"\t"(int($2/100)*100)}' | uniq -c | sed 's/^\s\s*//' | sed 's/\s\s*/\t/g' \
+| awk '{if($3==0){print $2"\t0\t1\t"$1}else{print $2"\t"$3-1"\t"$3"\t"$1}}' \
+> ${flashstatus}_REdig_unfiltered.bdg
+
+bedGraphToBigWig ${flashstatus}_REdig_unfiltered.bdg ${ucscBuild} ${flashstatus}_REdig_unfiltered.bw
+rm -f ${flashstatus}_REdig_unfiltered.bdg
+
+}
+
+
 sortIn1E6bunches(){
   # needs these to be set :
   # thisIsWhereIam=$( pwd )
@@ -58,13 +91,13 @@ sortIn1E6bunches(){
    for file in forSortingfile*
    do
        newwwName=$( echo ${file} | sed 's/forSortingfile/preSortedfile/' )
-       # echo "sort -S ${memoryMegas}M ${sortParams} -T ${thisIsWhereIam} ${file} > ${newwwName}" >&2
-       sort -S ${memoryMegas}M ${sortParams} -T ${thisIsWhereIam} ${file} > ${newwwName}
+       # echo "sort -S ${BOWTIEMEMORY}M ${sortParams} -T ${thisIsWhereIam} ${file} > ${newwwName}" >&2
+       sort -S ${BOWTIEMEMORY}M ${sortParams} -T ${thisIsWhereIam} ${file} > ${newwwName}
        rm -f ${file}
        
    done
    
-   sort -m -S ${memoryMegas}M ${sortParams} -T ${thisIsWhereIam} preSortedfile* > TEMPsortedMerged.txt
+   sort -m -S ${BOWTIEMEMORY}M ${sortParams} -T ${thisIsWhereIam} preSortedfile* > TEMPsortedMerged.txt
    rm -f preSortedfile*
    
 }
@@ -178,35 +211,6 @@ echo "tail -n 3 ${TEMPtestthisname} (without seq and qual columns)"
 echo 
 tail -n 3 ${TEMPtestthisname} | cut -f 10-11 --complement
 echo
-
-# ---------------------------------
-# Make bigwig track of the raw file (100b bins - start of each fragment) ..
-
-thisIsWhereIam=$( pwd )
-printThis="Starting to sort ${flashstatus}_REdig_unfiltered.sam BIG time - will save temporary files in ${thisIsWhereIam}"
-printToLogFile
-
-cut -f 2,3 ${flashstatus}_REdig_unfiltered.sam | grep '^chr' > intoSorting.txt
-
-sortParams='-k1,1 -k2,2n'
-sortIn1E6bunches
-# needs these to be set :
-# thisIsWhereIam=$( pwd )
-# sortParams="-k1,1 -k2,2n"  or sortParams="-n" etc
-# input in intoSorting.txt
-# outputs TEMPsortedMerged.txt
-
-# If all went well, we delete original file. If not, we complain here (but will not die).
-sortResultInfo
-rm -f intoSorting.txt
-
-cat TEMPsortedMerged.txt \
-| awk '{print $1"\t"(int($2/100)*100)}' | uniq -c | sed 's/^\s\s*//' | sed 's/\s\s*/\t/g' \
-| awk '{if($3==0){print $2"\t0\t1\t"$1}else{print $2"\t"$3-1"\t"$3"\t"$1}}' \
-> ${flashstatus}_REdig_unfiltered.bdg
-
-bedGraphToBigWig ${flashstatus}_REdig_unfiltered.bdg ${ucscBuild} ${flashstatus}_REdig_unfiltered.bw
-rm -f ${flashstatus}_REdig_unfiltered.bdg
 
 # ---------------------------------
 # Set pre-requisites for the loop ..
