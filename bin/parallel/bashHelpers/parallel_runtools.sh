@@ -1790,6 +1790,38 @@ echo '</pre>' >> description.html
 
 # ----------------------------------
 
+printThis="Raw mapped reads bigwigs and hub .."
+printToLogFile
+
+mkdir rawMappedReads
+weWereHereDir=$(pwd)
+cd rawMappedReads
+
+for folder in ./../../B_mapAndDivideFastqs/fastq*
+do
+    fastqName=$(basename ${folder})
+    ln -s ${folder}/F1_beforeCCanalyser_${sample}_${CCversion}/FLASHED_REdig_unfiltered.bw ${fastqName}_FLASHED_REdig_unfiltered.bw
+    ln -s ${folder}/F1_beforeCCanalyser_${sample}_${CCversion}/NONFLASHED_REdig_unfiltered.bw ${fastqName}_NONFLASHED_REdig_unfiltered.bw
+done
+
+cd ${weWereHereDir}
+
+thisHubSubfolder="rawMappedReads"
+echo -en "${thisHubSubfolder}\t"
+echo -en "${thisHubSubfolder}\t" >> "/dev/stderr"
+bigwigSuffix="_FLASHED_REdig_unfiltered"
+trackAbbrev="rawSam_FLASHED"
+${CaptureParallelPath}/makeRawsamTracks.sh ${thisHubSubfolder} ${bigwigSuffix} ${trackAbbrev} "full"
+bigwigSuffix="_NONFLASHED_REdig_unfiltered"
+trackAbbrev="rawSam_NONFLASHED"
+${CaptureParallelPath}/makeRawsamTracks.sh ${thisHubSubfolder} ${bigwigSuffix} ${trackAbbrev} "full"
+
+echo -n "- hubAndGenome "
+echo -n "- hubAndGenome " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowHubs.sh ${samplename} ${thisHubSubfolder} ${ucscBuildName}
+   
+# ----------------------------------
+
 printThis="Making folders for each chromosome .."
 printToLogFile
 

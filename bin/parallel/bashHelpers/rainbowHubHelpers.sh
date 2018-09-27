@@ -33,6 +33,24 @@ echo   >> ${parentname}_tracks.txt
 
 }
 
+doOneRawsamChild(){
+
+# FLASHED_REdig_CM5_1190007I07Rik_L_R.bw
+# track_symlinks/${folder}/${subfolder}_REdig_CM5_${oligolist[i]}.bw
+
+name=$(basename ${fastqBwfile})
+
+echo track ${name} >> ${parentname}_tracks.txt
+echo parent ${parentname} >> ${parentname}_tracks.txt
+echo bigDataUrl ${fastqBwfile} >> ${parentname}_tracks.txt
+echo shortLabel ${name} >> ${parentname}_tracks.txt
+echo longLabel ${name} >> ${parentname}_tracks.txt
+echo type bigWig >> ${parentname}_tracks.txt
+echo 'color 0,0,0' >> ${parentname}_tracks.txt
+echo   >> ${parentname}_tracks.txt
+
+}
+
 doOneChild(){
 
 # FLASHED_REdig_CM5_1190007I07Rik_L_R.bw
