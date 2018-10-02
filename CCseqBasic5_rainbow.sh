@@ -380,8 +380,14 @@ if [ "${onlyHub}" -eq 1 ] ; then
   flashstatus="NONFLASHED"
   makeOligorunSummaries
 
+  makeCombinedOligorunSummaries
+  
   # Summary of summaries ..
   head -n 20 D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
+  echo >> D_analysisSummaryCounts.txt
+  echo "==> D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt <==" >> D_analysisSummaryCounts.txt
+  cat D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> D_analysisSummaryCounts.txt
+
 
   printThis="Generate data hub .. "
   printNewChapterToLogFile
@@ -873,10 +879,13 @@ makeOligorunSummaries
 flashstatus="NONFLASHED"
 makeOligorunSummaries
 
+makeCombinedOligorunSummaries
+
 # Summary of summaries ..
 head -n 20 D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
 echo "" >> D_analysisSummaryCounts.txt
-head -n 20 D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> D_analysisSummaryCounts.txt
+echo "==> D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt <==" >> D_analysisSummaryCounts.txt
+cat D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> D_analysisSummaryCounts.txt
 
 # Check for errors
 

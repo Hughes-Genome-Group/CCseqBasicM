@@ -194,7 +194,7 @@ cd ${weWereHereDir}
 
 # ------------------------------------------
 
-makeOligorunSummaries(){
+makeCombinedOligorunSummaries(){
 # ------------------------------------------
 
 weWereHereDir=$(pwd)
@@ -220,7 +220,7 @@ awk 'BEGIN{cap=0;r=0;c=0;t=0;cap2=0;r2=0;c2=0;t2=0;N=0}\
 { N+=1; cap+=$2; r+=$3; c+=$4; t+=$5; cap2+=$2*$2; r2+=$3*$3; c2+=$4*$4; t2+=$5*$5;}\
 END{\
 capM=cap/N;rM=r/N;cM=c/N;tM=t/N;\
-print"Mean   CaptureFrags count :\t"capM"\t with std of :\t"sqrt((cap2-capM*capM*N)/(N-1))"\tand min/upperQuart/median/lowerQuart/max of:";\
+print"Mean   CaptureFrags count :\t"capM"\t with std of :\t"sqrt((cap2-capM*capM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
 print"Mean Total repFrags count :\t"rM"\t with std of :\t"sqrt((r2-rM*rM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
 print"Mean   CIS repFrags count :\t"cM"\t with std of :\t"sqrt((c2-cM*cM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
 print"Mean TRANS repFrags count :\t"tM"\t with std of :\t"sqrt((t2-tM*tM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
@@ -259,6 +259,48 @@ tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | tail -n ${ol
 
 paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt > COMBINED_meanStdMedian_overOligos.txt
 rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt
+
+
+# ###############################
+# Usage reports
+# ###############################
+
+if [ "${useWholenodeQueue}" -eq 1 ]; then 
+
+mkdir usageReports
+mkdir usageReports/makingOf
+cp qsubLogFiles/wholerun* usageReports/makingOf/.
+cp qsubLogFiles/allRunsRUNTIME.log usageReports/.
+
+cat usageReports/makingOf/wholerunTasks.txt | sed 's/\s\s*/\t/g' | \
+sed 's/_fl//g' | sed 's/_nonfl//g' \
+| sed 's/publicFiles/public/g' | sed 's/ReDigest/prepF1/g' | sed 's/SetParams/prepF1/g' \
+| sed 's/bamToSam/prepF1/g' | sed 's/F6_cc/F6/g' | sed 's/F6_samcomb/F6/g' \
+> usageReports/makingOf/wholerunTasksParsed.txt
+
+cat usageReports/makingOf/wholerunUsage.txt | sed 's/M\s/\t/g' | sed 's/M$//'> usageReports/wholerunUsageForExcel.txt
+cat usageReports/makingOf/wholerunTasksParsed.txt \
+|  awk '{a["prepF1"]=0;a["F2"]=0;a["F3"]=0;a["F5"]=0;a["F6"]=0;a["public"]=0;for(i=2;i<=NF;i++){a[$i]=a[$i]+1}; \
+print $1"\tprepF1\t"a["prepF1"]"\tF2\t"a["F2"]"\tF3\t"a["F3"]"\tF5\t"a["F5"]"\tF6\t"a["F6"]"\tpublic\t"a["public"]}' \
+> usageReports/wholerunTasksForExcel.txt
+
+fi
+ 
+cdCommand='cd ${weWereHereDir}'
+cdToThis="${weWereHereDir}"
+checkCdSafety  
+cd ${weWereHereDir}
+ 
+# ------------------------------------------
+}
+
+# ------------------------------------------
+
+makeOligorunSummaries(){
+# ------------------------------------------
+
+weWereHereDir=$(pwd)
+cd D_analyseOligoWise
 
 # ###############################
 # Duplicate filtering oneliners
@@ -1746,10 +1788,10 @@ echo " <body>" >> description.html
 TimeStamp=($( date | sed 's/[: ]/_/g' ))
 DateTime="$(date)"
 
-echo "<p>Data produced ${DateTime} with CapC pipeline (coded by James Davies, pipelined and parallelised by Jelena Telenius, located in ${CapturePipePath} )</p>" >> description.html
+echo "<p>Data produced ${DateTime} with CapC pipeline (coded by James Davies, pipelined and parallelised by Jelena Telenius, located in ${MainScriptPath} )</p>" >> description.html
 
 echo "<hr />" >> description.html
-echo "Restriction enzyme and genome build : ( ${REenzyme} ) ( ${GENOME} )" >> description.html
+echo "Restriction enzyme and genome build : ( ${REenzyme} ) ( ${inputgenomename} )" >> description.html
 echo "<hr />" >> description.html
 echo "Data located in : ${HOME}" >> description.html
 echo "<hr />" >> description.html
@@ -1758,6 +1800,7 @@ ln -s ../../E_hubAddresses.txt .
 
 echo "All data hubs : <br>" >> description.html
 echo "<a target="_blank" href=\"E_hubAddresses.txt\" >E_hubAddresses.txt</a>" >> description.html
+echo "<hr />" >> description.html
 
 mkdir description_page_files
 
@@ -1777,7 +1820,7 @@ echo "Run error log (main log) : <br>" >> description.html
 echo "<a target="_blank" href=\"../qsub.err\" >qsub.err</a>" >> description.html
 echo "<hr />" >> description.html
 
-echo '<pre>' > description.html
+echo '<pre>' >> description.html
 echo 'The statistics below are for the WHOLE experiment - over all chromosomes' >> description.html
 echo '' >> description.html
 cat ../../B_fastqSummaryCounts.txt >> description.html
@@ -1960,19 +2003,20 @@ echo -en "${folder}\t" >> "/dev/stderr"
 
 thisHubSubfolder="COMBINED"
 bigwigPrefix="COMBINED"
-bigwigSuffix=""
+# Setting suffix (or any of these flags) to 'none' turns it off, i.e. sets it to ""
+bigwigSuffix="none"
 trackAbbrev="COMB"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "full" ${CCversion}
-bigwigSuffix="_normTo100k"
+bigwigSuffix="_normTo10k"
 trackAbbrev="COMBnorm"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "full" ${CCversion}
-bigwigSuffix="_CIS_normTo100k"
+bigwigSuffix="_CIS_normTo10k"
 trackAbbrev="COMBnormCIS"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "full" ${CCversion}
 
 flashstatus="FLASHED"
 bigwigPrefix="FLASHED_REdig"
-bigwigSuffix=""
+bigwigSuffix="none"
 trackAbbrev="filtF"
 thisHubSubfolder="FILTERED_${flashstatus}"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion}
@@ -1985,7 +2029,7 @@ ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigw
 
 flashstatus="NONFLASHED"
 bigwigPrefix="NONFLASHED_REdig"
-bigwigSuffix=""
+bigwigSuffix="none"
 trackAbbrev="filtNF"
 thisHubSubfolder="FILTERED_${flashstatus}"
 ${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion}
@@ -2056,8 +2100,8 @@ echo '_______________________________' >> E_hubAddresses.txt
 echo '_______________________________'
 echo >> E_hubAddresses.txt
 
-echo "Each chromosome has a data hub, see all addresses here :"
-echo "Each chromosome has a data hub, see all addresses here :" >> E_hubAddresses.txt
+echo "Raw mapped Sam fragments -hub and chromosome-wise data hubs :"
+echo "Raw mapped Sam fragments -hub and chromosome-wise data hubs :" >> E_hubAddresses.txt
 echo
 echo >> E_hubAddresses.txt
 

@@ -283,7 +283,7 @@ echo
 
 echo 
 echo "Blacklist filtering available for these genomes : "
-for g in $( seq 0 $((${#genomesWhichHaveBlacklist[@]}-1)) ); do echo -n $( echo ${genomesWhichHaveBlacklist[$g]} | grep -v '^MASKED_GENOME_SHOULD_NOT' ); done
+for g in $( seq 0 $((${#genomesWhichHaveBlacklist[@]}-1)) ); do echo -n $( echo ${genomesWhichHaveBlacklist[$g]} | grep -v '^MASKED_GENOME_SHOULD_NOT' )" "; done
 echo 
 echo
 

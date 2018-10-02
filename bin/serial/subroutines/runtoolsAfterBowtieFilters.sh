@@ -32,7 +32,7 @@ thisIsWhereIam=$( pwd )
 printThis="Starting to sort ${flashstatus}_REdig_unfiltered.sam BIG time - will save temporary files in ${thisIsWhereIam}"
 printToLogFile
 
-cut -f 2,3 ${flashstatus}_REdig_unfiltered.sam | grep '^chr' > intoSorting.txt
+cat ${flashstatus}_REdig_unfiltered.sam | grep -v '^@' | cut -f 2,3 ${flashstatus}_REdig_unfiltered.sam | grep '^chr' > intoSorting.txt
 
 sortParams='-k1,1 -k2,2n'
 sortIn1E6bunches
@@ -46,10 +46,22 @@ sortIn1E6bunches
 sortResultInfo
 rm -f intoSorting.txt
 
+# echo
+# echo 1
+# head TEMPsortedMerged.txt \
+# | awk '{print $1"\t"(int($2/100)*100)}' | uniq -c | sed 's/^\s\s*//' | sed 's/\s\s*/\t/g'
+# echo
+# echo 2
+# head TEMPsortedMerged.txt \
+# | awk '{print $1"\t"(int($2/100)*100)}' | uniq -c | sed 's/^\s\s*//' | sed 's/\s\s*/\t/g' \
+# | awk '{if($3==0){print $2"\t0\t1\t"$1}else{print $2"\t"$3-1"\t"$3"\t"$1}}'
+# echo
+
 cat TEMPsortedMerged.txt \
 | awk '{print $1"\t"(int($2/100)*100)}' | uniq -c | sed 's/^\s\s*//' | sed 's/\s\s*/\t/g' \
 | awk '{if($3==0){print $2"\t0\t1\t"$1}else{print $2"\t"$3-1"\t"$3"\t"$1}}' \
 > ${flashstatus}_REdig_unfiltered.bdg
+rm -f TEMPsortedMerged.txt
 
 bedGraphToBigWig ${flashstatus}_REdig_unfiltered.bdg ${ucscBuild} ${flashstatus}_REdig_unfiltered.bw
 rm -f ${flashstatus}_REdig_unfiltered.bdg
@@ -131,6 +143,12 @@ sortResultInfo(){
 
     countBefore=$(($( cat intoSorting.txt | grep -c "" )))
     countAfter=$(($( cat TEMPsortedMerged.txt | grep -c "" )))
+    
+    # For testing purposes :
+    ls -lht intoSorting.txt
+    echo "countBefore ${countBefore}"
+    ls -lht TEMPsortedMerged.txt
+    echo "countAfter ${countAfter}"
     
     if [ "${countBefore}" -ne "${countAfter}" ]
     then

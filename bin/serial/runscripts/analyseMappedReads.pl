@@ -1481,11 +1481,14 @@ output_hash_sam(\%cap_samhash, $outputfilename."_capture_".$oligo_data[$i][0],$o
 for (my $i=0; $i< (scalar (@oligo_data)); $i++)
 {
 frag_to_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0]);
+cisfrag_to_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0],$oligo_data[$i][1]);
 
-print $counters{$i." 17a Reporter fragments (final count) :"};
-frag_to_wigout_normto100k(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0],$counters{$i." 17a Reporter fragments (final count) :"});
-print $counters{$i." 17b Reporter fragments CIS (final count) :"};
-frag_to_wigout_normto100k(\%fraghash, $outputfilename."_".$oligo_data[$i][0]."_CIS","full",$oligo_data[$i][0],$counters{$i." 17b Reporter fragments CIS (final count) :"});
+print $counters{$oligo_data[$i][0]." 17a Reporter fragments (final count) :"};
+print $counters{$oligo_data[$i][0]." 17b Reporter fragments CIS (final count) :"};
+frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0],$counters{$oligo_data[$i][0]." 17a Reporter fragments (final count) :"});
+cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0],$counters{$oligo_data[$i][0]." 17a Reporter fragments (final count) :"},$oligo_data[$i][1]);
+frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$oligo_data[$i][0]."_CIS","full",$oligo_data[$i][0],$counters{$oligo_data[$i][0]." 17b Reporter fragments CIS (final count) :"});
+cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$oligo_data[$i][0]."_CIS","full",$oligo_data[$i][0],$counters{$oligo_data[$i][0]." 17b Reporter fragments CIS (final count) :"},$oligo_data[$i][1]);
 
 frag_to_windowed_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0], $window, $increment);
 frag_to_migout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0]);
@@ -1500,13 +1503,17 @@ my @tracks_to_combine = qw(Hba-1 Hba-2);
 my $combined_name = "HbaCombined";
 my @combined_name = ("HbaCombined", 11, 320000, 330000, 11, 320000, 320000);
 push @oligo_data, [@combined_name];
+my $norm_value=0;
+my $cis_norm_value=0;
 
 foreach my $storedChr(sort keys %{$fraghash{"full"}{$tracks_to_combine[0]}})
     {
     foreach my $storedposition(sort keys %{$fraghash{"full"}{$tracks_to_combine[0]}{$storedChr}})
         {         
               $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"value"}=$fraghash{"full"}{$tracks_to_combine[0]}{$storedChr}{$storedposition}{"value"};
-              $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"end"}=$fraghash{"full"}{$tracks_to_combine[0]}{$storedChr}{$storedposition}{"end"}
+              $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"end"}=$fraghash{"full"}{$tracks_to_combine[0]}{$storedChr}{$storedposition}{"end"};
+              $norm_value=$counters{$tracks_to_combine[0]." 17a Reporter fragments (final count) :"};
+              $cis_norm_value=$counters{$tracks_to_combine[0]." 17a Reporter fragments (final count) :"};
         }
     }
 
@@ -1515,10 +1522,17 @@ foreach my $storedChr(sort keys %{$fraghash{"full"}{$tracks_to_combine[1]}})
     foreach my $storedposition(sort keys %{$fraghash{"full"}{$tracks_to_combine[1]}{$storedChr}})
         {         
               $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"value"}+=$fraghash{"full"}{$tracks_to_combine[1]}{$storedChr}{$storedposition}{"value"};
-              $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"end"}=$fraghash{"full"}{$tracks_to_combine[1]}{$storedChr}{$storedposition}{"end"}
+              $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"end"}=$fraghash{"full"}{$tracks_to_combine[1]}{$storedChr}{$storedposition}{"end"};
+              $norm_value=$norm_value+$counters{$tracks_to_combine[1]." 17a Reporter fragments (final count) :"};
+              $cis_norm_value=$norm_value+$counters{$tracks_to_combine[1]." 17a Reporter fragments (final count) :"};
         }
     }
 frag_to_wigout(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name);
+cisfrag_to_wigout(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name,"11");
+frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name,$norm_value);
+cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name,$norm_value,"11");
+frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$combined_name."_CIS","full",$combined_name,$cis_norm_value);
+cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$combined_name."_CIS","full",$combined_name,$cis_norm_value,"11");
 frag_to_windowed_wigout(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name, $window, $increment);
 frag_to_migout(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name);
 }
@@ -1530,12 +1544,17 @@ my @tracks_to_combine = qw(Hbb-b1 Hbb-b2);
 my $combined_name = "HbbCombined";
 my @combined_name = ("HbbCombined", 7, 110961967, 110962817, 7, 110961967, 110962817);
 push @oligo_data, [@combined_name];
+my $norm_value=0;
+my $cis_norm_value=0;
+
 foreach my $storedChr(sort keys %{$fraghash{"full"}{$tracks_to_combine[0]}})
     {
     foreach my $storedposition(sort keys %{$fraghash{"full"}{$tracks_to_combine[0]}{$storedChr}})
         {         
               $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"value"}=$fraghash{"full"}{$tracks_to_combine[0]}{$storedChr}{$storedposition}{"value"};
-              $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"end"}=$fraghash{"full"}{$tracks_to_combine[0]}{$storedChr}{$storedposition}{"end"}
+              $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"end"}=$fraghash{"full"}{$tracks_to_combine[0]}{$storedChr}{$storedposition}{"end"};
+              $norm_value=$counters{$tracks_to_combine[0]." 17a Reporter fragments (final count) :"};
+              $cis_norm_value=$counters{$tracks_to_combine[0]." 17a Reporter fragments (final count) :"};
         }
     }
 
@@ -1544,10 +1563,17 @@ foreach my $storedChr(sort keys %{$fraghash{"full"}{$tracks_to_combine[1]}})
     foreach my $storedposition(sort keys %{$fraghash{"full"}{$tracks_to_combine[1]}{$storedChr}})
         {         
               $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"value"}+=$fraghash{"full"}{$tracks_to_combine[1]}{$storedChr}{$storedposition}{"value"};
-              $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"end"}=$fraghash{"full"}{$tracks_to_combine[1]}{$storedChr}{$storedposition}{"end"}
+              $fraghash{"full"}{$combined_name}{$storedChr}{$storedposition}{"end"}=$fraghash{"full"}{$tracks_to_combine[1]}{$storedChr}{$storedposition}{"end"};
+              $norm_value=$norm_value+$counters{$tracks_to_combine[1]." 17a Reporter fragments (final count) :"};
+              $cis_norm_value=$norm_value+$counters{$tracks_to_combine[1]." 17a Reporter fragments (final count) :"};
         }
     }
 frag_to_wigout(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name);
+cisfrag_to_wigout(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name,"7");
+frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name,$norm_value);
+cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name,$norm_value,"7");
+frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$combined_name."_CIS","full",$combined_name,$cis_norm_value);
+cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$combined_name."_CIS","full",$combined_name,$cis_norm_value,"7");
 frag_to_windowed_wigout(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name, $window, $increment);
 frag_to_migout(\%fraghash, $outputfilename."_".$combined_name,"full",$combined_name);
 }
@@ -1583,11 +1609,14 @@ for (my$i=0; $i< (scalar (@oligo_data)); $i++)
   if ($filesize >0)	# ensures that wigtobigwig is not run on files containing no data
   {
     wigtobigwig($outputfilename."_".$oligo_data[$i][0], \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+    wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_CISonly", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
     wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_win", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
 
     if ($normalised_tracks) {
-      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_normTo100k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_CIS_normTo100k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_normTo10k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_normTo10k_CISonly", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_CIS_normTo10k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_CIS_normTo10k_CISonly", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
     }
     
     my $short_filename = $outputfilename."_".$oligo_data[$i][0];
@@ -1612,6 +1641,17 @@ color 0,0,0
 autoScale on
 alwaysZero on
 
+track cis_$sample\_$oligo_data[$i][0]$flashstatus
+type bigWig
+longLabel CC_cis_$sample\_$oligo_data[$i][0]$flashstatus
+shortLabel cis_$sample\_$oligo_data[$i][0]$flashstatus
+bigDataUrl $public_folder/$short_filename\_CISonly.bw
+visibility hide
+priority 200
+color 0,0,0
+autoScale on
+alwaysZero on
+
 track win_$sample\_$oligo_data[$i][0]$flashstatus
 type bigWig
 longLabel CC_win_$sample\_$oligo_data[$i][0]$flashstatus
@@ -1623,22 +1663,38 @@ color 0,0,0
 autoScale on
 alwaysZero on
 
-track norm100k_$sample\_$oligo_data[$i][0]$flashstatus
+";
+
+if ($normalised_tracks) {
+
+    print TRACKHUBC
+"track norm10k_$sample\_$oligo_data[$i][0]$flashstatus
 type bigWig
-longLabel CC_norm100k_$sample\_$oligo_data[$i][0]$flashstatus
-shortLabel norm100k_$sample\_$oligo_data[$i][0]$flashstatus
-bigDataUrl $public_folder/$short_filename\_norm100k.bw
+longLabel CC_norm10k_$sample\_$oligo_data[$i][0]$flashstatus
+shortLabel norm10k_$sample\_$oligo_data[$i][0]$flashstatus
+bigDataUrl $public_folder/$short_filename\_norm10k.bw
 visibility hide
 priority 200
 color 0,0,0
 autoScale on
 alwaysZero on
 
-track norm100k_CIS_$sample\_$oligo_data[$i][0]$flashstatus
+track norm10k_CIS_$sample\_$oligo_data[$i][0]$flashstatus
 type bigWig
-longLabel CC_CISnorm100k_$sample\_$oligo_data[$i][0]$flashstatus
-shortLabel CIS_norm100k_$sample\_$oligo_data[$i][0]$flashstatus
-bigDataUrl $public_folder/$short_filename\_CIS_norm100k.bw
+longLabel CC_CISnorm10k_$sample\_$oligo_data[$i][0]$flashstatus
+shortLabel CIS_norm10k_$sample\_$oligo_data[$i][0]$flashstatus
+bigDataUrl $public_folder/$short_filename\_CIS_norm10k.bw
+visibility hide
+priority 200
+color 0,0,0
+autoScale on
+alwaysZero on
+
+track cisOnly_norm10k_CIS_$sample\_$oligo_data[$i][0]$flashstatus
+type bigWig
+longLabel CC_cisonly_CISnorm10k_$sample\_$oligo_data[$i][0]$flashstatus
+shortLabel cisonly_CIS_norm10k_$sample\_$oligo_data[$i][0]$flashstatus
+bigDataUrl $public_folder/$short_filename\_CIS_normTo10k_CISonly.bw
 visibility hide
 priority 200
 color 0,0,0
@@ -1646,6 +1702,8 @@ autoScale on
 alwaysZero on
 
 "
+}
+
   }
 
 }
@@ -2476,16 +2534,45 @@ sub frag_to_wigout
 }
 
 # This subroutine outputs the data from a hash of dpnII fragments of format %hash{$fragtype}{$capture}{$chr}{$fragment_start}{"end"/"value"} to wig format
-sub frag_to_wigout_normto100k  
+sub cisfrag_to_wigout  
 {
-    my ($hashref, $filenameout, $fragtype, $capture, $fragCountToNorm) = @_;
-    
-    print $fragCountToNorm;
+    my ($hashref, $filenameout, $fragtype, $capture, $cis) = @_;
     
     if (keys %{$$hashref{$fragtype}{$capture}})
     {
     
-    unless (open(WIGOUTPUT, ">$filenameout\_normTo100k.wig")){print STDERR "Cannot open file $filenameout\_normTo100k.wig\n";}
+    unless (open(WIGOUTPUT, ">$filenameout\_CISonly.wig")){print STDERR "Cannot open file $filenameout\_CISonly.wig\n";}
+    my $storedChr=$cis;
+    {
+    
+    print WIGOUTPUT "variableStep  chrom=chr$storedChr\n";
+    
+    foreach my $storedposition (sort keys %{$$hashref{$fragtype}{$capture}{$storedChr}})
+        {   
+        for (my $i=$storedposition; $i<=$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"end"}; $i++)
+            {
+            print WIGOUTPUT "$i\t".$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}."\n";
+            }
+        }
+    }
+    
+    close WIGOUTPUT ;
+    
+    }
+}
+
+
+# This subroutine outputs the data from a hash of dpnII fragments of format %hash{$fragtype}{$capture}{$chr}{$fragment_start}{"end"/"value"} to wig format
+sub frag_to_wigout_normto10k  
+{
+    my ($hashref, $filenameout, $fragtype, $capture, $fragCountToNorm) = @_;
+    
+    print "fragCountToNorm $fragCountToNorm";
+    
+    if (keys %{$$hashref{$fragtype}{$capture}})
+    {
+    
+    unless (open(WIGOUTPUT, ">$filenameout\_normTo10k.wig")){print STDERR "Cannot open file $filenameout\_normTo10k.wig\n";}
     foreach my $storedChr (sort keys %{$$hashref{$fragtype}{$capture}})  
     {
     
@@ -2498,7 +2585,60 @@ sub frag_to_wigout_normto100k
             my $normalisedValue=0;
             if ($fragCountToNorm != 0)
               {
-              $normalisedValue=int(($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"}/$fragCountToNorm)*100000);
+              print "___";
+              print $$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"} ;
+              print int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0 ;
+              print (int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0) ;
+              print ((int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0))*10000 ;
+              $normalisedValue=sprintf "%.3f" , ((int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0))*10000 ;
+              }
+            else
+              {
+              print "___" ;
+              }
+            print WIGOUTPUT "$i\t".$normalisedValue."\n";
+            }
+        }
+    }
+    
+    close WIGOUTPUT ;
+    
+    }
+}
+
+# This subroutine outputs the data from a hash of dpnII fragments of format %hash{$fragtype}{$capture}{$chr}{$fragment_start}{"end"/"value"} to wig format
+sub cisfrag_to_wigout_normto10k  
+{
+    my ($hashref, $filenameout, $fragtype, $capture, $fragCountToNorm, $cis) = @_;
+    
+    print "fragCountToNorm $fragCountToNorm";
+    
+    if (keys %{$$hashref{$fragtype}{$capture}})
+    {
+    
+    unless (open(WIGOUTPUT, ">$filenameout\_normTo10k_CISonly.wig")){print STDERR "Cannot open file $filenameout\_normTo10k_CISonly.wig\n";}
+    my $storedChr=$cis;
+    {
+    
+    print WIGOUTPUT "variableStep  chrom=chr$storedChr\n";
+    
+    foreach my $storedposition (sort keys %{$$hashref{$fragtype}{$capture}{$storedChr}})
+        {   
+        for (my $i=$storedposition; $i<=$$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"end"}; $i++)
+            {
+            my $normalisedValue=0;
+            if ($fragCountToNorm != 0)
+              {
+              print "___";
+              print $$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"} ;
+              print int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0 ;
+              print (int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0) ;
+              print ((int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0))*10000 ;
+              $normalisedValue=sprintf "%.3f" , ((int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0))*10000 ;
+              }
+            else
+              {
+              print "___" ;
               }
             print WIGOUTPUT "$i\t".$normalisedValue."\n";
             }

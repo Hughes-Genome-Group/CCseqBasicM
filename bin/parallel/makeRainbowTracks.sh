@@ -24,10 +24,22 @@ abbrev=$5
 visibility=$6
 ccversion=$7
 
+# Setting suffix (or any of these flags) to 'none' turns it off, i.e. sets it to ""
+
+if [     "${folder}" == "none" ]; then     folder="";fi
+if [  "${subfolder}" == "none" ]; then  subfolder="";fi
+if [   "${bwprefix}" == "none" ]; then   bwprefix="";fi
+if [   "${bwsuffix}" == "none" ]; then   bwsuffix="";fi
+if [     "${abbrev}" == "none" ]; then     abbrev="";fi
+if [ "${visibility}" == "none" ]; then visibility="";fi
+if [  "${ccversion}" == "none" ]; then  ccversion="";fi
+
+# ----------------------------
+
 echo -n "- ${subfolder} "
 echo -n "- ${subfolder} " >> "/dev/stderr"
 
-parentname="${folder}_${subfolder}"
+parentname="${folder}_${subfolder}${bwsuffix}"
 
 rm -f ${parentname}_tracks.txt
 doOneParent
@@ -51,8 +63,13 @@ do
 if [ -s "${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}${bwsuffix}.bw" ]; then
   doOneChild
 else
-  echo -n "( skipping ${oligolist[i]} as no data found ) "
-  echo -n "( skipping ${oligolist[i]} as no data found ) " >> "/dev/null"
+  echo -n "( skipping ${oligolist[i]} ) "
+  echo -n "( skipping ${oligolist[i]} ) " >> "/dev/null"
+  
+  # For testing purposes ..
+  echo
+  echo ${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}${bwsuffix}.bw
+  
 fi
 
 done
