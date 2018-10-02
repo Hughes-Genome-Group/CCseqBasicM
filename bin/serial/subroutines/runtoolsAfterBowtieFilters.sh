@@ -32,7 +32,7 @@ thisIsWhereIam=$( pwd )
 printThis="Starting to sort ${flashstatus}_REdig_unfiltered.sam BIG time - will save temporary files in ${thisIsWhereIam}"
 printToLogFile
 
-cat ${flashstatus}_REdig_unfiltered.sam | grep -v '^@' | cut -f 2,3 ${flashstatus}_REdig_unfiltered.sam | grep '^chr' > intoSorting.txt
+cat ${flashstatus}_REdig_unfiltered.sam | grep -v '^@' | cut -f 3,4 | grep '^chr' > intoSorting.txt
 
 sortParams='-k1,1 -k2,2n'
 sortIn1E6bunches
@@ -143,12 +143,6 @@ sortResultInfo(){
 
     countBefore=$(($( cat intoSorting.txt | grep -c "" )))
     countAfter=$(($( cat TEMPsortedMerged.txt | grep -c "" )))
-    
-    # For testing purposes :
-    ls -lht intoSorting.txt
-    echo "countBefore ${countBefore}"
-    ls -lht TEMPsortedMerged.txt
-    echo "countAfter ${countAfter}"
     
     if [ "${countBefore}" -ne "${countAfter}" ]
     then

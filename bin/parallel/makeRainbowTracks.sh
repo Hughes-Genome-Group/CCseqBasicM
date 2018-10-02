@@ -67,8 +67,8 @@ else
   echo -n "( skipping ${oligolist[i]} ) " >> "/dev/null"
   
   # For testing purposes ..
-  echo
-  echo ${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}${bwsuffix}.bw
+  # echo
+  # echo ${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}${bwsuffix}.bw
   
 fi
 

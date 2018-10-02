@@ -2585,16 +2585,7 @@ sub frag_to_wigout_normto10k
             my $normalisedValue=0;
             if ($fragCountToNorm != 0)
               {
-              print "___";
-              print $$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"} ;
-              print int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0 ;
-              print (int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0) ;
-              print ((int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0))*10000 ;
               $normalisedValue=sprintf "%.3f" , ((int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0))*10000 ;
-              }
-            else
-              {
-              print "___" ;
               }
             print WIGOUTPUT "$i\t".$normalisedValue."\n";
             }
@@ -2629,16 +2620,7 @@ sub cisfrag_to_wigout_normto10k
             my $normalisedValue=0;
             if ($fragCountToNorm != 0)
               {
-              print "___";
-              print $$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"} ;
-              print int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0 ;
-              print (int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0) ;
-              print ((int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0))*10000 ;
               $normalisedValue=sprintf "%.3f" , ((int($$hashref{$fragtype}{$capture}{$storedChr}{$storedposition}{"value"})*1.0)/($fragCountToNorm*1.0))*10000 ;
-              }
-            else
-              {
-              print "___" ;
               }
             print WIGOUTPUT "$i\t".$normalisedValue."\n";
             }
