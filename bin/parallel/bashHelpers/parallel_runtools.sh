@@ -111,12 +111,12 @@ rm -f temp_mapping.txt
 if [ "${flashstatus}" == "FLASHED" ]; then
 
     # FLASHED
-    head -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads processed' | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' >    FLASHED_readcount.txt
+    head -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads processed' | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' >    FLASHEDreadsEnteringBowtie_readcount.txt
 
 else
 
     # NONFLASHED
-    tail -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads processed' | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > NONFLASHED_readcount.txt
+    tail -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads processed' | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > NONFLASHEDreadsEnteringBowtie_readcount.txt
  
 fi
 
@@ -1854,6 +1854,22 @@ cd ${weWereHereDir}
 
 # ------------------------------------------    
 
+addStatsWithJavascriptToIndex(){
+# Add to the index.html - the main stats with javascript inline figures ..
+
+# Flashing counts ..
+
+echo '<h3>Flashing counts (read PAIRS) </h3>' >> index.html
+echo '<pre>' >> index.html
+cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/flashing.log
+echo '</pre>' >> index.html
+
+    
+# ------------------------------------------    
+}
+
+# ------------------------------------------    
+
 generateDataHub(){
 # ------------------------------------------
 
@@ -1969,6 +1985,8 @@ echo 'Text file of the main statistics : <br>' >> index.html
 echo '<a target="_blank" href="description_page_files/statslisting.txt" >statslisting.txt</a>' >> index.html
 echo '<hr />' >> index.html
 
+# Add to the index.html - the main stats with javascript inline figures ..
+addStatsWithJavascriptToIndex
 
 # ----------------------------------
 
