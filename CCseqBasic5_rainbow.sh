@@ -368,7 +368,8 @@ if [ "${onlyHub}" -eq 1 ] ; then
   makeGeneralFastqrunSummaries
   
   # Summary of summaries ..
-  head B_mapAndDivideFastqs/*FLASHED*.[tl][xo][tg] > B_fastqSummaryCounts.txt
+  head -n 20 B_mapAndDivideFastqs/*FLASHED*.[tl][xo][tg] > B_fastqSummaryCounts.txt
+  echo >> B_fastqSummaryCounts.txt
   echo '==> B_mapAndDivideFastqs/flashing.log <==' >> B_fastqSummaryCounts.txt
   cat B_mapAndDivideFastqs/flashing.log >> B_fastqSummaryCounts.txt
   
@@ -655,7 +656,8 @@ makeFastqrunSummaries
 makeGeneralFastqrunSummaries
 
 # Summary of summaries ..
-head B_mapAndDivideFastqs/*FLASHED*.[tl][xo][tg] > B_fastqSummaryCounts.txt
+head -n 20 B_mapAndDivideFastqs/*FLASHED*.[tl][xo][tg] > B_fastqSummaryCounts.txt
+echo >> B_fastqSummaryCounts.txt
 echo '==> B_mapAndDivideFastqs/flashing.log <==' >> B_fastqSummaryCounts.txt
 cat B_mapAndDivideFastqs/flashing.log >> B_fastqSummaryCounts.txt
 
