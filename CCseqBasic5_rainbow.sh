@@ -364,8 +364,13 @@ if [ "${onlyHub}" -eq 1 ] ; then
   flashstatus="NONFLASHED"
   makeFastqrunSummaries
   
+  # Not using FLASHED/NONFLASHED flags ..
+  makeGeneralFastqrunSummaries
+  
   # Summary of summaries ..
-  head B_mapAndDivideFastqs/*FLASHED*.txt > B_fastqSummaryCounts.txt
+  head B_mapAndDivideFastqs/*FLASHED*.[tl][xo][tg] > B_fastqSummaryCounts.txt
+  echo '==> B_mapAndDivideFastqs/flashing.log <==' >> B_fastqSummaryCounts.txt
+  cat B_mapAndDivideFastqs/flashing.log >> B_fastqSummaryCounts.txt
   
   printThis="Combined bam visualisations  .. "
   printNewChapterToLogFile
@@ -646,8 +651,13 @@ makeFastqrunSummaries
 flashstatus="NONFLASHED"
 makeFastqrunSummaries
 
+# Not using FLASHED/NONFLASHED flags ..
+makeGeneralFastqrunSummaries
+
 # Summary of summaries ..
-head B_mapAndDivideFastqs/*FLASHED*.txt > B_fastqSummaryCounts.txt
+head B_mapAndDivideFastqs/*FLASHED*.[tl][xo][tg] > B_fastqSummaryCounts.txt
+echo '==> B_mapAndDivideFastqs/flashing.log <==' >> B_fastqSummaryCounts.txt
+cat B_mapAndDivideFastqs/flashing.log >> B_fastqSummaryCounts.txt
 
 # Check for errors ..
 

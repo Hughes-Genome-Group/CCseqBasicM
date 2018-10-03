@@ -127,28 +127,6 @@ fi
 # --------------------------------
 # RE cut reports (full reports - combining all fastqs)
 
-flashstatus="FLASHED"
-
-rm -rf TMP_makingdigestLogs
-mkdir TMP_makingdigestLogs
-
-for folder in fastq_*
-do
-cat ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/${flashstatus}_${REenzyme}digestion.log \
-| sed 's/.*command run on file: //' | sed 's/\s\s*/\t/' | cut -f 1 | sed 's/^[a-zA-Z].*//' > TMP_makingdigestLogs/${folder}.txt
-done
-
-paste TMP_makingdigestLogs/* | sed 's/\s/+/g' | sed 's/^+$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
-
-# Heading part ..
-cat fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/${flashstatus}_${REenzyme}digestion.log | sed 's/^[1234567890]*//' > TEMPheading.txt
-
-paste TMPnumbers.txt TEMPheading.txt | tr '\t' ' ' | sed 's/^\s\s*//' > ${flashstatus}_${REenzyme}digestion.log
-
-rm -rf TMP_makingdigestLogs
-
-flashstatus="NONFLASHED"
-
 rm -rf TMP_makingdigestLogs
 mkdir TMP_makingdigestLogs
 
@@ -167,14 +145,22 @@ paste TMPnumbers.txt TEMPheading.txt | tr '\t' ' ' | sed 's/^\s\s*//' > ${flashs
 
 rm -rf TMP_makingdigestLogs TEMPheading.txt TMPnumbers.txt
 
-# --------------------------------
-# RE cut counts - for description page
 
-   TEMPcountREflashed=$(($( cat    FLASHED_${REenzyme}digestion.log | grep "had at least one ${REenzyme} site in them" | sed 's/\s.*//' )))
-TEMPcountREnonflashed=$(($( cat NONFLASHED_${REenzyme}digestion.log | grep "had at least one ${REenzyme} site in them" | sed 's/\s.*//' )))
+cdCommand='cd ${weWereHereDir}'
+cdToThis="${weWereHereDir}"
+checkCdSafety  
+cd ${weWereHereDir}
 
-echo "   TEMPcountREflashed ${TEMPcountREflashed}"
-echo "TEMPcountREnonflashed ${TEMPcountREnonflashed}"
+# ------------------------------------------
+}
+
+# ------------------------------------------
+
+makeGeneralFastqrunSummaries(){
+# ------------------------------------------
+
+weWereHereDir=$(pwd)
+cd B_mapAndDivideFastqs
 
 # --------------------------------
 # Flashing counts - summary over all fastqs
@@ -210,23 +196,6 @@ paste TEMPheading.txt TMPnumbers.txt | tr '\t' ' ' | sed 's/^\s\s*//' > flashing
 
 rm -rf TMP_makingflashLog TMP_makingflashLogPerc TEMPheading.txt TMPnumbers.txt
 
-# --------------------------------
-# Flashing counts - for description page
-
-# All reads
-# Old versions of Flash say "Total reads" when counting total read pairs. New versions of Flash say "Total pairs".
-# all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total reads:" | sed 's/.*:\s*//' )))
-# all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total pairs:" | sed 's/.*:\s*//' )))
-all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
-
-# Flashed (see notes for "All reads" above)
-
-   TEMPcountAllflashed=$(($( cat   flashing.log | grep "Combined [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
-TEMPcountAllnonflashed=$(($( cat flashing.log | grep "Uncombined [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
-
-echo "   TEMPcountAllflashed ${TEMPcountAllflashed}"
-echo "TEMPcountAllnonflashed ${TEMPcountAllnonflashed}"
-
 
 # ###############################
 # Usage reports
@@ -253,6 +222,27 @@ print $1"\tFastqIn\t"a["FastqIn"]"\tFastQC\t"a["FastQC"]"\tTrim\t"a["Trim"]"\tFl
 > usageReports/wholerunTasksForExcel.txt
 
 fi
+
+# notes for future purposes :
+# --------------------------------
+# Flashing counts - for description page
+
+# All reads
+# Old versions of Flash say "Total reads" when counting total read pairs. New versions of Flash say "Total pairs".
+# all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
+
+# Flashed (see notes for "All reads" above)
+
+#    TEMPcountAllflashed=$(($( cat   flashing.log | grep "Combined [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
+# TEMPcountAllnonflashed=$(($( cat flashing.log | grep "Uncombined [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
+
+# --------------------------------
+# RE cut counts - for description page
+
+#    TEMPcountREflashed=$(($( cat    FLASHED_${REenzyme}digestion.log | grep "had at least one ${REenzyme} site in them" | sed 's/\s.*//' )))
+# TEMPcountREnonflashed=$(($( cat NONFLASHED_${REenzyme}digestion.log | grep "had at least one ${REenzyme} site in them" | sed 's/\s.*//' )))
+# --------------------------------
+
 
 cdCommand='cd ${weWereHereDir}'
 cdToThis="${weWereHereDir}"
