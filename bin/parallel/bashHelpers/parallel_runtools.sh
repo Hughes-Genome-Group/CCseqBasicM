@@ -1902,61 +1902,66 @@ hubTopDir=$(pwd)
 printThis="Making description html page .."
 printToLogFile
 
-echo "<!DOCTYPE HTML PUBLIC -//W3C//DTD HTML 4.01//EN" > description.html
-echo "http://www.w3.org/TR/html4/strict.dtd" >> description.html
-echo ">" >> description.html
-echo " <html lang=en>" >> description.html
-echo " <head>" >> description.html
-echo " <title> ${hubNameList[0]} data hub in ${GENOME} </title>" >> description.html
-echo " </head>" >> description.html
-echo " <body>" >> description.html
+'Run statistics available in this page : <br> ' > description.html
+'<a target=_blank href="http://userweb.molbiol.ox.ac.uk/'${publicfolder}/${samplename}/${CCversion}_${REenzyme}'/data_hubs/index.html" >(statistics page)</a>' >> description.html
+'<hr />' >> description.html
+
+
+echo "<!DOCTYPE HTML PUBLIC -//W3C//DTD HTML 4.01//EN" > index.html
+echo "http://www.w3.org/TR/html4/strict.dtd" >> index.html
+echo ">" >> index.html
+echo " <html lang=en>" >> index.html
+echo " <head>" >> index.html
+echo " <title> ${hubNameList[0]} data hub in ${GENOME} </title>" >> index.html
+echo " </head>" >> index.html
+echo " <body>" >> index.html
 
 # Generating TimeStamp 
 TimeStamp=($( date | sed 's/[: ]/_/g' ))
 DateTime="$(date)"
 
-echo "<p>Data produced ${DateTime} with CapC pipeline (coded by James Davies, pipelined and parallelised by Jelena Telenius, located in ${MainScriptPath} )</p>" >> description.html
+echo "<p>Data produced ${DateTime} with CapC pipeline (coded by James Davies, pipelined and parallelised by Jelena Telenius, located in ${MainScriptPath} )</p>" >> index.html
 
-echo "<hr />" >> description.html
-echo "Restriction enzyme and genome build : ( ${REenzyme} ) ( ${inputgenomename} )" >> description.html
-echo "<hr />" >> description.html
-echo "Data located in : ${HOME}" >> description.html
-echo "<hr />" >> description.html
+echo "<hr />" >> index.html
+echo "Restriction enzyme and genome build : ( ${REenzyme} ) ( ${inputgenomename} )" >> index.html
+echo "<hr />" >> index.html
+echo "Data located in : ${HOME}" >> index.html
+echo "<hr />" >> index.html
 
 ln -s ../../E_hubAddresses.txt .
 
-echo "All data hubs : <br>" >> description.html
-echo "<a target="_blank" href=\"E_hubAddresses.txt\" >E_hubAddresses.txt</a>" >> description.html
-echo "<hr />" >> description.html
+echo "All data hubs : <br>" >> index.html
+echo "<a target="_blank" href=\"E_hubAddresses.txt\" >E_hubAddresses.txt</a>" >> index.html
+echo "<hr />" >> index.html
 
 mkdir description_page_files
 
 ln -s ../../COMBINED_allFinalCounts.txt description_page_files/.
 ln -s ../../COMBINED_allFinalCounts_table.txt description_page_files/.
 
-echo "Oligo-wise counts (table) : <br>" >> description.html
-echo "<a target="_blank" href=\"description_page_files/COMBINED_allFinalCounts_table.txt\" >COMBINED_allFinalCounts_table.txt</a>" >> description.html
-echo "<hr />" >> description.html
-echo "Oligo-wise counts (raw list) : <br>" >> description.html
-echo "<a target="_blank" href=\"description_page_files/COMBINED_allFinalCounts.txt\" >COMBINED_allFinalCounts.txt</a>" >> description.html
-echo "<hr />" >> description.html
-echo "Run output log (main log) : <br>" >> description.html
-echo "<a target="_blank" href=\"../qsub.out\" >qsub.out</a>" >> description.html
-echo "<hr />" >> description.html
-echo "Run error log (main log) : <br>" >> description.html
-echo "<a target="_blank" href=\"../qsub.err\" >qsub.err</a>" >> description.html
-echo "<hr />" >> description.html
+echo "Oligo-wise counts (table) : <br>" >> index.html
+echo "<a target="_blank" href=\"description_page_files/COMBINED_allFinalCounts_table.txt\" >COMBINED_allFinalCounts_table.txt</a>" >> index.html
+echo "<hr />" >> index.html
+echo "Oligo-wise counts (raw list) : <br>" >> index.html
+echo "<a target="_blank" href=\"description_page_files/COMBINED_allFinalCounts.txt\" >COMBINED_allFinalCounts.txt</a>" >> index.html
+echo "<hr />" >> index.html
+echo "Run output log (main log) : <br>" >> index.html
+echo "<a target="_blank" href=\"../qsub.out\" >qsub.out</a>" >> index.html
+echo "<hr />" >> index.html
+echo "Run error log (main log) : <br>" >> index.html
+echo "<a target="_blank" href=\"../qsub.err\" >qsub.err</a>" >> index.html
+echo "<hr />" >> index.html
 
-echo '<pre>' >> description.html
-echo 'The statistics below are for the WHOLE experiment - over all chromosomes' >> description.html
-echo '' >> description.html
-cat ../../B_fastqSummaryCounts.txt >> description.html
-echo  >> description.html
-echo  >> description.html
-cat ../../D_analysisSummaryCounts.txt >> description.html
-echo  >> description.html
-echo  >> description.html
-echo '</pre>' >> description.html
+echo '<pre>' >> index.html
+echo 'The statistics below are for the WHOLE experiment - over all chromosomes' >> index.html
+echo '' >> index.html
+cat ../../B_fastqSummaryCounts.txt >> index.html
+echo  >> index.html
+echo  >> index.html
+cat ../../D_analysisSummaryCounts.txt >> index.html
+echo  >> index.html
+echo  >> index.html
+echo '</pre>' >> index.html
 
 # ----------------------------------
 
