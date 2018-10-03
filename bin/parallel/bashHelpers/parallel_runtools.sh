@@ -1843,8 +1843,8 @@ cd rawMappedReads
 for folder in ../../../B_mapAndDivideFastqs/fastq_*
 do
     fastqName=$(basename ${folder})
-    ln -s ${folder}/F1_beforeCCanalyser_${sample}_${CCversion}/FLASHED_REdig_unfiltered.bw ${fastqName}_FLASHED_REdig_unfiltered.bw
-    ln -s ${folder}/F1_beforeCCanalyser_${sample}_${CCversion}/NONFLASHED_REdig_unfiltered.bw ${fastqName}_NONFLASHED_REdig_unfiltered.bw
+    ln -s ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/FLASHED_REdig_unfiltered.bw ${fastqName}_FLASHED_REdig_unfiltered.bw
+    ln -s ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/NONFLASHED_REdig_unfiltered.bw ${fastqName}_NONFLASHED_REdig_unfiltered.bw
 done
 
 cd ${weWereHereDir}
