@@ -121,6 +121,114 @@ else
 fi
 
 # ###############################
+# RE cut reports, flashing reports.
+# ###############################
+
+# --------------------------------
+# RE cut reports (full reports - combining all fastqs)
+
+flashstatus="FLASHED"
+
+rm -rf TMP_makingdigestLogs
+mkdir TMP_makingdigestLogs
+
+for folder in fastq_*
+do
+cat ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/${flashstatus}_${REenzyme}digestion.log \
+| sed 's/.*command run on file: //' | sed 's/\s\s*/\t/' | cut -f 1 | sed 's/^[a-zA-Z].*//' > TMP_makingdigestLogs/${folder}.txt
+done
+
+paste TMP_makingdigestLogs/* | sed 's/\s/+/g' | sed 's/^+$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
+
+# Heading part ..
+cat fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/${flashstatus}_${REenzyme}digestion.log | sed 's/^[1234567890]*//' > TEMPheading.txt
+
+paste TMPnumbers.txt TEMPheading.txt | tr '\t' ' ' | sed 's/^\s\s*//' > ${flashstatus}_${REenzyme}digestion.log
+
+rm -rf TMP_makingdigestLogs
+
+flashstatus="NONFLASHED"
+
+rm -rf TMP_makingdigestLogs
+mkdir TMP_makingdigestLogs
+
+for folder in fastq_*
+do
+cat ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/${flashstatus}_${REenzyme}digestion.log \
+| sed 's/.*command run on file: //' | sed 's/\s\s*/\t/' | cut -f 1 | sed 's/^[a-zA-Z].*//' > TMP_makingdigestLogs/${folder}.txt
+done
+
+paste TMP_makingdigestLogs/* | sed 's/\s/+/g' | sed 's/^+$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
+
+# Heading part ..
+cat fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/${flashstatus}_${REenzyme}digestion.log | sed 's/^[1234567890]*//' > TEMPheading.txt
+
+paste TMPnumbers.txt TEMPheading.txt | tr '\t' ' ' | sed 's/^\s\s*//' > ${flashstatus}_${REenzyme}digestion.log
+
+rm -rf TMP_makingdigestLogs TEMPheading.txt TMPnumbers.txt
+
+# --------------------------------
+# RE cut counts - for description page
+
+   TEMPcountREflashed=$(($( cat    FLASHED_${REenzyme}digestion.log | grep "had at least one ${REenzyme} site in them" | sed 's/\s.*//' )))
+TEMPcountREnonflashed=$(($( cat NONFLASHED_${REenzyme}digestion.log | grep "had at least one ${REenzyme} site in them" | sed 's/\s.*//' )))
+
+echo "   TEMPcountREflashed ${TEMPcountREflashed}"
+echo "TEMPcountREnonflashed ${TEMPcountREnonflashed}"
+
+# --------------------------------
+# Flashing counts - summary over all fastqs
+
+# Both old and new versions of flash say
+# [FLASH] Read combination statistics:
+# (the deviation is in the 3 lines which follow this) - so we can just grep -A based on this
+
+rm -rf TMP_makingflashLog
+mkdir TMP_makingflashLog
+rm -rf TMP_makingflashLogPerc
+mkdir TMP_makingflashLogPerc
+
+for folder in fastq_*
+do
+cat ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/flashing.log | grep -A 4 'Read combination statistics'\
+| head -n 4 \
+| sed 's/.*\s\s*//' | sed 's/^[a-zA-Z].*//' > TMP_makingflashLog/${folder}.txt
+cat ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/flashing.log | grep -A 4 'Read combination statistics'\
+| tail -n 1 \
+| sed 's/.*\s\s*//' | sed 's/^[a-zA-Z].*//' | sed 's/%$//'> TMP_makingflashLogPerc/${folder}.txt
+
+done
+
+paste TMP_makingflashLog/* | sed 's/\s/+/g' | sed 's/^+$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
+cat TMP_makingflashLogPerc/* | awk 'BEGIN{s=0}{s=s+$1}END{print s/NR"%"}' >> TMPnumbers.txt
+
+# Heading part ..
+cat fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/flashing.log | grep -A 4 'Read combination statistics'\
+| sed 's/[1234567890][1234567890].*//' > TEMPheading.txt
+
+paste TEMPheading.txt TMPnumbers.txt | tr '\t' ' ' | sed 's/^\s\s*//' > flashing.log
+
+rm -rf TMP_makingflashLog TMP_makingflashLogPerc TEMPheading.txt TMPnumbers.txt
+
+# --------------------------------
+# Flashing counts - for description page
+
+# All reads
+# Old versions of Flash say "Total reads" when counting total read pairs. New versions of Flash say "Total pairs".
+# all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total reads:" | sed 's/.*:\s*//' )))
+# all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total pairs:" | sed 's/.*:\s*//' )))
+all=$(($( cat ${targetDir}/F1_beforeCCanalyser_${Sample}_${CCversion}/flashing.log | grep "Total [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
+
+# Flashed (see notes for "All reads" above)
+
+   TEMPcountAllflashed=$(($( cat   flashing.log | grep "Combined [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
+TEMPcountAllnonflashed=$(($( cat flashing.log | grep "Uncombined [rp][ea][ai][dr]s:" | sed 's/.*:\s*//' )))
+
+echo "   TEMPcountAllflashed ${TEMPcountAllflashed}"
+echo "TEMPcountAllnonflashed ${TEMPcountAllnonflashed}"
+
+
+# ###############################
 # Usage reports
 # ###############################
 
@@ -1757,7 +1865,36 @@ cd ${weWereHereDir}
 # ------------------------------------------    
 
 generateDataHub(){
-# ------------------------------------------    
+# ------------------------------------------
+
+printThis="This is subroutine generateDataHub .."
+printToLogFile
+
+# This needs access to UCSC genome sizes, as well as UCSCtools tool locations ..
+
+echo
+echo "confFolder ${confFolder}"
+echo
+
+supportedGenomes=()
+UCSC=()
+
+setPathsForPipe
+setGenomeLocations
+
+GENOME="UNDEFINDED"
+GENOME=${inputgenomename}
+echo "GENOME ${GENOME}"
+
+# If the visualisation genome name differs from the asked genome name : masked genomes
+setUCSCgenomeName
+# Visualisation genome sizes file
+setUCSCgenomeSizes
+
+echo "ucscBuildName ${ucscBuildName}"
+echo "ucscBuild ${ucscBuild}"
+
+# --------------------------------------
 
 listOfChromosomes=$( ls A_prepareForRun/OLIGOSindividualFiles )
 checkThis="${listOfChromosomes}"
@@ -1857,7 +1994,14 @@ trackAbbrev="rawSam_FLASHED"
 ${CaptureParallelPath}/makeRawsamTracks.sh ${thisHubSubfolder} ${bigwigSuffix} ${trackAbbrev} "full"
 bigwigSuffix="_NONFLASHED_REdig_unfiltered"
 trackAbbrev="rawSam_NONFLASHED"
-${CaptureParallelPath}/makeRawsamTracks.sh ${thisHubSubfolder} ${bigwigSuffix} ${trackAbbrev} "full"
+${CaptureParallelPath}/makeRawsamTracks.sh ${thisHubSubfolder} ${bigwigSuffix} ${trackAbbrev} "full" "noparent"
+
+# combining these to the final tracks.txt
+
+cat rawSam_FLASHED_tracks.txt rawSam_NONFLASHED_tracks.txt > ${thisHubSubfolder}_tracks.txt
+mkdir ${thisHubSubfolder}/makingOfTracks
+mv rawSam_FLASHED_tracks.txt ${thisHubSubfolder}/makingOfTracks/.
+mv rawSam_NONFLASHED_tracks.txt ${thisHubSubfolder}/makingOfTracks/.
 
 echo -n "- hubAndGenome "
 echo -n "- hubAndGenome " >> "/dev/stderr"
@@ -1919,32 +2063,6 @@ done
 # Color key and tracks, hub, genomes ..
 
 #------------------------------------------
-
-# This needs access to UCSC genome sizes, as well as UCSCtools tool locations ..
-
-echo
-echo "confFolder ${confFolder}"
-echo
-
-supportedGenomes=()
-UCSC=()
-
-setPathsForPipe
-setGenomeLocations
-
-GENOME="UNDEFINDED"
-GENOME=${inputgenomename}
-echo "GENOME ${GENOME}"
-
-# If the visualisation genome name differs from the asked genome name : masked genomes
-setUCSCgenomeName
-# Visualisation genome sizes file
-setUCSCgenomeSizes
-
-echo "ucscBuildName ${ucscBuildName}"
-echo "ucscBuild ${ucscBuild}"
-
-# --------------------------------------
 
 # Now preparing for hub generation ..
 
@@ -2065,7 +2183,10 @@ cd  ${publicfolder}/${samplename}/${CCversion}_${REenzyme}/
 rm -f data_hubs
 ln -s ${hubTopDir} .
 
-for file in  data_hubs/hub_*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses.txt
+for file in  data_hubs/hub_chr*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses.txt
+for file in  data_hubs/hub_raw*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/rawHubAddress.txt
+for file in  data_hubs/hub_all*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/allChrsHubAddress.txt
+
 
 trackDescriptionLine='track type=bigBed name="CaptureC_oligos" description="CaptureC_oligos" visibility="pack" itemRgb=On exonArrows=off bigDataUrl='
 echo ${trackDescriptionLine}'http://userweb.molbiol.ox.ac.uk'$( fp data_hubs/oligosAndExclusions_allReps.bb) > ${hubTopDir}/hubColorKeyBigbed.txt
@@ -2100,8 +2221,35 @@ echo '_______________________________' >> E_hubAddresses.txt
 echo '_______________________________'
 echo >> E_hubAddresses.txt
 
-echo "Raw mapped Sam fragments -hub and chromosome-wise data hubs :"
-echo "Raw mapped Sam fragments -hub and chromosome-wise data hubs :" >> E_hubAddresses.txt
+echo "Combined data hub (all chromosomes) - the main hub for small designs ( upto ~ 200 oligos or so ) :"
+echo "Combined data hub (all chromosomes) - the main hub for small designs ( upto ~ 200 oligos or so ) :" >> E_hubAddresses.txt
+echo
+echo >> E_hubAddresses.txt
+
+cat allChrsHubAddress.txt
+cat allChrsHubAddress.txt >> E_hubAddresses.txt
+echo
+echo >> E_hubAddresses.txt
+
+echo "(for big design visualisation - use the chr-wise hubs below, to avoid crashing the UCSC browser)"
+echo "(for big design visualisation - use the chr-wise hubs below, to avoid crashing the UCSC browser)" >> E_hubAddresses.txt
+
+echo
+echo >> E_hubAddresses.txt
+
+echo "Raw mapped Sam fragments -hub (for troubleshooting and QC of the analysis) :"
+echo "Raw mapped Sam fragments -hub (for troubleshooting and QC of the analysis) :" >> E_hubAddresses.txt
+echo
+echo >> E_hubAddresses.txt
+
+cat rawHubAddress.txt
+cat rawHubAddress.txt >> E_hubAddresses.txt
+
+echo
+echo >> E_hubAddresses.txt
+
+echo "Chromosome-wise data hubs (for visualising larger than ~ 200 oligos designs) :"
+echo "Chromosome-wise data hubs (for visualising larger than ~ 200 oligos designs) :" >> E_hubAddresses.txt
 echo
 echo >> E_hubAddresses.txt
 

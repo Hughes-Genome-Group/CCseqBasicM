@@ -23,6 +23,7 @@ bwsuffix=$4
 abbrev=$5
 visibility=$6
 ccversion=$7
+noparent=$8
 
 # Setting suffix (or any of these flags) to 'none' turns it off, i.e. sets it to ""
 
@@ -42,7 +43,13 @@ echo -n "- ${subfolder} " >> "/dev/stderr"
 parentname="${folder}_${subfolder}${bwsuffix}"
 
 rm -f ${parentname}_tracks.txt
-doOneParent
+
+# If we didn't disable, making a parent track ..
+if [ "${noparent}" != "noparent" ]; then
+  doOneParent
+else
+  echo -n '(skipping parent track), '  
+fi
 
 color=(); oligolist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
 
