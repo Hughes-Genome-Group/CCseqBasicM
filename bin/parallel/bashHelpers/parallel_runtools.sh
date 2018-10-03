@@ -1942,29 +1942,33 @@ mkdir description_page_files
 ln -s ../../COMBINED_allFinalCounts.txt description_page_files/.
 ln -s ../../COMBINED_allFinalCounts_table.txt description_page_files/.
 
-echo "Oligo-wise counts (table) : <br>" >> index.html
-echo "<a target="_blank" href=\"description_page_files/COMBINED_allFinalCounts_table.txt\" >COMBINED_allFinalCounts_table.txt</a>" >> index.html
-echo "<hr />" >> index.html
-echo "Oligo-wise counts (raw list) : <br>" >> index.html
-echo "<a target="_blank" href=\"description_page_files/COMBINED_allFinalCounts.txt\" >COMBINED_allFinalCounts.txt</a>" >> index.html
-echo "<hr />" >> index.html
-echo "Run output log (main log) : <br>" >> index.html
-echo "<a target="_blank" href=\"../qsub.out\" >qsub.out</a>" >> index.html
-echo "<hr />" >> index.html
-echo "Run error log (main log) : <br>" >> index.html
-echo "<a target="_blank" href=\"../qsub.err\" >qsub.err</a>" >> index.html
-echo "<hr />" >> index.html
+echo 'Oligo-wise counts (table) : <br>' >> index.html
+echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a>' >> index.html
+echo '<hr />' >> index.html
+echo 'Oligo-wise counts (raw list) : <br>' >> index.html
+echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts.txt" >COMBINED_allFinalCounts.txt</a>' >> index.html
+echo '<hr />' >> index.html
+echo 'Run output log (main log) : <br>' >> index.html
+echo '<a target="_blank" href="../qsub.out" >qsub.out</a>' >> index.html
+echo '<hr />' >> index.html
+echo 'Run error log (main log) : <br>' >> index.html
+echo '<a target="_blank" href="../qsub.err" >qsub.err</a>' >> index.html
+echo '<hr />' >> index.html
 
-echo '<pre>' >> index.html
-echo 'The statistics below are for the WHOLE experiment - over all chromosomes' >> index.html
-echo '' >> index.html
-cat ../../B_fastqSummaryCounts.txt >> index.html
-echo  >> index.html
-echo  >> index.html
-cat ../../D_analysisSummaryCounts.txt >> index.html
-echo  >> index.html
-echo  >> index.html
-echo '</pre>' >> index.html
+echo > description_page_files/statslisting.txt
+echo 'The statistics below are for the WHOLE experiment - over all chromosomes' >> description_page_files/statslisting.txt
+echo '' >> description_page_files/statslisting.txt
+cat ../../B_fastqSummaryCounts.txt >> description_page_files/statslisting.txt
+echo  >> description_page_files/statslisting.txt
+echo  >> description_page_files/statslisting.txt
+cat ../../D_analysisSummaryCounts.txt >> description_page_files/statslisting.txt
+echo  >> description_page_files/statslisting.txt
+echo  >> description_page_files/statslisting.txt
+
+echo 'Text file of the main statistics : <br>' >> index.html
+echo '<a target="_blank" href="description_page_files/statslisting.txt" >statslisting.txt</a>' >> index.html
+echo '<hr />' >> index.html
+
 
 # ----------------------------------
 
