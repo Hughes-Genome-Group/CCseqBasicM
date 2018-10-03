@@ -1902,9 +1902,12 @@ hubTopDir=$(pwd)
 printThis="Making description html page .."
 printToLogFile
 
-'Run statistics available in this page : <br> ' > description.html
-'<a target=_blank href="http://userweb.molbiol.ox.ac.uk/'${publicfolder}/${samplename}/${CCversion}_${REenzyme}'/data_hubs/index.html" >(statistics page)</a>' >> description.html
-'<hr />' >> description.html
+echo '<h2>Run '${samplename}/${CCversion}_${REenzyme}' </h2>' > description.html
+echo '<p><h3>' >> description.html
+echo 'Summary statistics available in this page : </br>' >> description.html
+echo '<a target=_blank href="http://userweb.molbiol.ox.ac.uk/'${publicfolder}/${samplename}/${CCversion}_${REenzyme}'/data_hubs/index.html" >( '${samplename}/${CCversion}_${REenzyme}' statistics page )</a>' >> description.html
+echo '</h3></p>' >> description.html
+echo '<hr />' >> description.html
 
 
 echo "<!DOCTYPE HTML PUBLIC -//W3C//DTD HTML 4.01//EN" > index.html
