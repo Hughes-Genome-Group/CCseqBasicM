@@ -1864,11 +1864,17 @@ cp -r ${CaptureParallelPath}/javascriptHelpers .
 chmod -R a+x javascriptHelpers
 
 echo ''                                                                                             >> index.html
+echo '<!--   ------------------------------------------------------------------------------------------------------------------------------           -->' >> index.html
 echo '<!--   This code is based on example code taken (04Oct2018) from : https://omnipotent.net/jquery.sparkline/#s-docs                              -->' >> index.html
 echo '<!--   Thie original example code is available in :  javascriptHelpers/example.html                                                             -->' >> index.html
 echo '<!--   jquery is MIT licensed and jquery.sparkline is BSD-3-Clause licensed. They both can be added to GPL3 licensed codes such as CCseqBasicM. -->' >> index.html
 echo '<!--   jquery (C) the jquery foundation : http://jquery.com . Code available (also in) GitHub : https://github.com/jquery/jquery                -->' >> index.html
 echo '<!--   jquery.sparkline (C) Gareth Watts, Splunk Inc. Code available (also in) GitHub : https://github.com/gwatts/jquery.sparkline              -->' >> index.html
+echo '<!--   ------------------------------------------------------------------------------------------------------------------------------           -->' >> index.html
+echo ''                                                                                             >> index.html
+echo '<!--   All available finetuning flags for the sparklines are available here : https://omnipotent.net/jquery.sparkline/assets/index.js           -->' >> index.html
+echo ''                                                                                             >> index.html
+echo '<!--   ------------------------------------------------------------------------------------------------------------------------------           -->' >> index.html
 echo ''                                                                                             >> index.html
 echo '    <script type="text/javascript" src="javascriptHelpers/jquery-3.2.1.min.js"></script>'     >> index.html
 echo '    <script type="text/javascript" src="javascriptHelpers/jquery.sparkline.min.js"></script>' >> index.html
@@ -1890,6 +1896,8 @@ echo '        $'"('.orangesilverpie').sparkline('html', {type: 'pie', sliceColor
 echo '        $'"('.orangebrownpie').sparkline('html', {type: 'pie', sliceColors: ['peru','orange'], height: '100', width: '100' } );"        >> index.html
 echo '        $'"('.bluesilverwhitepie').sparkline('html', {type: 'pie', sliceColors: ['blue','lightsteelblue','azure'], height: '100', width: '100', borderColor: 'steelblue', borderWidth: '1' } );" >> index.html
 echo '        $'"('.orangesilverwhitepie').sparkline('html', {type: 'pie', sliceColors: ['orange','wheat','ivory'], height: '100', width: '100', borderColor: 'goldenrod', borderWidth: '1' } );"      >> index.html
+echo '        $'"('.boxplotprecalculated').sparkline('html', {type:'box', raw: true, showOutliers:false, height: '70', width: '500', target: '30000'});"           >> index.html
+
 echo '    });'                                                                   >> index.html
 echo '    </script>'                                                             >> index.html
 echo ''                                                                          >> index.html
@@ -2001,18 +2009,36 @@ echo '</pre>' >> index.html
 nfcountOUT=$(($(cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/NONFLASHED_${REenzyme}digestion.log | grep 'fragments were printed' | sed 's/\s.*//')))
 
 echo '<p>' >> index.html
-echo '<span class="bluesilverpie">'${fcountIN}','${fcountOUT}'</span> <span class="orangebrownpie">'${nfcountIN}'',${nfcountOUT}'</span>' >> index.html
+echo '<span class="bluesilverpie">'${fcountIN}','${fcountOUT}'</span> <span class="orangesilverpie">'${nfcountIN}'',${nfcountOUT}'</span>' >> index.html
 echo '</p>' >> index.html
 echo '' >> index.html
 
 echo '<b style="color:blue">' >> index.html
 echo 'FLASHED ' >> index.html
 echo '</b>' >> index.html
-echo '(only BLUE reads continue to mapping, light-blue reads filtered at this stage)' >> index.html
+echo '(BLUE fragments continue to mapping, light-blue fragments - too short or no RE cut - filtered at this stage)' >> index.html
 echo '<br/><b style="color:orange">' >> index.html
 echo 'NONFLASHED ' >> index.html
 echo '</b>' >> index.html
-echo '(all reads continue to mapping)' >> index.html
+echo '(ORANGE fragments continue to mapping, light-orange fragments - too short -  filtered at this stage)' >> index.html
+
+# -----------------------
+# Reads entering mapping ..
+
+echo '<hr />' >> index.html
+echo '<h3>Fragments entering mapping </h3>' >> index.html
+
+echo '<p>' >> index.html
+echo '<span class="blueorangepie">'${fcountOUT}','${nfcountOUT}'</span>  ' >> index.html                                       
+echo '</p>' >> index.html
+echo '' >> index.html
+
+echo '<b style="color:blue">' >> index.html
+echo 'FLASHED ' >> index.html
+echo '</b>' >> index.html
+echo '<b style="color:orange">' >> index.html
+echo 'NONFLASHED ' >> index.html
+echo '</b>' >> index.html
 
 # -----------------------
 # Mapping counts ..
@@ -2099,19 +2125,36 @@ echo '</pre>' >> index.html
 echo '<hr />' >> index.html
 echo '<h3>CCanalyser runs (duplicate filtering, final counts) :</h3>' >> index.html
 
-echo '<h4>Read counts</h4>' >> index.html
 echo '<pre>' >> index.html
-head ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/*FLASHED_summary* | sed 's/\/.*\///' >> index.html
+head -n 20 ${rainbowRunTOPDIR}/D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt | sed 's/\/.*\///' >> index.html
 echo '</pre>' >> index.html
 
+  fcountIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/FLASHED_percentagesAndFinalCounts.txt    | tail -n 1)
+ nfcountIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/NONFLASHED_percentagesAndFinalCounts.txt | tail -n 1)
+ fcountOUT=$(echo ${fcountIN}  | awk '{print 100.0-$1}')
+nfcountOUT=$(echo ${nfcountIN} | awk '{print 100.0-$1}')
+
+ echo '<h4>Duplicates</h4>' >> index.html
 echo '<p>' >> index.html
-echo 'Duplicates' >> index.html
-# echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>      ' >> index.html        
+echo '<span class="bluesilverpie">'${fcountOUT}','${fcountIN}'</span> <span class="orangesilverpie">'${nfcountOUT}','${nfcountIN}'</span>      ' >> index.html        
 echo '</p>' >> index.html
 echo '' >> index.html
+
+echo '<b style="color:blue">' >> index.html
+echo 'FLASHED ' >> index.html
+echo '</b>' >> index.html
+echo 'BLUE reads continue, light-blue reads are duplicates (filtered at this stage)' >> index.html
+echo '<br/><b style="color:orange">' >> index.html
+echo 'NONFLASHED ' >> index.html
+echo '</b>' >> index.html
+echo 'ORANGE reads continue, light-orange reads are duplicates (filtered at this stage)' >> index.html
+
+  fcountIN=$(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/FLASHED_percentagesAndFinalCounts.txt    | grep -v '^\s*$' | tail -n 1 | cut -f 4,5 | sed 's/\t/,/')
+ nfcountIN=$(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/NONFLASHED_percentagesAndFinalCounts.txt | grep -v '^\s*$' | tail -n 1 | cut -f 4,5 | sed 's/\t/,/')
+
+echo '<h4>Cis/trans reporters</h4>' >> index.html
 echo '<p>' >> index.html
-echo 'Cis/trans reporters' >> index.html
-# echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>   ' >> index.html           
+echo '<span class="bluesilverpie">'${fcountIN}'</span> <span class="orangesilverpie">'${nfcountIN}'</span>   ' >> index.html           
 echo '</p>' >> index.html
 echo '' >> index.html
 
@@ -2123,6 +2166,46 @@ echo '<h3>CCanalyser runs (duplicate filtering, final counts) :</h3>' >> index.h
 echo '<pre>' >> index.html
 cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> index.html
 echo '</pre>' >> index.html
+
+countIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
+echo '<h4>Reported fragments (total), oligo-wise distribution</h4>' >> index.html
+echo '<p>' >> index.html
+echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
+echo '</p>' >> index.html
+echo '<pre>' >> index.html
+head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+echo '</pre>' >> index.html
+echo '' >> index.html
+
+countIN=$(head -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
+echo '<h4>Reported fragments ( CIS ), oligo-wise distribution</h4>' >> index.html
+echo '<p>' >> index.html
+echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
+echo '</p>' >> index.html
+echo '<pre>' >> index.html
+head -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+echo '</pre>' >> index.html
+echo '' >> index.html
+
+countIN=$(tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
+echo '<h4>Reported fragments ( TRANS ), oligo-wise distribution</h4>' >> index.html
+echo '<p>' >> index.html
+echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
+echo '</p>' >> index.html
+echo '<pre>' >> index.html
+tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+echo '</pre>' >> index.html
+echo '' >> index.html
+
+countIN=$(head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
+echo '<h4>Capture fragments in reported reads (intra-read duplicates not filtered), oligo-wise distribution</h4>' >> index.html
+echo '<p>' >> index.html
+echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
+echo '</p>' >> index.html
+echo '<pre>' >> index.html
+head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+echo '</pre>' >> index.html
+echo '' >> index.html
 
 # -----------------------
 # Some emptylines ..
