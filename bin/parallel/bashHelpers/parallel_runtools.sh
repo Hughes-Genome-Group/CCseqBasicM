@@ -2069,24 +2069,24 @@ echo '</pre>' >> index.html
 echo '<p style="color:blue">' >> index.html
 echo 'FLASHED pre-filtering' >> index.html
 echo '<br/><span class="bluebar">'${fcountIN}'</span>   ' >> index.html                           
-echo '<br/> mapped, multifrag, hascap, singlecap, withinSonicSize' >> index.html
+echo '<br/> mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
 echo '</p>' >> index.html
 echo '' >> index.html
 echo '<p style="color:orange">' >> index.html
 echo 'NONFLASHED pre-filtering' >> index.html
 echo '<br/><span class="orangebar">'${nfcountIN}'</span>' >> index.html
-echo '<br/> mapped, multifrag, hascap, singlecap, withinSonicSize' >> index.html
+echo '<br/> mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
 echo '</p>' >> index.html
 echo '' >> index.html
 
 echo '<pre>' >> index.html
 echo 'Abbreviations :' >> index.html
 echo '' >> index.html
-echo '         mapped = mapped reads' >> index.html
-echo '      multifrag = reads with more than 1 fragment (can potentially report interaction)' >> index.html
-echo '         hascap = reads containing fragment(s) overlapping any of the capture sites (within +/- sonicationSize from RE cut sites)' >> index.html
-echo '      singlecap = resolves to single capture site (not reporting multiple different capture sites within same read)' >> index.html
-echo 'withinSonicSize = within +/- sonicationSize from RE cut sites (filters out mapping errors)' >> index.html
+echo '         mappedR = mapped reads' >> index.html
+echo '      multifragR = reads with more than 1 fragment (can potentially report interaction)' >> index.html
+echo '         hascapR = reads containing fragment(s) overlapping any of the capture sites (within +/- sonicationSize from RE cut sites)' >> index.html
+echo '      singlecapF = fragment count in reads which can be resolved to a single capture site (not reporting multiple different capture sites within same read)' >> index.html
+echo 'withinSonicSizeF = fragments within +/- sonicationSize from RE cut sites (filters out mapping errors)' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
@@ -2101,17 +2101,17 @@ echo '<h3>CCanalyser runs (duplicate filtering, final counts) :</h3>' >> index.h
 
 echo '<h4>Read counts</h4>' >> index.html
 echo '<pre>' >> index.html
-head ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/*FLASHED_percentagesAndFinalCounts.txt | sed 's/\/.*\///' >> index.html
+head ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/*FLASHED_summary* | sed 's/\/.*\///' >> index.html
 echo '</pre>' >> index.html
 
 echo '<p>' >> index.html
 echo 'Duplicates' >> index.html
-echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>      ' >> index.html        
+# echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>      ' >> index.html        
 echo '</p>' >> index.html
 echo '' >> index.html
 echo '<p>' >> index.html
 echo 'Cis/trans reporters' >> index.html
-echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>   ' >> index.html           
+# echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>   ' >> index.html           
 echo '</p>' >> index.html
 echo '' >> index.html
 
