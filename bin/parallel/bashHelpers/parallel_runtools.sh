@@ -1854,16 +1854,284 @@ cd ${weWereHereDir}
 
 # ------------------------------------------    
 
+prepareIndexforJavascript(){
+# ------------------------------------------
+
+# copies the javascripts, 
+# , and adds to the <head> the subroutines to draw the inline pie charts and bar graphs
+
+cp -r ${CaptureParallelPath}/javascriptHelpers .
+chmod -R a+x javascriptHelpers
+
+echo ''                                                                                             >> index.html
+echo '<!--   This code is based on example code taken (04Oct2018) from : https://omnipotent.net/jquery.sparkline/#s-docs                              -->' >> index.html
+echo '<!--   Thie original example code is available in :  javascriptHelpers/example.html                                                             -->' >> index.html
+echo '<!--   jquery is MIT licensed and jquery.sparkline is BSD-3-Clause licensed. They both can be added to GPL3 licensed codes such as CCseqBasicM. -->' >> index.html
+echo '<!--   jquery (C) the jquery foundation : http://jquery.com . Code available (also in) GitHub : https://github.com/jquery/jquery                -->' >> index.html
+echo '<!--   jquery.sparkline (C) Gareth Watts, Splunk Inc. Code available (also in) GitHub : https://github.com/gwatts/jquery.sparkline              -->' >> index.html
+echo ''                                                                                             >> index.html
+echo '    <script type="text/javascript" src="javascriptHelpers/jquery-3.2.1.min.js"></script>'     >> index.html
+echo '    <script type="text/javascript" src="javascriptHelpers/jquery.sparkline.min.js"></script>' >> index.html
+echo ''                                                                                             >> index.html
+
+# The functions to bring the stuff alive ..
+echo '    <script type="text/javascript">'                                       >> index.html
+echo '    $(function() {'                                                        >> index.html
+echo ''                                                                          >> index.html        
+echo '        /** This code runs when everything has been loaded on the page */' >> index.html
+echo '        /* Use 'html' instead of an array of values to pass options '      >> index.html
+echo '        to a sparkline with data in the tag */'                            >> index.html
+echo ''        
+echo '        $'"('.bluebar').sparkline('html', {type: 'bar', barColor: 'blue', height: '100', barWidth: '20', chartRangeMin: '0' } );"       >> index.html
+echo '        $'"('.orangebar').sparkline('html', {type: 'bar', barColor: 'orange', height: '100', barWidth: '20', chartRangeMin: '0' } );"   >> index.html
+echo '        $'"('.blueorangepie').sparkline('html', {type: 'pie', sliceColors: ['blue','orange'], height: '100', width: '100' } );"         >> index.html
+echo '        $'"('.bluesilverpie').sparkline('html', {type: 'pie', sliceColors: ['blue','lightsteelblue'], height: '100', width: '100' } );" >> index.html
+echo '        $'"('.orangesilverpie').sparkline('html', {type: 'pie', sliceColors: ['orange','wheat'], height: '100', width: '100' } );"      >> index.html
+echo '        $'"('.orangebrownpie').sparkline('html', {type: 'pie', sliceColors: ['peru','orange'], height: '100', width: '100' } );"        >> index.html
+echo '        $'"('.bluesilverwhitepie').sparkline('html', {type: 'pie', sliceColors: ['blue','lightsteelblue','azure'], height: '100', width: '100', borderColor: 'steelblue', borderWidth: '1' } );" >> index.html
+echo '        $'"('.orangesilverwhitepie').sparkline('html', {type: 'pie', sliceColors: ['orange','wheat','ivory'], height: '100', width: '100', borderColor: 'goldenrod', borderWidth: '1' } );"      >> index.html
+echo '    });'                                                                   >> index.html
+echo '    </script>'                                                             >> index.html
+echo ''                                                                          >> index.html
+
+}
+
+# ------------------------------------------    
+
+testStatsWithJavascriptToIndex(){
+# Add to the index.html - the main stats with javascript inline figures ..
+
+echo '<hr />' >> index.html
+echo '<h2>THE BELOW IS EXAMPLE DATA (for testing the visualisations) </h2> - see the above text file of statistics for REAL values of your experiment !' >> index.html
+echo '<hr />' >> index.html
+
+echo '' >> index.html
+echo '<p>' >> index.html
+echo 'Flashing' >> index.html
+echo '<span class="blueorangepie">1,3</span>  ' >> index.html                                       
+echo '</p>' >> index.html
+echo '' >> index.html
+echo '<p>' >> index.html
+echo 'In-silico RE-digestion' >> index.html
+echo '<span class="bluesilverpie">1,3</span> <span class="orangebrownpie">1,3</span>' >> index.html
+echo '</p>' >> index.html
+echo '' >> index.html
+echo '<p>' >> index.html
+echo 'Mapping' >> index.html
+echo '<span class="bluesilverwhitepie">1,3,4</span> <span class="orangesilverwhitepie">1,3,4</span>' >> index.html
+echo '</p>' >> index.html
+echo '' >> index.html
+echo '<p>' >> index.html
+echo 'FLASHED Pre-filtering (mapped, multifrag, hascap, singlecap, sonicSize)' >> index.html
+echo '<span class="bluebar">1,3,4,5,3,5</span>   ' >> index.html                           
+echo '</p>' >> index.html
+echo '' >> index.html
+echo '<p>' >> index.html
+echo 'NONFLASHED Pre-filtering (mapped, multifrag, hascap, singlecap, sonicSize)' >> index.html
+echo '<span class="orangebar">1,3,4,5,3,5</span>' >> index.html
+echo '</p>' >> index.html
+echo '' >> index.html
+echo '<p>' >> index.html
+echo 'Duplicates' >> index.html
+echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>      ' >> index.html        
+echo '</p>' >> index.html
+echo '' >> index.html
+echo '<p>' >> index.html
+echo 'Cis/trans reporters' >> index.html
+echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>   ' >> index.html           
+echo '</p>' >> index.html
+echo '' >> index.html
+
+    
+# ------------------------------------------    
+}
+
+
+# ------------------------------------------    
+
 addStatsWithJavascriptToIndex(){
 # Add to the index.html - the main stats with javascript inline figures ..
 
+# -----------------------
 # Flashing counts ..
 
+echo '<hr />' >> index.html
 echo '<h3>Flashing counts (read PAIRS) </h3>' >> index.html
 echo '<pre>' >> index.html
-cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/flashing.log
+cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/flashing.log >> index.html
 echo '</pre>' >> index.html
 
+  fcountIN=$(($(cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/flashing.log | grep 'Combined'   | sed 's/.*\s//')))
+ nfcountIN=$(($(cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/flashing.log | grep 'Uncombined' | sed 's/.*\s//')))
+
+echo '<p>' >> index.html
+echo '<span class="blueorangepie">'${fcountIN}','${nfcountIN}'</span>  ' >> index.html                                       
+echo '</p>' >> index.html
+echo '' >> index.html
+
+echo '<b style="color:blue">' >> index.html
+echo 'FLASHED ' >> index.html
+echo '</b>' >> index.html
+echo '<b style="color:orange">' >> index.html
+echo 'NONFLASHED ' >> index.html
+echo '</b>' >> index.html
+
+# -----------------------
+# RE digest counts ..
+
+echo '<hr />' >> index.html
+echo '<h3>In-silico RE digestion counts :</h3>' >> index.html
+
+flashstatus="FLASHED"
+echo '<h4>'${flashstatus}_${REenzyme}'digestion.log</h4>' >> index.html
+echo '<pre style="color:blue">' >> index.html
+cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/${flashstatus}_${REenzyme}digestion.log >> index.html
+echo '</pre>' >> index.html
+
+
+flashstatus="NONFLASHED"
+echo '<h4>'${flashstatus}_${REenzyme}'digestion.log</h4>' >> index.html
+echo '<pre style="color:orange">' >> index.html
+cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/${flashstatus}_${REenzyme}digestion.log >> index.html
+echo '</pre>' >> index.html
+
+  fcountIN=$(($(cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_${REenzyme}digestion.log    | grep 'fragments was found'    | sed 's/\s.*//')))
+ nfcountIN=$(($(cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/NONFLASHED_${REenzyme}digestion.log | grep 'fragments was found'    | sed 's/\s.*//')))
+ fcountOUT=$(($(cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_${REenzyme}digestion.log    | grep 'fragments were printed' | sed 's/\s.*//')))
+nfcountOUT=$(($(cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/NONFLASHED_${REenzyme}digestion.log | grep 'fragments were printed' | sed 's/\s.*//')))
+
+echo '<p>' >> index.html
+echo '<span class="bluesilverpie">'${fcountIN}','${fcountOUT}'</span> <span class="orangebrownpie">'${nfcountIN}'',${nfcountOUT}'</span>' >> index.html
+echo '</p>' >> index.html
+echo '' >> index.html
+
+echo '<b style="color:blue">' >> index.html
+echo 'FLASHED ' >> index.html
+echo '</b>' >> index.html
+echo '(only BLUE reads continue to mapping, light-blue reads filtered at this stage)' >> index.html
+echo '<br/><b style="color:orange">' >> index.html
+echo 'NONFLASHED ' >> index.html
+echo '</b>' >> index.html
+echo '(all reads continue to mapping)' >> index.html
+
+# -----------------------
+# Mapping counts ..
+
+echo '<hr />' >> index.html
+echo '<h3>Mapping counts :</h3>' >> index.html
+
+echo '<h4>Reads entering mapping</h4>' >> index.html
+echo '<pre>' >> index.html
+head ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/*FLASHEDreadsEnteringBowtie_readcount.txt | sed 's/\/.*\///' >> index.html
+echo '</pre>' >> index.html
+
+echo '<h4>Mapping percentages</h4>' >> index.html
+echo '<pre>' >> index.html
+head ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/*FLASHED_bowtiePerc.txt | sed 's/\/.*\///' >> index.html
+echo '</pre>' >> index.html
+
+  fcountIN=$(tail -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_bowtiePerc.txt    | tr '\t' ',')
+ nfcountIN=$(tail -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/NONFLASHED_bowtiePerc.txt | tr '\t' ',')
+
+echo '<p>' >> index.html
+echo '<span class="bluesilverwhitepie">'${fcountIN}'</span> <span class="orangesilverwhitepie">'${nfcountIN}'</span>' >> index.html
+echo '</p>' >> index.html
+echo '' >> index.html
+
+echo '<b style="color:blue">' >> index.html
+echo 'FLASHED ' >> index.html
+echo '</b>' >> index.html
+echo '(only BLUE reads continue, light-blue reads filtered at this stage)' >> index.html
+echo '<br/><b style="color:orange">' >> index.html
+echo 'NONFLASHED ' >> index.html
+echo '</b>' >> index.html
+echo '(only ORANGE reads continue, light-orange reads filtered at this stage)' >> index.html
+
+# -----------------------
+# Pre-filtering counts ..
+
+echo '<hr />' >> index.html
+echo '<h3>Pre-filtering counts (before CCanalysers) :</h3>' >> index.html
+
+echo '<h4>Read counts</h4>' >> index.html
+echo '<pre>' >> index.html
+head ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/*FLASHED_summaryCounts.txt | sed 's/\/.*\///' >> index.html
+echo '</pre>' >> index.html
+
+echo '<h4>Read percentages</h4>' >> index.html
+echo '<pre>' >> index.html
+head ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/*FLASHED_summaryPerc.txt | sed 's/\/.*\///' >> index.html
+echo '</pre>' >> index.html
+
+  fcountIN=$(tail -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_summaryCounts.txt    | tr '\t' ',')
+ nfcountIN=$(tail -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/NONFLASHED_summaryCounts.txt | tr '\t' ',')
+
+echo '<p style="color:blue">' >> index.html
+echo 'FLASHED pre-filtering' >> index.html
+echo '<br/><span class="bluebar">'${fcountIN}'</span>   ' >> index.html                           
+echo '<br/> mapped, multifrag, hascap, singlecap, withinSonicSize' >> index.html
+echo '</p>' >> index.html
+echo '' >> index.html
+echo '<p style="color:orange">' >> index.html
+echo 'NONFLASHED pre-filtering' >> index.html
+echo '<br/><span class="orangebar">'${nfcountIN}'</span>' >> index.html
+echo '<br/> mapped, multifrag, hascap, singlecap, withinSonicSize' >> index.html
+echo '</p>' >> index.html
+echo '' >> index.html
+
+echo '<pre>' >> index.html
+echo 'Abbreviations :' >> index.html
+echo '' >> index.html
+echo '         mapped = mapped reads' >> index.html
+echo '      multifrag = reads with more than 1 fragment (can potentially report interaction)' >> index.html
+echo '         hascap = reads containing fragment(s) overlapping any of the capture sites (within +/- sonicationSize from RE cut sites)' >> index.html
+echo '      singlecap = resolves to single capture site (not reporting multiple different capture sites within same read)' >> index.html
+echo 'withinSonicSize = within +/- sonicationSize from RE cut sites (filters out mapping errors)' >> index.html
+echo '</pre>' >> index.html
+echo '' >> index.html
+
+
+echo '</pre>' >> index.html
+
+# -----------------------
+# CCanalyser counters ..
+
+echo '<hr />' >> index.html
+echo '<h3>CCanalyser runs (duplicate filtering, final counts) :</h3>' >> index.html
+
+echo '<h4>Read counts</h4>' >> index.html
+echo '<pre>' >> index.html
+head ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/*FLASHED_percentagesAndFinalCounts.txt | sed 's/\/.*\///' >> index.html
+echo '</pre>' >> index.html
+
+echo '<p>' >> index.html
+echo 'Duplicates' >> index.html
+echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>      ' >> index.html        
+echo '</p>' >> index.html
+echo '' >> index.html
+echo '<p>' >> index.html
+echo 'Cis/trans reporters' >> index.html
+echo '<span class="bluesilverpie">1,3</span> <span class="orangesilverpie">1,3</span>   ' >> index.html           
+echo '</p>' >> index.html
+echo '' >> index.html
+
+# -----------------------
+# Quantile ranges ..
+
+echo '<hr />' >> index.html
+echo '<h3>CCanalyser runs (duplicate filtering, final counts) :</h3>' >> index.html
+echo '<pre>' >> index.html
+cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> index.html
+echo '</pre>' >> index.html
+
+# -----------------------
+# Some emptylines ..
+
+echo '</br>' >> index.html
+echo '</br>' >> index.html
+echo '<hr />' >> index.html
+echo '</br>' >> index.html
+echo '</br>' >> index.html
     
 # ------------------------------------------    
 }
@@ -1932,6 +2200,11 @@ echo ">" >> index.html
 echo " <html lang=en>" >> index.html
 echo " <head>" >> index.html
 echo " <title> ${hubNameList[0]} data hub in ${GENOME} </title>" >> index.html
+
+prepareIndexforJavascript
+# copies the javascripts, 
+# , and adds to the <head> the subroutines to draw the inline pie charts and bar graphs
+
 echo " </head>" >> index.html
 echo " <body>" >> index.html
 
@@ -1984,6 +2257,10 @@ echo  >> description_page_files/statslisting.txt
 echo 'Text file of the main statistics : <br>' >> index.html
 echo '<a target="_blank" href="description_page_files/statslisting.txt" >statslisting.txt</a>' >> index.html
 echo '<hr />' >> index.html
+
+# Test the javascript functions ..
+# testStatsWithJavascriptToIndex
+# (uncomment the above, if the javascript functions need to be debugged for some reason)
 
 # Add to the index.html - the main stats with javascript inline figures ..
 addStatsWithJavascriptToIndex
@@ -2206,7 +2483,7 @@ ln -s ${hubTopDir} .
 for file in  data_hubs/hub_chr*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses.txt
 for file in  data_hubs/hub_raw*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/rawHubAddress.txt
 for file in  data_hubs/hub_all*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/allChrsHubAddress.txt
-
+for file in  data_hubs/index.html ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/descriptionAddress.txt
 
 trackDescriptionLine='track type=bigBed name="CaptureC_oligos" description="CaptureC_oligos" visibility="pack" itemRgb=On exonArrows=off bigDataUrl='
 echo ${trackDescriptionLine}'http://userweb.molbiol.ox.ac.uk'$( fp data_hubs/oligosAndExclusions_allReps.bb) > ${hubTopDir}/hubColorKeyBigbed.txt
@@ -2256,6 +2533,25 @@ echo "(for big design visualisation - use the chr-wise hubs below, to avoid cras
 
 echo
 echo >> E_hubAddresses.txt
+echo
+echo '_______________________________' >> E_hubAddresses.txt
+echo '_______________________________'
+echo >> E_hubAddresses.txt
+
+echo "Description html page (also auto-loads with the data hubs) :"
+echo "Description html page (also auto-loads with the data hubs) :" >> E_hubAddresses.txt
+echo
+echo >> E_hubAddresses.txt
+
+cat descriptionAddress.txt
+cat descriptionAddress.txt >> E_hubAddresses.txt
+
+echo
+echo >> E_hubAddresses.txt
+echo
+echo '_______________________________' >> E_hubAddresses.txt
+echo '_______________________________'
+echo >> E_hubAddresses.txt
 
 echo "Raw mapped Sam fragments -hub (for troubleshooting and QC of the analysis) :"
 echo "Raw mapped Sam fragments -hub (for troubleshooting and QC of the analysis) :" >> E_hubAddresses.txt
@@ -2266,6 +2562,10 @@ cat rawHubAddress.txt
 cat rawHubAddress.txt >> E_hubAddresses.txt
 
 echo
+echo >> E_hubAddresses.txt
+echo
+echo '_______________________________' >> E_hubAddresses.txt
+echo '_______________________________'
 echo >> E_hubAddresses.txt
 
 echo "Chromosome-wise data hubs (for visualising larger than ~ 200 oligos designs) :"
