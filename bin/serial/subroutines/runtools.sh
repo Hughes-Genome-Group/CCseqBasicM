@@ -540,7 +540,7 @@ echo "RAW untrimmed files " >fastqcRuns.err
 echo >>fastqcRuns.err
 
 setStringentFailForTheFollowing
-${RunScriptsPath}/QC_and_Trimming.sh --fastqc 1>>fastqcRuns.out 2>>fastqcRuns.err
+${RunScriptsPath}/QC_and_Trimming.sh --fastqc  --fastqcname $(basename $(dirname $(pwd)))_ORIGINAL 1>>fastqcRuns.out 2>>fastqcRuns.err
 stopStringentFailAfterTheAbove
 
     # Changing names of fastqc folders to be "ORIGINAL"
@@ -611,7 +611,7 @@ printThis="${RunScriptsPath}/QC_and_Trimming.sh --fastqc"
 printToLogFile
 
 setStringentFailForTheFollowing
-${RunScriptsPath}/QC_and_Trimming.sh --fastqc  1>>fastqcRuns.out 2>>fastqcRuns.err
+${RunScriptsPath}/QC_and_Trimming.sh --fastqc  --fastqcname $(basename $(dirname $(pwd)))_TRIMMED 1>>fastqcRuns.out 2>>fastqcRuns.err
 stopStringentFailAfterTheAbove
 
     # Changing names of fastqc folders to be "TRIMMED"
@@ -663,14 +663,14 @@ printToLogFile
 rm -rf FLASHED_fastqc
 mkdir FLASHED_fastqc
 setStringentFailForTheFollowing
-${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 FLASHED  1>>fastqcRuns.out 2>>fastqcRuns.err
+${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 FLASHED  --fastqcname $(basename $(dirname $(pwd)))_FLASHED 1>>fastqcRuns.out 2>>fastqcRuns.err
 stopStringentFailAfterTheAbove
 mv -f FLASHED_fastqc.html FLASHED_fastqc/fastqc_report.html
 
 rm -rf NONFLASHED_fastqc
 mkdir NONFLASHED_fastqc
 setStringentFailForTheFollowing
-${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 NONFLASHED  1>>fastqcRuns.out 2>>fastqcRuns.err
+${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 NONFLASHED  --fastqcname $(basename $(dirname $(pwd)))_NONFLASHED 1>>fastqcRuns.out 2>>fastqcRuns.err
 stopStringentFailAfterTheAbove
 mv -f NONFLASHED_fastqc.html NONFLASHED_fastqc/fastqc_report.html
 
@@ -739,14 +739,14 @@ printToLogFile
 rm -rf FLASHED_REdig_fastqc
 mkdir FLASHED_REdig_fastqc
 setStringentFailForTheFollowing
-${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 FLASHED_REdig  1>>fastqcRuns.out 2>>fastqcRuns.err
+${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 FLASHED_REdig  --fastqcname $(basename $(dirname $(pwd)))_FLASHED_REdig 1>>fastqcRuns.out 2>>fastqcRuns.err
 stopStringentFailAfterTheAbove
 mv -f FLASHED_REdig_fastqc.html FLASHED_REdig_fastqc/fastqc_report.html
 
 rm -rf NONFLASHED_REdig_fastqc
 mkdir NONFLASHED_REdig_fastqc
 setStringentFailForTheFollowing
-${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 NONFLASHED_REdig  1>>fastqcRuns.out 2>>fastqcRuns.err
+${RunScriptsPath}/QC_and_Trimming.sh --fastqc --single 1 --basenameR1 NONFLASHED_REdig   --fastqcname $(basename $(dirname $(pwd)))_NONFLASHED_REdig 1>>fastqcRuns.out 2>>fastqcRuns.err
 stopStringentFailAfterTheAbove
 mv -f NONFLASHED_REdig_fastqc.html NONFLASHED_REdig_fastqc/fastqc_report.html
 

@@ -356,6 +356,11 @@ if [ "${onlyHub}" -eq 1 ] ; then
   printThis="Only generating summary counts and data hub - as user states --onlyHub  .. "
   printNewChapterToLogFile
 
+  printThis="MultiQC reports  .. "
+  printNewChapterToLogFile
+
+  makeMultiqcReports
+
   printThis="Fastq summary counts  .. "
   printNewChapterToLogFile
 
@@ -647,6 +652,8 @@ cd ${rainbowRunTOPDIR}
 
 # Make summaries
 
+makeMultiqcReports
+
 flashstatus="FLASHED"
 makeFastqrunSummaries
 flashstatus="NONFLASHED"
@@ -666,12 +673,6 @@ cat B_mapAndDivideFastqs/flashing.log >> B_fastqSummaryCounts.txt
 checkFastqRunErrors
 
 # ------------------------------
-
-printThis="${CaptureParallelPath}/runscripts/parallel_QC.sh"
-printToLogFile
-
-${CaptureParallelPath}/parallel_QC.sh 1> B_mapAndDivideFastqs/multiQCrunlog.out 2> B_mapAndDivideFastqs/multiQCrunlog.err
-# runs multiQC
 
 # If running only first stages
 if [ "${stopAfterFolderB}" -eq 1 ]; then

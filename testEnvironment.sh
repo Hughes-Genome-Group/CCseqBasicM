@@ -837,6 +837,16 @@ echo
 
 sleep 4
 
+echo "MultiQC .."
+echo
+multiqc --version
+multiqc --version >> /dev/null
+exitCode=$(( ${exitCode} + $? ))
+echo
+
+sleep 4
+
+
 
 ##########################################################################
 

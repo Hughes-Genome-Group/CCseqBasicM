@@ -120,8 +120,8 @@ export PATH=$PATH:/package/trim_galore/0.3.1/bin
 export PATH=$PATH:/package/cutadapt/1.2.1/bin
 export PATH=$PATH:/package/perl/5.18.1/bin
 export PATH=$PATH:/package/blat/35/bin
-export PATH=$PATH:/package/python/2.7.5/bin
-
+export PATH=$PATH:/package/python/2.7.8/bin
+export PATH=$PATH:/package/multiqc/0.7/bin
 
 # See notes of SUPPORTED VERSIONS above !
 

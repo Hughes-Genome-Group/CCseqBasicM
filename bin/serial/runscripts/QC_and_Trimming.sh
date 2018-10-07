@@ -176,8 +176,9 @@ singleEnd=0
 stringency=1
 length=10
 qualFilter=20
+fastqcName="UNDEFINED"
 
-OPTS=`getopt -o q: --long preFilter,filter5prime,flashFilter,fastqc,customad,qmin:,filter:,basenameR1:,basenameR2:,basename:,single:,nextera:,a31:,a32:,a51:,a52: -- "$@"`
+OPTS=`getopt -o q: --long preFilter,filter5prime,flashFilter,fastqc,customad,fastqcname:,qmin:,filter:,basenameR1:,basenameR2:,basename:,single:,nextera:,a31:,a32:,a51:,a52: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -189,6 +190,7 @@ while true ; do
     case "$1" in
         -q) QUAL=$2 ; shift 2;;
         --fastqc) runMode="fastqc" ; shift 1;;
+        --fastqcname) fastqcName=$2 ; shift 2;;
         --customad) CUSTOMAD=1 ; shift 1;;
         --nextera) NEXTERA=$2 ; shift 2;;
         --qmin) qualFilter=$2 ; shift 2;;
@@ -296,12 +298,25 @@ if [ "${runMode}" = "fastqc" ]; then
 
 echo "RUNNING FASTQC .."
 
+# MultiQC reads the name from the html, not from the file name, so better do this via symlinks, then..
+if [ "${fastqcName}" == "UNDEFINED" ]; then
+    fastqcName=$( echo "${READ1}" | rev | sed 's/1//' | rev )
+fi
+
+ln -s "${READ1}".fastq ${fastqcName}_R1.fastq
 echo "fastqc --quiet -f fastq ${READ1}.fastq"
-fastqc -f fastq "${READ1}.fastq"
+fastqc -f fastq "${fastqcName}_R1.fastq"
+rm -f ${fastqcName}_R1.fastq
+mv -f ${fastqcName}_R1_fastqc.html  ${READ1}_fastqc.html
+mv -f ${fastqcName}_R1_fastqc.zip  ${READ1}_fastqc.zip
 
 if [ "${singleEnd}" -eq 0 ] ; then
+ln -s "${READ2}".fastq ${fastqcName}_R2.fastq
 echo "fastqc --quiet -f fastq ${READ2}.fastq"
-fastqc -f fastq "${READ2}.fastq"
+fastqc -f fastq "${fastqcName}_R2.fastq"
+rm -f ${fastqcName}_R2.fastq
+mv -f ${fastqcName}_R2_fastqc.html  ${READ2}_fastqc.html
+mv -f ${fastqcName}_R2_fastqc.zip  ${READ2}_fastqc.zip
 fi
 
 ###################################################################
