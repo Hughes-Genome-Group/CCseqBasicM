@@ -15,20 +15,20 @@ echo "trackDb ${parentname}_tracks.txt" >> genomes_${parentname}.txt
 
 doOneParent(){
 
-echo track ${parentname} >> ${parentname}_tracks.txt
-echo shortLabel ${parentname} >> ${parentname}_tracks.txt
-echo longLabel ${parentname} >> ${parentname}_tracks.txt
-echo type bigWig >> ${parentname}_tracks.txt
-echo container multiWig >> ${parentname}_tracks.txt
-echo aggregate transparentOverlay >> ${parentname}_tracks.txt
-echo showSubtrackColorOnUi on >> ${parentname}_tracks.txt
-echo visibility ${visibility} >> ${parentname}_tracks.txt
-echo windowingFunction maximum >> ${parentname}_tracks.txt
-echo html description >> ${parentname}_tracks.txt
-echo autoScale on >> ${parentname}_tracks.txt
-echo alwaysZero on >> ${parentname}_tracks.txt
-echo priority 120  >> ${parentname}_tracks.txt
-echo   >> ${parentname}_tracks.txt
+echo track ${parentname} >> ${trackfilename}_tracks.txt
+echo shortLabel ${parentname} >> ${trackfilename}_tracks.txt
+echo longLabel ${parentname} >> ${trackfilename}_tracks.txt
+echo type bigWig >> ${trackfilename}_tracks.txt
+echo container multiWig >> ${trackfilename}_tracks.txt
+echo aggregate transparentOverlay >> ${trackfilename}_tracks.txt
+echo showSubtrackColorOnUi on >> ${trackfilename}_tracks.txt
+echo visibility ${visibility} >> ${trackfilename}_tracks.txt
+echo windowingFunction maximum >> ${trackfilename}_tracks.txt
+echo html description >> ${trackfilename}_tracks.txt
+echo autoScale on >> ${trackfilenamee}_tracks.txt
+echo alwaysZero on >> ${trackfilename}_tracks.txt
+echo priority 120  >> ${trackfilename}_tracks.txt
+echo   >> ${trackfilename}_tracks.txt
 
 
 }
@@ -40,14 +40,14 @@ doOneRawsamChild(){
 
 name=$(basename ${fastqBwfile})
 
-echo track ${name} >> ${parentname}_tracks.txt
-echo parent ${parentname} >> ${parentname}_tracks.txt
-echo bigDataUrl ${fastqBwfile} >> ${parentname}_tracks.txt
-echo shortLabel ${name} >> ${parentname}_tracks.txt
-echo longLabel ${name} >> ${parentname}_tracks.txt
-echo type bigWig >> ${parentname}_tracks.txt
-echo 'color 0,0,0' >> ${parentname}_tracks.txt
-echo   >> ${parentname}_tracks.txt
+echo track ${name} >> ${trackfilename}_tracks.txt
+echo parent ${parentname} >> ${trackfilename}_tracks.txt
+echo bigDataUrl ${fastqBwfile} >> ${trackfilename}_tracks.txt
+echo shortLabel ${name} >> ${trackfilename}_tracks.txt
+echo longLabel ${name} >> ${trackfilename}_tracks.txt
+echo type bigWig >> ${trackfilename}_tracks.txt
+echo 'color 0,0,0' >> ${trackfilename}_tracks.txt
+echo   >> ${trackfilename}_tracks.txt
 
 }
 
@@ -58,18 +58,18 @@ doOneChild(){
 
 name="${oligolist[i]}_${abbrev}"
 
-echo track ${name} >> ${parentname}_tracks.txt
-echo parent ${parentname} >> ${parentname}_tracks.txt
-echo bigDataUrl ${folder}/${subfolder}/${bwprefix}_${ccversion}_${oligolist[i]}${bwsuffix}.bw >> ${parentname}_tracks.txt
-echo shortLabel ${name} >> ${parentname}_tracks.txt
-echo longLabel ${name} >> ${parentname}_tracks.txt
-echo type bigWig >> ${parentname}_tracks.txt
+echo track ${name} >> ${trackfilename}_tracks.txt
+echo parent ${parentname} >> ${trackfilename}_tracks.txt
+echo bigDataUrl ${folder}/${subfolder}/${bwprefix}_${ccversion}_${oligolist[i]}${bwsuffix}.bw >> ${trackfilename}_tracks.txt
+echo shortLabel ${name} >> ${trackfilename}_tracks.txt
+echo longLabel ${name} >> ${trackfilename}_tracks.txt
+echo type bigWig >> ${trackfilename}_tracks.txt
 
-echo color ${color[$((i%19+1))]} >> ${parentname}_tracks.txt
+echo color ${color[$((i%19+1))]} >> ${trackfilename}_tracks.txt
 
 echo -n color[$((i%19+1))]
 
-echo   >> ${parentname}_tracks.txt
+echo   >> ${trackfilename}_tracks.txt
 
 }
 

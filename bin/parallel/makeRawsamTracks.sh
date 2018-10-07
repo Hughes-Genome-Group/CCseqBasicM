@@ -25,6 +25,7 @@ echo -n "- ${abbrev} "
 echo -n "- ${abbrev} " >> "/dev/stderr"
 
 parentname="${abbrev}"
+trackfilename="${abbrev}"
 
 rm -f ${parentname}_tracks.txt
 doOneParent

@@ -1983,6 +1983,7 @@ echo '</b>' >> index.html
 echo '<b style="color:orange">' >> index.html
 echo 'NONFLASHED ' >> index.html
 echo '</b>' >> index.html
+echo '</br>(hover over to see the counts)' >> index.html
 
 # -----------------------
 # RE digest counts ..
@@ -2039,6 +2040,7 @@ echo '</b>' >> index.html
 echo '<b style="color:orange">' >> index.html
 echo 'NONFLASHED ' >> index.html
 echo '</b>' >> index.html
+echo '</br>(hover over to see the counts)' >> index.html
 
 # -----------------------
 # Mapping counts ..
@@ -2097,12 +2099,14 @@ echo 'FLASHED pre-filtering' >> index.html
 echo '<br/><span class="bluebar">'${fcountIN}'</span>   ' >> index.html                           
 echo '<br/> mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
 echo '</p>' >> index.html
+echo '</br>(hover over to see the counts)' >> index.html
 echo '' >> index.html
 echo '<p style="color:orange">' >> index.html
 echo 'NONFLASHED pre-filtering' >> index.html
 echo '<br/><span class="orangebar">'${nfcountIN}'</span>' >> index.html
 echo '<br/> mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
 echo '</p>' >> index.html
+echo '</br>(hover over to see the counts)' >> index.html
 echo '' >> index.html
 
 echo '<pre>' >> index.html
@@ -2157,6 +2161,13 @@ echo '<p>' >> index.html
 echo '<span class="bluesilverpie">'${fcountIN}'</span> <span class="orangesilverpie">'${nfcountIN}'</span>   ' >> index.html           
 echo '</p>' >> index.html
 echo '' >> index.html
+echo '<b style="color:blue">' >> index.html
+echo 'FLASHED ' >> index.html
+echo '</b>' >> index.html
+echo '<b style="color:orange">' >> index.html
+echo 'NONFLASHED ' >> index.html
+echo '</b>' >> index.html
+echo '</br>(hover over to see the counts)' >> index.html
 
 # -----------------------
 # Quantile ranges ..
@@ -2169,6 +2180,7 @@ echo '</pre>' >> index.html
 
 countIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
 echo '<h4>Reported fragments (total), oligo-wise distribution</h4>' >> index.html
+echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
@@ -2179,6 +2191,7 @@ echo '' >> index.html
 
 countIN=$(head -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
 echo '<h4>Reported fragments ( CIS ), oligo-wise distribution</h4>' >> index.html
+echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
@@ -2189,6 +2202,7 @@ echo '' >> index.html
 
 countIN=$(tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
 echo '<h4>Reported fragments ( TRANS ), oligo-wise distribution</h4>' >> index.html
+echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
@@ -2199,6 +2213,7 @@ echo '' >> index.html
 
 countIN=$(head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
 echo '<h4>Capture fragments in reported reads (intra-read duplicates not filtered), oligo-wise distribution</h4>' >> index.html
+echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
@@ -2216,6 +2231,105 @@ echo '<hr />' >> index.html
 echo '</br>' >> index.html
 echo '</br>' >> index.html
     
+# ------------------------------------------    
+}
+
+# ------------------------------------------    
+makeAllTheHubs(){
+# ------------------------------------------    
+
+echo "cisTypeSuffix '${cisTypeSuffix}'"
+
+thisIsFirstRound=1
+for folder in ${listOfChromosomes}
+do
+{
+pwd
+echo -en "${folder}\t"
+echo -en "${folder}\t" >> "/dev/stderr"
+
+thisHubSubfolder="COMBINED"
+bigwigPrefix="COMBINED"
+
+# only first time around we print parent for cis tracks (to become the combined hub)
+# In any case the parent of cis tracks will have shorter name (no chr in name)
+parentOrNot=""
+if [ "${cisTypeSuffix}" != "" ]; then
+    if [ "${thisIsFirstRound}" -ne 1 ] ; then
+        parentOrNot="noparent"
+    else
+        parentOrNot="wholegenparent"
+    fi
+fi
+thisIsFirstRound=0
+
+# Setting suffix (or any of these flags) to 'none' turns it off, i.e. sets it to ""
+if [ "${cisTypeSuffix}" == "" ]; then bigwigSuffix="none"; else bigwigSuffix="${cisTypeSuffix}";fi
+trackAbbrev="COMB"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "full" ${CCversion} ${parentOrNot}
+bigwigSuffix="_normTo10k${cisTypeSuffix}"
+trackAbbrev="COMBnorm"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "full" ${CCversion} ${parentOrNot}
+bigwigSuffix="_CIS_normTo10k${cisTypeSuffix}"
+trackAbbrev="COMBnormCIS"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "full" ${CCversion} ${parentOrNot}
+
+flashstatus="FLASHED"
+bigwigPrefix="FLASHED_REdig"
+if [ "${cisTypeSuffix}" == "" ]; then bigwigSuffix="none"; else bigwigSuffix="${cisTypeSuffix}";fi
+trackAbbrev="filtF"
+thisHubSubfolder="FILTERED_${flashstatus}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion} ${parentOrNot}
+trackAbbrev="prefiltF"
+thisHubSubfolder="PREfiltered_${flashstatus}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion} ${parentOrNot}
+trackAbbrev="rawF"
+thisHubSubfolder="RAW_${flashstatus}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion} ${parentOrNot}
+
+flashstatus="NONFLASHED"
+bigwigPrefix="NONFLASHED_REdig"
+if [ "${cisTypeSuffix}" == "" ]; then bigwigSuffix="none"; else bigwigSuffix="${cisTypeSuffix}";fi
+trackAbbrev="filtNF"
+thisHubSubfolder="FILTERED_${flashstatus}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion} ${parentOrNot}
+trackAbbrev="prefiltNF"
+thisHubSubfolder="PREfiltered_${flashstatus}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion} ${parentOrNot}
+trackAbbrev="rawNF"
+thisHubSubfolder="RAW_${flashstatus}"
+${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion} ${parentOrNot}
+
+rm -rf ${folder}/makingOfTracks${cisTypeSuffix}
+mkdir ${folder}/makingOfTracks${cisTypeSuffix}
+mv ${folder}_*_tracks.txt ${folder}/makingOfTracks${cisTypeSuffix}/.
+cat ${folder}/makingOfTracks${cisTypeSuffix}/* > ${folder}${cisTypeSuffix}_tracks.txt
+
+if [ "${cisTypeSuffix}" == "" ]; then
+
+echo -n "- hubAndGenome "
+echo -n "- hubAndGenome " >> "/dev/stderr"
+${CaptureParallelPath}/makeRainbowHubs.sh ${samplename} ${folder}${cisTypeSuffix} ${ucscBuildName}
+    
+fi
+
+echo ''
+echo '' >> "/dev/stderr"
+
+}
+done
+
+if [ "${cisTypeSuffix}" != "" ]; then
+    rm -rf makingOfCisTracks
+    mkdir makingOfCisTracks
+    mv chr*${cisTypeSuffix}_tracks.txt makingOfCisTracks/.
+    cat makingOfCisTracks/chr*${cisTypeSuffix}_tracks.txt > wholegenome${cisTypeSuffix}_tracks.txt
+    
+    ${CaptureParallelPath}/makeRainbowHubs.sh ${samplename} wholegenome${cisTypeSuffix} ${ucscBuildName}
+    
+    
+fi
+
 # ------------------------------------------    
 }
 
@@ -2492,66 +2606,26 @@ printToLogFile
 
 weWereHereDir=$(pwd)
 
-for folder in ${listOfChromosomes}
-do
-{
-pwd
-echo -en "${folder}\t"
-echo -en "${folder}\t" >> "/dev/stderr"
+# -----------------------
+# Master hub (whole genome hub) ..
 
-thisHubSubfolder="COMBINED"
-bigwigPrefix="COMBINED"
-# Setting suffix (or any of these flags) to 'none' turns it off, i.e. sets it to ""
-bigwigSuffix="none"
-trackAbbrev="COMB"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "full" ${CCversion}
-bigwigSuffix="_normTo10k"
-trackAbbrev="COMBnorm"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "full" ${CCversion}
-bigwigSuffix="_CIS_normTo10k"
-trackAbbrev="COMBnormCIS"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "full" ${CCversion}
+printThis="Master hub (whole genome hub) .."
+printToLogFile
 
-flashstatus="FLASHED"
-bigwigPrefix="FLASHED_REdig"
-bigwigSuffix="none"
-trackAbbrev="filtF"
-thisHubSubfolder="FILTERED_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion}
-trackAbbrev="prefiltF"
-thisHubSubfolder="PREfiltered_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion}
-trackAbbrev="rawF"
-thisHubSubfolder="RAW_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion}
+cisTypeSuffix="_CISonly"
+makeAllTheHubs
 
-flashstatus="NONFLASHED"
-bigwigPrefix="NONFLASHED_REdig"
-bigwigSuffix="none"
-trackAbbrev="filtNF"
-thisHubSubfolder="FILTERED_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion}
-trackAbbrev="prefiltNF"
-thisHubSubfolder="PREfiltered_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion}
-trackAbbrev="rawNF"
-thisHubSubfolder="RAW_${flashstatus}"
-${CaptureParallelPath}/makeRainbowTracks.sh ${folder} ${thisHubSubfolder} ${bigwigPrefix} ${bigwigSuffix} ${trackAbbrev} "hide" ${CCversion}
 
-rm -rf ${folder}/makingOfTracks
-mkdir ${folder}/makingOfTracks
-mv ${folder}_*_tracks.txt ${folder}/makingOfTracks/.
-cat ${folder}/makingOfTracks/* > ${folder}_tracks.txt
+# -----------------------
+# Chromosome-wise hubs ..
 
-echo -n "- hubAndGenome "
-echo -n "- hubAndGenome " >> "/dev/stderr"
-${CaptureParallelPath}/makeRainbowHubs.sh ${samplename} ${folder} ${ucscBuildName}
+printThis="Chromosome-wise hubs .."
+printToLogFile
 
-echo ''
-echo '' >> "/dev/stderr"
+cisTypeSuffix=""
+makeAllTheHubs
 
-}
-done
+# -----------------------
 
 # Symlink to all hub files into public ..
 cd ${hubTopDir}
@@ -2563,10 +2637,10 @@ cd  ${publicfolder}/${samplename}/${CCversion}_${REenzyme}/
 rm -f data_hubs
 ln -s ${hubTopDir} .
 
-for file in  data_hubs/hub_chr*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses.txt
-for file in  data_hubs/hub_raw*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/rawHubAddress.txt
-for file in  data_hubs/hub_all*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/allChrsHubAddress.txt
-for file in  data_hubs/index.html ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/descriptionAddress.txt
+for file in  data_hubs/hub_chr*.txt         ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/hubAddresses.txt
+for file in  data_hubs/hub_raw*.txt         ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/rawHubAddress.txt
+for file in  data_hubs/hub_wholegenome*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/allChrsHubAddress.txt
+for file in  data_hubs/index.html           ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/descriptionAddress.txt
 
 trackDescriptionLine='track type=bigBed name="CaptureC_oligos" description="CaptureC_oligos" visibility="pack" itemRgb=On exonArrows=off bigDataUrl='
 echo ${trackDescriptionLine}'http://userweb.molbiol.ox.ac.uk'$( fp data_hubs/oligosAndExclusions_allReps.bb) > ${hubTopDir}/hubColorKeyBigbed.txt
