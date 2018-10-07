@@ -2096,17 +2096,17 @@ echo '</pre>' >> index.html
 
 echo '<p style="color:blue">' >> index.html
 echo 'FLASHED pre-filtering' >> index.html
+echo '<span style="color:black"></br>(hover over to see the counts)</span>' >> index.html
 echo '<br/><span class="bluebar">'${fcountIN}'</span>   ' >> index.html                           
 echo '<br/> mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
 echo '</p>' >> index.html
-echo '</br>(hover over to see the counts)' >> index.html
 echo '' >> index.html
 echo '<p style="color:orange">' >> index.html
 echo 'NONFLASHED pre-filtering' >> index.html
+echo '<span style="color:black"></br>(hover over to see the counts)</span>' >> index.html
 echo '<br/><span class="orangebar">'${nfcountIN}'</span>' >> index.html
 echo '<br/> mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
 echo '</p>' >> index.html
-echo '</br>(hover over to see the counts)' >> index.html
 echo '' >> index.html
 
 echo '<pre>' >> index.html
