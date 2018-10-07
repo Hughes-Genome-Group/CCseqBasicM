@@ -25,7 +25,7 @@ echo showSubtrackColorOnUi on >> ${trackfilename}_tracks.txt
 echo visibility ${visibility} >> ${trackfilename}_tracks.txt
 echo windowingFunction maximum >> ${trackfilename}_tracks.txt
 echo html description >> ${trackfilename}_tracks.txt
-echo autoScale on >> ${trackfilenamee}_tracks.txt
+echo autoScale on >> ${trackfilename}_tracks.txt
 echo alwaysZero on >> ${trackfilename}_tracks.txt
 echo priority 120  >> ${trackfilename}_tracks.txt
 echo   >> ${trackfilename}_tracks.txt
@@ -56,7 +56,7 @@ doOneChild(){
 # FLASHED_REdig_CM5_1190007I07Rik_L_R.bw
 # track_symlinks/${folder}/${subfolder}_REdig_CM5_${oligolist[i]}.bw
 
-name="${oligolist[i]}_${abbrev}"
+name="${oligolist[i]}_${abbrev}_${folder}"
 
 echo track ${name} >> ${trackfilename}_tracks.txt
 echo parent ${parentname} >> ${trackfilename}_tracks.txt

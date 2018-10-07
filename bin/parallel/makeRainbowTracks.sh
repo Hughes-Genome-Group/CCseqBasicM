@@ -47,7 +47,7 @@ echo -n "- ${subfolder} " >> "/dev/stderr"
 trackfilename="${folder}_${subfolder}${bwsuffix}"
 
 # If we want to have chr name in the parent
-if [ "${parent}" == "wholegenparent" ]; then
+if [ "${parent}" == "wholegenparent" ] || [ "${parent}" == "noparent" ]; then
   parentname="${subfolder}${bwsuffix}"
 else
   parentname="${folder}_${subfolder}${bwsuffix}"
