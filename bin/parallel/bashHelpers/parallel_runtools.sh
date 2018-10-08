@@ -56,79 +56,6 @@ confFolder="${MainScriptPath}/conf"
 . ${confFolder}/genomeBuildSetup.sh
 . ${confFolder}/loadNeededTools.sh
 
-
-# ------------------------------------------
-
-oneMultiqcRound(){
-# ------------------------------------------
-
-rm -rf forMulti_TMP
-mkdir  forMulti_TMP
-
-for folder in fastq_*
-do 
-mkdir forMulti_TMP/$folder
-cp -r $folder/F1_beforeCCanalyser_${samplename}_${CCversion}/${multiRoundName}_fastqc forMulti_TMP/$folder/${multiRoundName}_fastqc
-cp    $folder/F1_beforeCCanalyser_${samplename}_${CCversion}/${multiRoundName}_fastqc.zip forMulti_TMP/$folder/${multiRoundName}_fastqc.zip
-done
-
-rm -rf forMulti_${multiRoundName}
-multiqc -o multiqc_${multiRoundName} forMulti_TMP
-rm -rf forMulti_TMP
-
-# ------------------------------------------
-}
-
-# ------------------------------------------
-
-makeMultiqcReports(){
-# ------------------------------------------
-
-weWereHereDir=$(pwd)
-cd B_mapAndDivideFastqs
-
-multiRoundName="FLASHED"
-multiRoundFolder="FLASHED_fastqc"
-oneMultiqcRound
-
-multiRoundName="NONFLASHED"
-multiRoundFolder="NONFLASHED_fastqc"
-oneMultiqcRound
-
-
-multiRoundName="FLASHED_REdig"
-multiRoundFolder="FLASHED_REdig_fastqc"
-oneMultiqcRound
-
-
-multiRoundName="NONFLASHED_REdig"
-multiRoundFolder="FLASHED_REdig_fastqc"
-oneMultiqcRound
-
-multiRoundName="READ1_unmodified"
-multiRoundFolder="READ1_fastqc_ORIGINAL"
-oneMultiqcRound
-
-multiRoundName="READ2_unmodified"
-multiRoundFolder="READ2_fastqc_ORIGINAL"
-oneMultiqcRound
-
-multiRoundName="READ1_trimmed"
-multiRoundFolder="READ1_fastqc_TRIMMED"
-oneMultiqcRound
-
-multiRoundName="READ2_trimmed"
-multiRoundFolder="READ2_fastqc_TRIMMED"
-oneMultiqcRound
-
-cdCommand='cd ${weWereHereDir}'
-cdToThis="${weWereHereDir}"
-checkCdSafety  
-cd ${weWereHereDir}
-
-# ------------------------------------------
-}
-
 # ------------------------------------------
 
 makeFastqrunSummaries(){
@@ -2500,7 +2427,7 @@ mkdir description_page_files
 
 ln -s ../../COMBINED_allFinalCounts.txt description_page_files/.
 ln -s ../../COMBINED_allFinalCounts_table.txt description_page_files/.
-ln -s ../../../B_mapAndDivideFastqs/multiqc* description_page_files/.
+ln -s ../../../B_mapAndDivideFastqs/multiqcReports description_page_files/.
 
 echo 'Oligo-wise counts (table) : <br>' >> index.html
 echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a>' >> index.html
@@ -2516,14 +2443,14 @@ echo '<a target="_blank" href="../qsub.err" >qsub.err</a>' >> index.html
 echo '<hr />' >> index.html
 echo '<h4>FastQC reports along the run :</h4>' >> index.html
 echo '<ol>' >> index.html
-echo '<li><a target="_blank" href="description_page_files/multiqc_READ1_unmodified/multiqc_report.html" >ummodified READ1</a></li>' >> index.html
-echo '<li><a target="_blank" href="description_page_files/multiqc_READ2_unmodified/multiqc_report.htmll" >unmodified READ2</a></li>' >> index.html
-echo '<li><a target="_blank" href="description_page_files/multiqc_READ1_trimmed/multiqc_report.html" >adaptor-trimmed READ1</a></li>' >> index.html
-echo '<li><a target="_blank" href="description_page_files/multiqc_READ2_trimmed/multiqc_report.htmll" >adaptor-trimmed READ2</a></li>' >> index.html
-echo '<li><a target="_blank" href="description_page_files/multiqc_FLASHED/multiqc_report.html" >FLASHED reads</a></li>' >> index.html
-echo '<li><a target="_blank" href="description_page_files/multiqc_NONFLASHED/multiqc_report.html" >NONFLASHED reads</a></li>' >> index.html
-echo '<li><a target="_blank" href="description_page_files/multiqc_FLASHED_REdig/multiqc_report.htmll" >FLASHED reads, RE-digested</a></li>' >> index.html
-echo '<li><a target="_blank" href="description_page_files/multiqc_NONFLASHED_REdig/multiqc_report.html" >NONFLASHED_reads, RE-digested</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/multiqcReports/READ1_unmodified/multiqc_report.html" >ummodified READ1</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/multiqcReports/READ2_unmodified/multiqc_report.html" >unmodified READ2</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/multiqcReports/READ1_trimmed/multiqc_report.html" >adaptor-trimmed READ1</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/multiqcReports/READ2_trimmed/multiqc_report.html" >adaptor-trimmed READ2</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/multiqcReports/FLASHED/multiqc_report.html" >FLASHED reads</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/multiqcReports/NONFLASHED/multiqc_report.html" >NONFLASHED reads</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/multiqcReports/FLASHED_REdig/multiqc_report.html" >FLASHED reads, RE-digested</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/multiqcReports/NONFLASHED_REdig/multiqc_report.html" >NONFLASHED_reads, RE-digested</a></li>' >> index.html
 echo '</ol>' >> index.html
 echo '<hr />' >> index.html
 

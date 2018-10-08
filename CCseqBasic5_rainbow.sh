@@ -359,7 +359,7 @@ if [ "${onlyHub}" -eq 1 ] ; then
   printThis="MultiQC reports  .. "
   printNewChapterToLogFile
 
-  makeMultiqcReports
+  ${CaptureParallelPath}/parallel_QC.sh ${samplename} ${CCversion}
 
   printThis="Fastq summary counts  .. "
   printNewChapterToLogFile
@@ -652,7 +652,7 @@ cd ${rainbowRunTOPDIR}
 
 # Make summaries
 
-makeMultiqcReports
+${CaptureParallelPath}/parallel_QC.sh ${samplename} ${CCversion}
 
 flashstatus="FLASHED"
 makeFastqrunSummaries
