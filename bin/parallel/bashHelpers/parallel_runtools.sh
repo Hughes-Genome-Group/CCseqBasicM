@@ -1572,7 +1572,7 @@ mkdir BLAT
 # If we have previous blats.
 if [ "${isReuseBlatPathGiven}" -eq 1 ]; then
 
-# ls ${reuseblatpath}
+ls ${reuseblatpath} >> "/dev/null"
 if [ $? -ne 0 ];then
     printThis="Cannot find the BLAT results folder --BLATforREUSEfolderPath ${reuseblatpath} . Check your run command ! "
     printToLogFile
@@ -1581,7 +1581,7 @@ if [ $? -ne 0 ];then
     exit 1
 fi
 
-pslFilesFound=$(($( ls ${reuseblatpath} | grep -c psl )))
+pslFilesFound=$(($( ls -1 ${reuseblatpath} | grep -c ".psl$" )))
 if [ "${pslFilesFound}" -eq 0 ];then
     printThis="No .psl files found in the BLAT results folder --BLATforREUSEfolderPath ${reuseblatpath} . Check your run REUSE_blat folder ! "
     printToLogFile
@@ -1617,12 +1617,10 @@ fi
 
 if [ "${isReuseBlatPathGiven}" -eq 1 ] && [ "${onlyblat}" -eq 0 ]; then
 
-oligofileCount=0
 blatwarningsCount=0
 blatwarningOligoList=""
 for file in A_prepareForRun/OLIGOSindividualFiles/*/*/oligoFileOneliner.txt 
 do
-    oligofileCount=$((${fastqCount}+1))
     
     thisOligoName=$( basename $( dirname $file ))
     thisOligoChr=$( basename $( dirname $( dirname $file ))) 
@@ -1644,8 +1642,8 @@ do
 done
 
 if [ "${blatwarningsCount}" -eq "${pslFilesFound}" ];then
-    printThis="None of the oligos had .psl files in the BLAT results folder --BLATforREUSEfolderPath ${reuseblatpath} . Maybe you are using wrong REUSE_blat folder ? "
-    printToLogFile
+    printThis="None of the ${pslFilesFound} oligos had .psl files in the BLAT results folder --BLATforREUSEfolderPath ${reuseblatpath} . Maybe you are using wrong REUSE_blat folder ? "
+    printToLogFile    
     printThis="EXITING "
     printToLogFile
     exit 1
