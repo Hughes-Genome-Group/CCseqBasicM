@@ -85,6 +85,25 @@ else{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}\
 # BOWTIEs summary oneliners
 # ###############################
 
+# Bowtie1 and bowtie2 reports differ :
+# 1_b2	7160726 reads; of these:
+# 2_b2	  7160726 (100.00%) were unpaired; of these:
+# 3_b2	    43688 (0.61%) aligned 0 times
+# 4_b2	    6546174 (91.42%) aligned exactly 1 time
+# 5_b2	    570864 (7.97%) aligned >1 times
+# 6_b2	99.39% overall alignment rate
+# 
+# 1_b1	# reads processed: 44369755
+# 2_b1	# reads with at least one reported alignment: 36772576 (82.88%)
+# 3_b1	# reads that failed to align: 713963 (1.61%)
+# 4_b1	# reads with alignments suppressed due to -m: 6883216 (15.51%)
+# 5_b1	Reported 36772576 alignments to 1 output stream(s)
+
+weHaveBowtie1=$(($( head -n 8 fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep -c 'reads with at least one reported alignment' )))
+
+if [ "${weHaveBowtie1}" -ne 0 ]; then
+{
+# Bowtie1 reports
 if [ "${flashstatus}" == "FLASHED" ]; then
     
  # FLASHED
@@ -119,6 +138,51 @@ else
     tail -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads processed' | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > NONFLASHEDreadsEnteringBowtie_readcount.txt
  
 fi
+}
+else
+{
+# Bowtie2 reports
+# 1_b2	7160726 reads; of these:
+# 2_b2	  7160726 (100.00%) were unpaired; of these:
+# 3_b2	    43688 (0.61%) aligned 0 times
+# 4_b2	    6546174 (91.42%) aligned exactly 1 time
+# 5_b2	    570864 (7.97%) aligned >1 times
+# 6_b2	99.39% overall alignment rate
+if [ "${flashstatus}" == "FLASHED" ]; then
+    
+ # FLASHED
+head -n 9 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'aligned exactly 1 time' | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_mappedPerc.txt
+head -n 9 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'aligned 0 times'        | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_unmappedPerc.txt
+head -n 9 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'aligned >1 times'       | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_multimapped.txt
+
+else
+
+# NONFLASHED
+tail -n 9 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'aligned exactly 1 time' | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_mappedPerc.txt
+tail -n 9 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'aligned 0 times'        | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_unmappedPerc.txt
+tail -n 9 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'aligned >1 times'       | tr '(' '_' | tr ')' ' ' | sed 's/.*_//' | sed 's/\%.*//' > temp_multimapped.txt
+
+fi
+
+paste temp_mappedPerc.txt temp_unmappedPerc.txt temp_multimapped.txt > temp_mapping.txt
+rm -f temp_mappedPerc.txt temp_unmappedPerc.txt temp_multimapped.txt    
+
+echo -e 'uniqMappedRds\tunmappedRds\tmultiMappedRds' > ${flashstatus}_bowtiePerc.txt
+cat   temp_mapping.txt | awk 'BEGIN{a=0;b=0;c=0}{a=a+$1;b=b+$2;c=c+$3}END{print (a/NR)"\t"(b/NR)"\t"(c/NR)}' >> ${flashstatus}_bowtiePerc.txt
+rm -f temp_mapping.txt
+
+if [ "${flashstatus}" == "FLASHED" ]; then
+
+    # FLASHED
+    head -n 9 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads' | grep 'of these' | sed 's/\s.*//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' >    FLASHEDreadsEnteringBowtie_readcount.txt
+
+else
+
+    # NONFLASHED
+    tail -n 9 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads' | grep 'of these' | sed 's/\s.*//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > NONFLASHEDreadsEnteringBowtie_readcount.txt
+ 
+fi
+}
 
 # ###############################
 # RE cut reports, flashing reports.
@@ -185,7 +249,7 @@ cat ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/flashing.log | grep
 
 done
 
-paste TMP_makingflashLog/* | sed 's/\s/+/g' | sed 's/^+$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
+paste TMP_makingflashLog/* | sed 's/\s/+/g' | sed 's/^++*$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
 cat TMP_makingflashLogPerc/* | awk 'BEGIN{s=0}{s=s+$1}END{print s/NR"%"}' >> TMPnumbers.txt
 
 # Heading part ..
@@ -1621,7 +1685,7 @@ blatwarningsCount=0
 blatwarningOligoList=""
 for file in A_prepareForRun/OLIGOSindividualFiles/*/*/oligoFileOneliner.txt 
 do
-    
+
     thisOligoName=$( basename $( dirname $file ))
     thisOligoChr=$( basename $( dirname $( dirname $file ))) 
 
@@ -1643,7 +1707,7 @@ done
 
 if [ "${blatwarningsCount}" -eq "${pslFilesFound}" ];then
     printThis="None of the ${pslFilesFound} oligos had .psl files in the BLAT results folder --BLATforREUSEfolderPath ${reuseblatpath} . Maybe you are using wrong REUSE_blat folder ? "
-    printToLogFile    
+    printToLogFile
     printThis="EXITING "
     printToLogFile
     exit 1
@@ -2067,11 +2131,11 @@ echo '' >> index.html
 echo '<b style="color:blue">' >> index.html
 echo 'FLASHED ' >> index.html
 echo '</b>' >> index.html
-echo '(only BLUE reads continue, light-blue reads filtered at this stage)' >> index.html
+head -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_bowtiePerc.txt | sed 's/^/BLUE=/' | sed 's/\s/,SILVER=/' | sed 's/\s/,WHITE=/' | sed 's/,/, /g' >> index.html
 echo '<br/><b style="color:orange">' >> index.html
 echo 'NONFLASHED ' >> index.html
 echo '</b>' >> index.html
-echo '(only ORANGE reads continue, light-orange reads filtered at this stage)' >> index.html
+head -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_bowtiePerc.txt | sed 's/^/ORANGE=/' | sed 's/\s/,lightORANGE=/' | sed 's/\s/,WHITE=/' | sed 's/,/, /g' >> index.html
 
 # -----------------------
 # Pre-filtering counts ..
@@ -2165,6 +2229,7 @@ echo '</b>' >> index.html
 echo '<b style="color:orange">' >> index.html
 echo 'NONFLASHED ' >> index.html
 echo '</b>' >> index.html
+echo '</br>DARK color : cis reporters. LIGHT color : trans reporters.' >> index.html
 echo '</br>(hover over to see the counts)' >> index.html
 
 # -----------------------
