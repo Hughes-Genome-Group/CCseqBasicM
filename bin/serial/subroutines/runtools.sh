@@ -764,7 +764,6 @@ printToLogFile
 printThis="Flashed reads Bowtie .."
 printToLogFile
 
-echo >> bowties.log
 echo ${printThis} > bowties.log
 echo >> bowties.log
 
@@ -839,7 +838,7 @@ date
 
 if [ "${BOWTIE}" -eq 2 ] ; then
 setStringentFailForTheFollowing
-bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U NONFLASHED_REdig.fastq > NONFLASHED_REdig_unfiltered.sam
+bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U NONFLASHED_REdig.fastq > NONFLASHED_REdig_unfiltered.sam 2>> bowties.log
 stopStringentFailAfterTheAbove
 echo "bowtie2 -p 1 ${otherBowtie2Parameters} ${bowtieQuals} -x ${BowtieGenome} -U NONFLASHED_REdig.fastq"
 else
@@ -849,6 +848,10 @@ stopStringentFailAfterTheAbove
 fi
 
 date
+echo ""
+cat bowties.log
+echo "" >> "/dev/stderr"
+cat bowties.log >> "/dev/stderr"
 
 #bowtie -p 1 -m 2 --best --strata --sam --chunkmb 256 ${bowtieQuals} "${BowtieGenome}" Combined_reads_REdig.fastq Combined_reads_REdig.sam
 
