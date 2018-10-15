@@ -58,32 +58,8 @@ confFolder="${MainScriptPath}/conf"
 
 # ------------------------------------------
 
-makeFastqrunSummaries(){
+makeBowtie1Summaries(){
 # ------------------------------------------
-
-weWereHereDir=$(pwd)
-cd B_mapAndDivideFastqs
-
-# ###############################
-# LOOPs summary table
-# ###############################
-
-head -n 1 fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | sed 's/^chr\s\s*//' > ${flashstatus}_summaryCounts.txt
-cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^chr\s' \
- | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}END{print a"\t"b"\t"c"\t"d"\t"e"\t"f}' >> ${flashstatus}_summaryCounts.txt
-
-echo -e 'mappedReadsAs100perc\tmultifrag\thasCap\tsingleCap\twithinSonicSize' > ${flashstatus}_summaryPerc.txt
-cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^chr\s' \
-| awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}\
-END{\
-if(a==0){print "0\t0\t0\t0\t0"}\
-else if(e==0){print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t0"}\
-else{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}\
-}' >> ${flashstatus}_summaryPerc.txt
-
-# ###############################
-# BOWTIEs summary oneliners
-# ###############################
 
 # Bowtie1 and bowtie2 reports differ :
 # 1_b2	7160726 reads; of these:
@@ -99,10 +75,6 @@ else{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}\
 # 4_b1	# reads with alignments suppressed due to -m: 6883216 (15.51%)
 # 5_b1	Reported 36772576 alignments to 1 output stream(s)
 
-weHaveBowtie1=$(($( head -n 8 fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep -c 'reads with at least one reported alignment' )))
-
-if [ "${weHaveBowtie1}" -ne 0 ]; then
-{
 # Bowtie1 reports
 if [ "${flashstatus}" == "FLASHED" ]; then
     
@@ -138,16 +110,29 @@ else
     tail -n 8 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads processed' | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > NONFLASHEDreadsEnteringBowtie_readcount.txt
  
 fi
+
+# ------------------------------------------
 }
-else
-{
-# Bowtie2 reports
+
+# ------------------------------------------
+
+makeBowtie2Summaries(){
+# ------------------------------------------
+
+# Bowtie1 and bowtie2 reports differ :
 # 1_b2	7160726 reads; of these:
 # 2_b2	  7160726 (100.00%) were unpaired; of these:
 # 3_b2	    43688 (0.61%) aligned 0 times
 # 4_b2	    6546174 (91.42%) aligned exactly 1 time
 # 5_b2	    570864 (7.97%) aligned >1 times
 # 6_b2	99.39% overall alignment rate
+# 
+# 1_b1	# reads processed: 44369755
+# 2_b1	# reads with at least one reported alignment: 36772576 (82.88%)
+# 3_b1	# reads that failed to align: 713963 (1.61%)
+# 4_b1	# reads with alignments suppressed due to -m: 6883216 (15.51%)
+# 5_b1	Reported 36772576 alignments to 1 output stream(s)
+
 if [ "${flashstatus}" == "FLASHED" ]; then
     
  # FLASHED
@@ -182,7 +167,47 @@ else
     tail -n 9 fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep 'reads' | grep 'of these' | sed 's/\s.*//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > NONFLASHEDreadsEnteringBowtie_readcount.txt
  
 fi
+
+# ------------------------------------------
 }
+
+# ------------------------------------------
+
+makeFastqrunSummaries(){
+# ------------------------------------------
+
+weWereHereDir=$(pwd)
+cd B_mapAndDivideFastqs
+
+# ###############################
+# LOOPs summary table
+# ###############################
+
+head -n 1 fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | sed 's/^chr\s\s*//' > ${flashstatus}_summaryCounts.txt
+cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^chr\s' \
+ | awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}END{print a"\t"b"\t"c"\t"d"\t"e"\t"f}' >> ${flashstatus}_summaryCounts.txt
+
+echo -e 'mappedReadsAs100perc\tmultifrag\thasCap\tsingleCap\twithinSonicSize' > ${flashstatus}_summaryPerc.txt
+cat fastq_*/F1_beforeCCanalyser_${samplename}_${CCversion}/LOOPs1to5_${flashstatus}_total.txt | grep -v '^chr\s' \
+| awk 'BEGIN{a=0;b=0;c=0;d=0;e=0;f=0}{a=a+$1;b=b+$2;c=c+$3;d=d+$4;e=e+$5;f=f+$6}\
+END{\
+if(a==0){print "0\t0\t0\t0\t0"}\
+else if(e==0){print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t0"}\
+else{print (a/a)*100"\t"(b/a)*100"\t"(c/a)*100"\t"(d/a)*100"\t"(f/e)*(d/a)*100}\
+}' >> ${flashstatus}_summaryPerc.txt
+
+# ###############################
+# BOWTIEs summary oneliners
+# ###############################
+
+
+weHaveBowtie1=$(($( head -n 8 fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/bowties.log | grep -c 'reads with at least one reported alignment' )))
+
+if [ "${weHaveBowtie1}" -ne 0 ]; then
+makeBowtie1Summaries
+else
+makeBowtie2Summaries
+fi
 
 # ###############################
 # RE cut reports, flashing reports.
