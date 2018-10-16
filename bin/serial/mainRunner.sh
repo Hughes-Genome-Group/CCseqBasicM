@@ -134,7 +134,7 @@ echo "Loading subroutines in .."
 . ${CapturePipePath}/parametersetters.sh
 
 # HUBBING subroutines
-. ${CaptureCommonHelpersPath}/hubbers.sh
+. ${CapturePipePath}/hubbers.sh
 
 # CLEANING folders and organising structures
 . ${CapturePipePath}/cleaners.sh

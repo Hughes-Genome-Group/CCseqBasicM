@@ -299,8 +299,6 @@ ls ${commonHelpersFolder}/blacklistSetters.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${commonHelpersFolder}/genomeSetters.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${commonHelpersFolder}/hubbers.sh >> "/dev/null"
-scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 # Serial main 
 
@@ -318,6 +316,8 @@ scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${helperScriptFolder}/cleaners.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${helperScriptFolder}/defaultparams.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${helperScriptFolder}/hubbers.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${helperScriptFolder}/parametersetters.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
