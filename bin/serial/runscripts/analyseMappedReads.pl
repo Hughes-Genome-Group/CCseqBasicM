@@ -1914,7 +1914,7 @@ sub readAnalysisLoop
       
         if ( $tiled_analysis )
         {
-          $counters{"11f Total number of all-fragments-within-a-single-tile reads included to the analysis :"}++;        
+          $counters{"11f Total number of all-capturefragments-within-a-single-tile reads included to the analysis :"}++;        
         }
         else
         {
