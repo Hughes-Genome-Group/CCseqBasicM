@@ -399,8 +399,19 @@ cat chr*/*/F6_greenGraphs_combined_${samplename}_${CCversion}/COMBINED_report_${
 # 3110002H16Rik_L_R 17b Reporter fragments CIS (final count) :    461
 # 3110002H16Rik_L_R 17c Reporter fragments TRANS (final count) :  351
 
+if [ "${tiled}" -eq 0 ];then
+
 echo -e "oligo\tCaptureFrags\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
 cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
+
+else
+    
+echo -e "oligo\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
+cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
+
+fi
+
+if [ "${tiled}" -eq 0 ];then
 
 tail -n +2 COMBINED_allFinalCounts_table.txt | \
 awk 'BEGIN{cap=0;r=0;c=0;t=0;cap2=0;r2=0;c2=0;t2=0;N=0}\
@@ -414,6 +425,22 @@ print"Mean TRANS repFrags count :\t"tM"\t with std of :\t"sqrt((t2-tM*tM*N)/(N-1
 }' \
 > TEMP_meansAndStds.txt
 
+else
+
+tail -n +2 COMBINED_allFinalCounts_table.txt | \
+awk 'BEGIN{r=0;c=0;t=0;cap2=0;r2=0;c2=0;t2=0;N=0}\
+{ N+=1; r+=$3; c+=$4; t+=$5; r2+=$3*$3; c2+=$4*$4; t2+=$5*$5;}\
+END{\
+rM=r/N;cM=c/N;tM=t/N;\
+print"Mean Total repFrags count :\t"rM"\t with std of :\t"sqrt((r2-rM*rM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
+print"Mean   CIS repFrags count :\t"cM"\t with std of :\t"sqrt((c2-cM*cM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
+print"Mean TRANS repFrags count :\t"tM"\t with std of :\t"sqrt((t2-tM*tM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
+}' \
+> TEMP_meansAndStds.txt
+    
+fi
+
+
 # Median and quartiles - this is not exact, but close enough.
 
 oligoCountHalf=$(($(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c "")))/2))
@@ -422,27 +449,37 @@ oligoCountOneFourth=$(($(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep 
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n 1 >  TEMP_min.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n 1 >> TEMP_min.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | head -n 1 >> TEMP_min.txt
+if [ "${tiled}" -eq 0 ];then
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | head -n 1 >> TEMP_min.txt
+fi
 
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | tail -n 1 >  TEMP_max.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | tail -n 1 >> TEMP_max.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | tail -n 1 >> TEMP_max.txt
+if [ "${tiled}" -eq 0 ];then
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | tail -n 1 >> TEMP_max.txt
+fi
 
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >  TEMP_medians.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >> TEMP_medians.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >> TEMP_medians.txt
+if [ "${tiled}" -eq 0 ];then
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >> TEMP_medians.txt
+fi
 
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >  TEMP_lower.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >> TEMP_lower.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >> TEMP_lower.txt
+if [ "${tiled}" -eq 0 ];then
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >> TEMP_lower.txt
+fi
 
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >  TEMP_upper.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
+if [ "${tiled}" -eq 0 ];then
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
+fi
 
 paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt > COMBINED_meanStdMedian_overOligos.txt
 rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt
@@ -2268,6 +2305,9 @@ echo 'ORANGE reads continue, light-orange reads are duplicates (filtered at this
  nfcountIN=$(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/NONFLASHED_percentagesAndFinalCounts.txt | grep -v '^\s*$' | tail -n 1 | cut -f 4,5 | sed 's/\t/,/')
 
 echo '<h4>Cis/trans reporters</h4>' >> index.html
+if [ "${tiled}" -eq 1 ]; then
+    echo '( tiled reporters = all fragments - except exclusion zone fragments - within reads where at least one frag within the tile )' >> index.html
+fi
 echo '<p>' >> index.html
 echo '<span class="bluesilverpie">'${fcountIN}'</span> <span class="orangesilverpie">'${nfcountIN}'</span>   ' >> index.html           
 echo '</p>' >> index.html
@@ -2289,6 +2329,11 @@ echo '</br>(hover over to see the counts)' >> index.html
 
 echo '<hr />' >> index.html
 echo '<h3>CCanalyser runs (duplicate filtering, final counts) :</h3>' >> index.html
+
+if [ "${tiled}" -eq 1 ]; then
+    echo '( tiled reporters = all fragments - except exclusion zone fragments - within reads where at least one frag within the tile )' >> index.html
+fi
+
 echo '<pre>' >> index.html
 cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> index.html
 echo '</pre>' >> index.html
@@ -2307,7 +2352,7 @@ echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+tail -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
@@ -2318,7 +2363,7 @@ echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-head -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+tail -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
@@ -2335,15 +2380,11 @@ echo '' >> index.html
 
 # fi
 
-if [ "${tiled}" -ne 0 ]; then
+if [ "${tiled}" -eq 0 ]; then
 
 countIN=$(head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
 
-if [ "${tiled}" -ne 0 ]; then
 echo '<h4>Capture fragments in reported reads (intra-read duplicates not filtered yet in these counts), distribution over all capture sites</h4>' >> index.html
-else
-echo '<h4>Within-tile fragments in reported reads (intra-read duplicates not filtered yet in these counts), distribution over all tiles</h4>' >> index.html    
-fi
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
