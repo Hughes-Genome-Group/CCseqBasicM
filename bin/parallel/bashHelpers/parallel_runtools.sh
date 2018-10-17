@@ -225,7 +225,7 @@ cat ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/${flashstatus}_${RE
 | sed 's/.*command run on file: //' | sed 's/\s\s*/\t/' | cut -f 1 | sed 's/^[a-zA-Z].*//' > TMP_makingdigestLogs/${folder}.txt
 done
 
-paste TMP_makingdigestLogs/* | sed 's/\s/+/g' | sed 's/^+$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
+paste TMP_makingdigestLogs/* | sed 's/\s/+/g' | sed 's/^++*$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
 
 # Heading part ..
 cat fastq_1/F1_beforeCCanalyser_${samplename}_${CCversion}/${flashstatus}_${REenzyme}digestion.log | sed 's/^[1234567890]*//' > TEMPheading.txt
