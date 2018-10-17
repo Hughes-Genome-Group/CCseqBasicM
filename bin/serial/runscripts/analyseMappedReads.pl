@@ -159,7 +159,7 @@ my $flashed = 1;
 my $duplfilter = 1;
 my $use_parp = 0; # whether this is parp run or not (parp artificial chromosome to be filtered before visualisation files)
 my $use_umi = 0; # whether this is UMI run or not, if yes, filter based on UMI indices : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this
-my $wobble_bin_width = 1 ; # wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
+my $wobble_bin_width = 20 ; # wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
 my $only_cis = 0 ; # analysing only cis-reads (easing up the computational load for many-oligo samples which continue straight to PeakC which is essentially a cis program)
 my $oligos_per_bunch = 100; # How many oligos we have per folder, per one thread of the parallel run, per .. (shortly : the parallelisation unit)
 my $cutter_type = "fourcutter"; # If we have fourcutter (symmetric fourcutter like dpnII or nlaIII), if we have sixcutter (asymmetric sixcutter 1:5 like hindIII)
@@ -2143,7 +2143,29 @@ if ( ! $only_divide_bams ){
     
     my $duplicate_string;
     
-    if ($data{$analysis_read}{$pe}{$readno}{"type"} eq "reporter")
+    # Tiled support - we go into the loop, if we have Reporter OR Capture (tiled), or only when we have Reporter (normal run)
+    
+    my $continue_to_final_filters=0;
+    
+    # Continue - if we are normal run, and we have a reporter
+    if (($data{$analysis_read}{$pe}{$readno}{"type"} eq "reporter") && ( !$tiled_analysis ))
+    {
+      $continue_to_final_filters=1
+    }
+    
+    # Continue - if we are a tiled run, and we have a reporter OR capture
+    if ( $tiled_analysis )
+    {
+    if (($data{$analysis_read}{$pe}{$readno}{"type"} eq "reporter") || ($data{$analysis_read}{$pe}{$readno}{"type"} eq "capture"))
+    {
+      $continue_to_final_filters=1
+    }
+    }
+    
+    # --------------------------
+    
+    # Now entering the final filters ..
+    if ($continue_to_final_filters == 1)
     {
       $counters{"23 Reporters before final filtering steps"}++ ;
       $counters{$data{$analysis_read}{"captures"}." 12 Reporters before final filtering steps"}++ ;
@@ -2293,9 +2315,9 @@ if ( ! $only_divide_bams ){
       }
     }
 #------------------------------------------------------------------------------------------------------------------
-# ANALYSING THE CAPTURE FRAGMENTS 
+# ANALYSING THE CAPTURE FRAGMENTS (only non-tiled, as tiled get these into reporters above ..)
 #------------------------------------------------------------------------------------------------------------------
-    if ($data{$analysis_read}{$pe}{$readno}{"type"} eq "capture")
+    if (($data{$analysis_read}{$pe}{$readno}{"type"} eq "capture") && ( !$tiled_analysis ))
     {
       push @{$cap_samhash{$data{$analysis_read}{"captures"}}}, $data{$analysis_read}{$pe}{$readno}{"whole line"};
       $counters{$data{$analysis_read}{"captures"}." 15 Capture fragments (final count):"}++;

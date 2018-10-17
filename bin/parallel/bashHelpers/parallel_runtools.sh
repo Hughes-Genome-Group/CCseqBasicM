@@ -498,16 +498,16 @@ cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_repor
 cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_${CCversion}.txt | grep '16 Non-duplicated reads' \
 | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_nondupRds.txt
 
-if [ "${tiled}" -eq 0 ];then
+# if [ "${tiled}" -eq 0 ];then
 cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_${CCversion}.txt | grep '26a Actual reported fragments' \
 | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_repFragTotal.txt
 cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_${CCversion}.txt | grep '26b Actual reported CIS fragments' \
 | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_repFragCis.txt
 cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_report_${CCversion}.txt | grep '26c Actual reported TRANS fragments' \
 | sed 's/.*\s//' | awk 'BEGIN{a=0}{a=a+$1}END{print a}' > TMP_repFragTrans.txt
-else
-echo
-fi
+# else
+# echo
+# fi
     
 if [ "${tiled}" -eq 0 ];then
 echo -e "allRds\tnondupRds\trepFragTotal\trepFragCis\trepFragTrans" > ${flashstatus}_dupFiltStats.txt
@@ -515,26 +515,26 @@ else
 echo -e "allRds\tnondupRds" > ${flashstatus}_dupFiltStats.txt    
 fi
 
-if [ "${tiled}" -eq 0 ];then
+# if [ "${tiled}" -eq 0 ];then
 paste TMP_allRds.txt TMP_nondupRds.txt TMP_repFragTotal.txt TMP_repFragCis.txt TMP_repFragTrans.txt >> ${flashstatus}_dupFiltStats.txt
 rm -f TMP_allRds.txt TMP_nondupRds.txt TMP_repFragTotal.txt TMP_repFragCis.txt TMP_repFragTrans.txt
-else
-paste TMP_allRds.txt TMP_nondupRds.txt >> ${flashstatus}_dupFiltStats.txt
-rm -f TMP_allRds.txt TMP_nondupRds.txt 
-fi
+# else
+# paste TMP_allRds.txt TMP_nondupRds.txt >> ${flashstatus}_dupFiltStats.txt
+# rm -f TMP_allRds.txt TMP_nondupRds.txt 
+# fi
 
 echo 'Nondup reads %' > ${flashstatus}_percentages.txt
 tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 1-2 | awk '{print ($2/$1)*100}' >>${flashstatus}_percentages.txt
 echo '' >> ${flashstatus}_percentages.txt
 
-if [ "${tiled}" -eq 0 ];then
-echo 'Total cisreps/allrepfrags  %' >>${flashstatus}_percentages.txt
+# if [ "${tiled}" -eq 0 ];then
+# echo 'Total cisreps/allrepfrags  %' >>${flashstatus}_percentages.txt
 tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 3-4 | awk '{print ($2/$1)*100}' >>${flashstatus}_percentages.txt
 echo '' >> ${flashstatus}_percentages.txt
 echo 'Average reporter fragment count per read (final count)' >>${flashstatus}_percentages.txt
 tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 2-3 | awk '{print ($2/$1)}' >>${flashstatus}_percentages.txt
 echo '' >> ${flashstatus}_percentages.txt
-fi
+# fi
 
 cat ${flashstatus}_percentages.txt ${flashstatus}_dupFiltStats.txt > ${flashstatus}_percentagesAndFinalCounts.txt
  
@@ -2262,7 +2262,7 @@ echo 'NONFLASHED ' >> index.html
 echo '</b>' >> index.html
 echo 'ORANGE reads continue, light-orange reads are duplicates (filtered at this stage)' >> index.html
 
-if [ "${tiled}" -ne 0 ]; then
+# if [ "${tiled}" -ne 0 ]; then
 
   fcountIN=$(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/FLASHED_percentagesAndFinalCounts.txt    | grep -v '^\s*$' | tail -n 1 | cut -f 4,5 | sed 's/\t/,/')
  nfcountIN=$(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/NONFLASHED_percentagesAndFinalCounts.txt | grep -v '^\s*$' | tail -n 1 | cut -f 4,5 | sed 's/\t/,/')
@@ -2280,7 +2280,7 @@ echo 'NONFLASHED ' >> index.html
 echo '</b>' >> index.html
 echo '</br>DARK color : cis reporters. LIGHT color : trans reporters.' >> index.html
 
-fi
+# fi
 
 echo '</br>(hover over to see the counts)' >> index.html
 
@@ -2293,10 +2293,15 @@ echo '<pre>' >> index.html
 cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> index.html
 echo '</pre>' >> index.html
 
-if [ "${tiled}" -ne 0 ]; then
+oligoStringName="oligo"
+if [ "${tiled}" -eq 1 ]; then
+    oligoStringName="tile"
+fi
+
+# if [ "${tiled}" -ne 0 ]; then
 
 countIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
-echo '<h4>Reported fragments (total), oligo-wise distribution</h4>' >> index.html
+echo '<h4>Reported fragments (total), '${oligoStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
@@ -2307,7 +2312,7 @@ echo '</pre>' >> index.html
 echo '' >> index.html
 
 countIN=$(head -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
-echo '<h4>Reported fragments ( CIS ), oligo-wise distribution</h4>' >> index.html
+echo '<h4>Reported fragments ( CIS ), '${oligoStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
@@ -2318,7 +2323,7 @@ echo '</pre>' >> index.html
 echo '' >> index.html
 
 countIN=$(tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
-echo '<h4>Reported fragments ( TRANS ), oligo-wise distribution</h4>' >> index.html
+echo '<h4>Reported fragments ( TRANS ), '${oligoStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
@@ -2328,7 +2333,9 @@ tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOlig
 echo '</pre>' >> index.html
 echo '' >> index.html
 
-fi
+# fi
+
+if [ "${tiled}" -ne 0 ]; then
 
 countIN=$(head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
 
@@ -2345,6 +2352,8 @@ echo '<pre>' >> index.html
 head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
+
+fi
 
 # -----------------------
 # Some emptylines ..
