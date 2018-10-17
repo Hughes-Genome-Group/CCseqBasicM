@@ -2035,8 +2035,8 @@ echo '        $'"('.blueorangepie').sparkline('html', {type: 'pie', sliceColors:
 echo '        $'"('.bluesilverpie').sparkline('html', {type: 'pie', sliceColors: ['blue','lightsteelblue'], height: '100', width: '100' } );" >> index.html
 echo '        $'"('.orangesilverpie').sparkline('html', {type: 'pie', sliceColors: ['orange','wheat'], height: '100', width: '100' } );"      >> index.html
 echo '        $'"('.orangebrownpie').sparkline('html', {type: 'pie', sliceColors: ['peru','orange'], height: '100', width: '100' } );"        >> index.html
-echo '        $'"('.bluesilverwhitepie').sparkline('html', {type: 'pie', sliceColors: ['blue','lightsteelblue','azure'], height: '100', width: '100', borderColor: 'steelblue', borderWidth: '1' } );" >> index.html
-echo '        $'"('.orangesilverwhitepie').sparkline('html', {type: 'pie', sliceColors: ['orange','wheat','ivory'], height: '100', width: '100', borderColor: 'goldenrod', borderWidth: '1' } );"      >> index.html
+echo '        $'"('.bluewhitesilverpie').sparkline('html', {type: 'pie', sliceColors: ['blue','azure','lightsteelblue'], height: '100', width: '100', borderColor: 'steelblue', borderWidth: '1' } );" >> index.html
+echo '        $'"('.orangewhitesilverpie').sparkline('html', {type: 'pie', sliceColors: ['orange','ivory','wheat'], height: '100', width: '100', borderColor: 'goldenrod', borderWidth: '1' } );"      >> index.html
 echo '        $'"('.boxplotprecalculated').sparkline('html', {type:'box', raw: true, showOutliers:false, height: '70', width: '500', target: '30000'});"           >> index.html
 
 echo '    });'                                                                   >> index.html
@@ -2067,7 +2067,7 @@ echo '</p>' >> index.html
 echo '' >> index.html
 echo '<p>' >> index.html
 echo 'Mapping' >> index.html
-echo '<span class="bluesilverwhitepie">1,3,4</span> <span class="orangesilverwhitepie">1,3,4</span>' >> index.html
+echo '<span class="bluewhitesilverpie">1,3,4</span> <span class="orangewhitesilverpie">1,3,4</span>' >> index.html
 echo '</p>' >> index.html
 echo '' >> index.html
 echo '<p>' >> index.html
@@ -2151,7 +2151,7 @@ echo '</pre>' >> index.html
 nfcountOUT=$(($(cat ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/NONFLASHED_${REenzyme}digestion.log | grep 'fragments were printed' | sed 's/\s.*//')))
 
 echo '<p>' >> index.html
-echo '<span class="bluesilverpie">'${fcountIN}','${fcountOUT}'</span> <span class="orangesilverpie">'${nfcountIN}'',${nfcountOUT}'</span>' >> index.html
+echo '<span class="bluesilverpie">'${fcountOUT}','$((${fcountIN}-${fcountOUT}))'</span> <span class="orangesilverpie">'${nfcountOUT}','$((${nfcountIN}-${nfcountOUT}))'</span>' >> index.html
 echo '</p>' >> index.html
 echo '' >> index.html
 
@@ -2203,18 +2203,18 @@ echo '</pre>' >> index.html
  nfcountIN=$(tail -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/NONFLASHED_bowtiePerc.txt | tr '\t' ',')
 
 echo '<p>' >> index.html
-echo '<span class="bluesilverwhitepie">'${fcountIN}'</span> <span class="orangesilverwhitepie">'${nfcountIN}'</span>' >> index.html
+echo '<span class="bluewhitesilverpie">'${fcountIN}'</span> <span class="orangewhitesilverpie">'${nfcountIN}'</span>' >> index.html
 echo '</p>' >> index.html
 echo '' >> index.html
 
 echo '<b style="color:blue">' >> index.html
 echo 'FLASHED ' >> index.html
 echo '</b>' >> index.html
-head -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_bowtiePerc.txt | sed 's/^/BLUE=/' | sed 's/\s/,SILVER=/' | sed 's/\s/,WHITE=/' | sed 's/,/, /g' >> index.html
+head -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_bowtiePerc.txt | sed 's/^/BLUE=/' | sed 's/\s/,WHITE=/' | sed 's/\s/,SILVER=/' | sed 's/,/, /g' >> index.html
 echo '<br/><b style="color:orange">' >> index.html
 echo 'NONFLASHED ' >> index.html
 echo '</b>' >> index.html
-head -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_bowtiePerc.txt | sed 's/^/ORANGE=/' | sed 's/\s/,lightORANGE=/' | sed 's/\s/,WHITE=/' | sed 's/,/, /g' >> index.html
+head -n 1 ${rainbowRunTOPDIR}/B_mapAndDivideFastqs/FLASHED_bowtiePerc.txt | sed 's/^/ORANGE=/' | sed 's/\s/,WHITE=/' | sed 's/\s/,lightORANGE=/' | sed 's/,/, /g' >> index.html
 
 # -----------------------
 # Pre-filtering counts ..
