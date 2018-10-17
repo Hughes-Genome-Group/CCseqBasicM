@@ -565,7 +565,7 @@ tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 1-2 | awk '{print ($2/$1)*100
 echo '' >> ${flashstatus}_percentages.txt
 
 # if [ "${tiled}" -eq 0 ];then
-# echo 'Total cisreps/allrepfrags  %' >>${flashstatus}_percentages.txt
+echo 'Total cisreps/allrepfrags  %' >>${flashstatus}_percentages.txt
 tail -n 1 ${flashstatus}_dupFiltStats.txt | cut -f 3-4 | awk '{print ($2/$1)*100}' >>${flashstatus}_percentages.txt
 echo '' >> ${flashstatus}_percentages.txt
 echo 'Average reporter fragment count per read (final count)' >>${flashstatus}_percentages.txt
