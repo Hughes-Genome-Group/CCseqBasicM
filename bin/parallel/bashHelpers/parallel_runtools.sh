@@ -429,7 +429,7 @@ else
 
 tail -n +2 COMBINED_allFinalCounts_table.txt | \
 awk 'BEGIN{r=0;c=0;t=0;cap2=0;r2=0;c2=0;t2=0;N=0}\
-{ N+=1; r+=$3; c+=$4; t+=$5; r2+=$3*$3; c2+=$4*$4; t2+=$5*$5;}\
+{ N+=1; r+=$2; c+=$3; t+=$4; r2+=$2*$2; c2+=$3*$3; t2+=$4*$4;}\
 END{\
 rM=r/N;cM=c/N;tM=t/N;\
 print"Mean Total repFrags count :\t"rM"\t with std of :\t"sqrt((r2-rM*rM*N)/(N-1))"\tand min/lowerQuart/median/upperQuart/max of:";\
@@ -2238,15 +2238,15 @@ echo '</pre>' >> index.html
 echo '<p style="color:blue">' >> index.html
 echo 'FLASHED pre-filtering' >> index.html
 echo '<span style="color:black"></br>(hover over to see the counts)</span>' >> index.html
-echo '<br/><span class="bluebar">'${fcountIN}'</span>   ' >> index.html                           
-echo '<br/> mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
+echo '<br/><span class="bluebar">'${fcountIN}'</span>   ' >> index.html
+echo '<br/> mappedR, multifragR, hascapR, singlecapR, singlecapF, withinSonicSizeF' >> index.html
 echo '</p>' >> index.html
 echo '' >> index.html
 echo '<p style="color:orange">' >> index.html
 echo 'NONFLASHED pre-filtering' >> index.html
 echo '<span style="color:black"></br>(hover over to see the counts)</span>' >> index.html
 echo '<br/><span class="orangebar">'${nfcountIN}'</span>' >> index.html
-echo '<br/> mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
+echo '<br/>mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
 echo '</p>' >> index.html
 echo '' >> index.html
 
@@ -2261,6 +2261,7 @@ echo '' >> index.html
 echo '         mappedR = mapped reads' >> index.html
 echo '      multifragR = reads with more than 1 fragment (can potentially report interaction)' >> index.html
 echo '         hascapR = reads containing fragment(s) overlapping any of the '${capSiteName}'s (within +/- sonicationSize from RE cut sites)' >> index.html
+echo '      singlecapR = reads which can be resolved to a single '${capSiteName}' (not reporting multiple different '${capSiteName}'s within same read)' >> index.html
 echo '      singlecapF = fragment count in reads which can be resolved to a single '${capSiteName}' (not reporting multiple different '${capSiteName}'s within same read)' >> index.html
 echo 'withinSonicSizeF = fragments within +/- sonicationSize from RE cut sites (filters out mapping errors)' >> index.html
 echo '</pre>' >> index.html
