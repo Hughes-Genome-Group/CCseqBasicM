@@ -2608,15 +2608,56 @@ ln -s ../../COMBINED_allFinalCounts.txt description_page_files/.
 ln -s ../../COMBINED_allFinalCounts_table.txt description_page_files/.
 ln -s ../../../B_mapAndDivideFastqs/multiqcReports description_page_files/.
 
+ln -s ../../../B_mapAndDivideFastqs/qsubLogFiles description_page_files/B_folderLogs
+ln -s ../../../C_combineOligoWise/qsubLogFiles description_page_files/C_folderLogs
+ln -s ../../qsubLogFiles description_page_files/D_folderLogs
+
+mkdir description_page_files/B_folderLogs_symlinks
+mkdir description_page_files/C_folderLogs_symlinks
+mkdir description_page_files/D_folderLogs_symlinks
+
+
 echo 'Oligo-wise counts (table) : <br>' >> index.html
 echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a>' >> index.html
 echo '<hr />' >> index.html
 echo 'Oligo-wise counts (raw list) : <br>' >> index.html
 echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts.txt" >COMBINED_allFinalCounts.txt</a>' >> index.html
 echo '<hr />' >> index.html
+
 echo 'Run output log (main log) : <br>' >> index.html
 echo '<a target="_blank" href="../qsub.out" >qsub.out</a>' >> index.html
 echo '<hr />' >> index.html
+
+echo 'Parallel steps - output logs : <br>' >> index.html
+
+# --------------------------------------
+echo '<p>Folder B (fastq-wise analysis) - output logs :</p>' > description_page_files/folderB.html
+for file in description_page_files/B_folderLogs/${CCversion}*
+do
+ln -s ../../${file} description_page_files/B_folderLogs_symlinks/$(basename ${file}).txt
+echo '<li><a target="_blank" href="B_folderLogs_symlinks/'$(basename ${file}).txt'" >'$(basename ${file})'</a></li>' >> description_page_files/folderB.html
+done
+echo '<li><a target="_blank" href="description_page_files/folderB.html" >folderB.html</a></li>' >> index.html
+# --------------------------------------
+echo '<p>Folder C (bam-combining) - output logs :</p>' > description_page_files/folderC.html
+for file in description_page_files/C_folderLogs/${CCversion}*
+do
+ln -s ../../${file} description_page_files/C_folderLogs_symlinks/$(basename ${file}).txt
+echo '<li><a target="_blank" href="C_folderLogs_symlinks/'$(basename ${file}).txt'" >'$(basename ${file})'</a></li>' >> description_page_files/folderC.html
+done
+echo '<li><a target="_blank" href="description_page_files/folderC.html" >folderC.html</a></li>' >> index.html
+# --------------------------------------
+echo '<p>Folder D (oligo-wise analysis) - output logs :</p>' > description_page_files/folderD.html
+for file in description_page_files/D_folderLogs/${CCversion}*
+do
+ln -s ../../${file} description_page_files/D_folderLogs_symlinks/$(basename ${file}).txt
+echo '<li><a target="_blank" href="D_folderLogs_symlinks/'$(basename ${file}).txt'" >'$(basename ${file})'</a></li>' >> description_page_files/folderD.html
+done
+echo '<li><a target="_blank" href="description_page_files/folderD.html" >folderD.html</a></li>' >> index.html
+# --------------------------------------
+
+echo '<hr />' >> index.html
+
 echo 'Run error log (main log) : <br>' >> index.html
 echo '<a target="_blank" href="../qsub.err" >qsub.err</a>' >> index.html
 echo '<hr />' >> index.html
