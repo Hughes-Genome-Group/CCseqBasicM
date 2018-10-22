@@ -2280,6 +2280,10 @@ echo '<pre>' >> index.html
 head -n 20 ${rainbowRunTOPDIR}/D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt | sed 's/\/.*\///' >> index.html
 echo '</pre>' >> index.html
 
+if [ "${tiled}" -eq 1 ]; then
+    echo '( tiled reporters = all fragments - except exclusion zone fragments - within reads where at least one frag within the tile )' >> index.html
+fi
+
   fcountOUT=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/FLASHED_percentagesAndFinalCounts.txt    | tail -n 1)
  nfcountOUT=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/NONFLASHED_percentagesAndFinalCounts.txt | tail -n 1)
  fcountIN=$(echo ${fcountOUT}  | awk '{print 100.0-$1}')
