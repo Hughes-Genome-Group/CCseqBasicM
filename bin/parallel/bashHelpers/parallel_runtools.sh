@@ -2246,7 +2246,7 @@ echo '<p style="color:orange">' >> index.html
 echo 'NONFLASHED pre-filtering' >> index.html
 echo '<span style="color:black"></br>(hover over to see the counts)</span>' >> index.html
 echo '<br/><span class="orangebar">'${nfcountIN}'</span>' >> index.html
-echo '<br/>mappedR, multifragR, hascapR, singlecapF, withinSonicSizeF' >> index.html
+echo '<br/>mappedR, multifragR, hascapR, singlecapR, singlecapF, withinSonicSizeF' >> index.html
 echo '</p>' >> index.html
 echo '' >> index.html
 
