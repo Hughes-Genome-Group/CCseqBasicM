@@ -546,11 +546,11 @@ cat chr*/*/F3_orangeGraphs_${samplename}_${CCversion}/${flashstatus}_REdig_repor
 # echo
 # fi
     
-if [ "${tiled}" -eq 0 ];then
+# if [ "${tiled}" -eq 0 ];then
 echo -e "allRds\tnondupRds\trepFragTotal\trepFragCis\trepFragTrans" > ${flashstatus}_dupFiltStats.txt
-else
-echo -e "allRds\tnondupRds" > ${flashstatus}_dupFiltStats.txt    
-fi
+# else
+# echo -e "allRds\tnondupRds" > ${flashstatus}_dupFiltStats.txt    
+# fi
 
 # if [ "${tiled}" -eq 0 ];then
 paste TMP_allRds.txt TMP_nondupRds.txt TMP_repFragTotal.txt TMP_repFragCis.txt TMP_repFragTrans.txt >> ${flashstatus}_dupFiltStats.txt
@@ -2280,10 +2280,10 @@ echo '<pre>' >> index.html
 head -n 20 ${rainbowRunTOPDIR}/D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt | sed 's/\/.*\///' >> index.html
 echo '</pre>' >> index.html
 
-  fcountIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/FLASHED_percentagesAndFinalCounts.txt    | tail -n 1)
- nfcountIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/NONFLASHED_percentagesAndFinalCounts.txt | tail -n 1)
- fcountOUT=$(echo ${fcountIN}  | awk '{print 100.0-$1}')
-nfcountOUT=$(echo ${nfcountIN} | awk '{print 100.0-$1}')
+  fcountOUT=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/FLASHED_percentagesAndFinalCounts.txt    | tail -n 1)
+ nfcountOUT=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/NONFLASHED_percentagesAndFinalCounts.txt | tail -n 1)
+ fcountIN=$(echo ${fcountOUT}  | awk '{print 100.0-$1}')
+nfcountIN=$(echo ${nfcountOUT} | awk '{print 100.0-$1}')
 
  echo '<h4>Duplicates</h4>' >> index.html
 echo '<p>' >> index.html
