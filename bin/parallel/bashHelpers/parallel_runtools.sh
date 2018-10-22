@@ -442,9 +442,12 @@ fi
 
 
 # Median and quartiles - this is not exact, but close enough.
+# Only doing this if at least 4 oligos !
 
 oligoCountHalf=$(($(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c "")))/2))
 oligoCountOneFourth=$(($(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c "")))/4))
+
+if [ "${oligoCountOneFourth}" -ge 1 ]; then
 
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n 1 >  TEMP_min.txt
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n 1 >> TEMP_min.txt
@@ -481,8 +484,12 @@ if [ "${tiled}" -eq 0 ];then
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
 fi
 
-paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt > COMBINED_meanStdMedian_overOligos.txt
+paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt > COMBINED_meanStdMedianQuantiles_overOligos.txt
 rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt
+
+else
+    mv -f TEMP_meansAndStds.txt COMBINED_meanStdMedian_overOligos.txt
+fi
 
 
 # ###############################
@@ -2340,8 +2347,18 @@ if [ "${tiled}" -eq 1 ]; then
 fi
 
 echo '<pre>' >> index.html
+# if less than 4 oligos - file is called differently.
+if [ -s "${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt" ]; then
+cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt >> index.html
+else
 cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> index.html
+fi
 echo '</pre>' >> index.html
+
+# ----------
+# if less than 4 oligos - box plots don't make any sense ..
+if [ -s "${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt" ]; then
+{
 
 oligoStringName="oligo"
 if [ "${tiled}" -eq 1 ]; then
@@ -2350,36 +2367,36 @@ fi
 
 # if [ "${tiled}" -ne 0 ]; then
 
-countIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
+countIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
 echo '<h4>Reported fragments (total), '${oligoStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-tail -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+tail -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
-countIN=$(head -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
+countIN=$(head -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
 echo '<h4>Reported fragments ( CIS ), '${oligoStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-tail -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+tail -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
-countIN=$(tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
+countIN=$(tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
 echo '<h4>Reported fragments ( TRANS ), '${oligoStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
@@ -2387,7 +2404,7 @@ echo '' >> index.html
 
 if [ "${tiled}" -eq 0 ]; then
 
-countIN=$(head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
+countIN=$(head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
 
 echo '<h4>Capture fragments in reported reads (intra-read duplicates not filtered yet in these counts), distribution over all capture sites</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
@@ -2395,10 +2412,14 @@ echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
+fi
+
+# Box plot end if ------------
+}
 fi
 
 # -----------------------
