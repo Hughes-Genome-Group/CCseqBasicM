@@ -2412,31 +2412,31 @@ fi
 if [ $(($(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 21 ]; then
 echo '<h4>Full reporter counts table for all '${oligoStringName}'s :</h4>' >> index.html
 echo '<pre>' >> index.html
-cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt | sort -k3,3n >> index.html
+cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt >> index.html
 echo '</pre>' >> index.html
 fi
 
 # if [ "${tiled}" -ne 0 ]; then
 
-countIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
+countIN=$(tail -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
 echo '<h4>Reported fragments (total), '${oligoStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
-echo '</p>' >> index.html
 echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
+echo '</p>' >> index.html
 echo '<pre>' >> index.html
 tail -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
-countIN=$(head -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
+countIN=$(tail -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
 echo '<h4>Reported fragments ( CIS ), '${oligoStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
-echo '</p>' >> index.html
 echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
+echo '</p>' >> index.html
 echo '<pre>' >> index.html
 tail -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
@@ -2447,8 +2447,8 @@ echo '<h4>Reported fragments ( TRANS ), '${oligoStringName}'-wise distribution</
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
-echo '</p>' >> index.html
 echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
+echo '</p>' >> index.html
 echo '<pre>' >> index.html
 tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
@@ -2464,8 +2464,8 @@ echo '<h4>Capture fragments in reported reads (intra-read duplicates not filtere
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
-echo '</p>' >> index.html
 echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
+echo '</p>' >> index.html
 echo '<pre>' >> index.html
 head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
