@@ -2409,11 +2409,14 @@ if [ "${tiled}" -eq 1 ]; then
 fi
 
 # for small oligo counts we print all of them :
-if [ $(($(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 21 ]; then
 echo '<h4>Full reporter counts table for all '${oligoStringName}'s :</h4>' >> index.html
+if [ $(($(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 21 ]; then
 echo '<pre>' >> index.html
 cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt >> index.html
+echo '<br>( the same as a file here : <a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a> )' >> index.html
 echo '</pre>' >> index.html
+echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a>' >> index.html
+else
 fi
 
 # if [ "${tiled}" -ne 0 ]; then
