@@ -455,6 +455,38 @@ cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | 
 
 fi
 
+# Mean and std
+# This makes sense only if we have at least 2 oligos.
+
+if [ $(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 2 ]; then
+{
+    
+if [ "${tiled}" -eq 0 ];then
+
+tail -n +2 COMBINED_allFinalCounts_table.txt | \
+awk '{ cap=$2; r=$3; c=$4; t=$5; \
+print"Total   CaptureFrags count :\t"cap;\
+print"Total Total repFrags count :\t"r;\
+print"Total   CIS repFrags count :\t"c;\
+print"Total TRANS repFrags count :\t"t;\
+}' \
+> TEMP_meansAndStds.txt
+
+else
+
+tail -n +2 COMBINED_allFinalCounts_table.txt | \
+awk '{ r=$2; c=$3; t=$4; \
+print"Total Total repFrags count :\t"r;\
+print"Total   CIS repFrags count :\t"c;\
+print"Total TRANS repFrags count :\t"t;\
+}' \
+> TEMP_meansAndStds.txt
+
+fi
+}
+else
+{
+
 if [ "${tiled}" -eq 0 ];then
 
 tail -n +2 COMBINED_allFinalCounts_table.txt | \
@@ -483,8 +515,17 @@ print"Mean TRANS repFrags count :\t"tM"\t with std of :\t"sqrt((t2-tM*tM*N)/(N-1
 > TEMP_meansAndStds.txt
     
 fi
+}
+fi
 
 # Median and quartiles - this is exact, as now supporting also small amount of oligos.
+# This makes sense only if we have at least 4 oligos.
+
+if [ $(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 4 ]; then
+    cat TEMP_meansAndStds.txt | sed 's/\sand min\/lowerQuart\/median\/upperQuart\/max of://' > COMBINED_meanStdMedian_overOligos.txt
+    rm -f TEMP_meansAndStds.txt 
+else
+{
 
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n > TMPcol2
 tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n > TMPcol3
@@ -534,6 +575,8 @@ rm -f TMP${quanType}_lower.txt TMP${quanType}_upper.txt
 
 paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_medians_lower.txt TEMP_medians.txt TEMP_medians_upper.txt TEMP_max.txt > COMBINED_meanStdMedianQuantiles_overOligos.txt
 rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_medians_lower.txt TEMP_medians.txt TEMP_medians_upper.txt TEMP_max.txt
+}
+fi
 
 # ###############################
 # Usage reports
@@ -2415,8 +2458,8 @@ echo '<pre>' >> index.html
 cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt >> index.html
 echo '<br>( the same as a file here : <a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a> )' >> index.html
 echo '</pre>' >> index.html
-echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a>' >> index.html
 else
+echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a>' >> index.html
 fi
 
 # if [ "${tiled}" -ne 0 ]; then
@@ -2648,6 +2691,20 @@ echo '<a target=_blank href="http://userweb.molbiol.ox.ac.uk/'${publicfolder}/${
 echo '</h3></p>' >> description.html
 echo '<hr />' >> description.html
 
+mkdir description_page_files
+
+cat ${rainbowRunTOPDIR}/A_prepareForRun/OLIGOFILE/oligofile_sorted.txt | awk '{print $1"\tchr"$2":"$3"-"$4}' > description_page_files/oligo_coordinates.txt
+
+echo 'Oligo coordinates : <br>' >> description.html
+if [ $(($(cat description_page_files/oligo_coordinates.txt | grep -c ""))) -lt 21 ]; then
+echo '<pre>' >> description.html
+cat description_page_files/oligo_coordinates.txt >> description.html
+echo '<br>( the same as a file here : <a target="_blank" href="description_page_files/oligo_coordinates.txt" >oligo_coordinates.txt</a> )' >> description.html
+echo '</pre>' >> description.html
+else
+echo '<a target="_blank" href="description_page_files/oligo_coordinates.txt" >oligo_coordinates.txt</a>' >> description.html
+fi
+echo '<hr />' >> description.html
 
 echo "<!DOCTYPE HTML PUBLIC -//W3C//DTD HTML 4.01//EN" > index.html
 echo "http://www.w3.org/TR/html4/strict.dtd" >> index.html
@@ -2681,11 +2738,10 @@ echo "All data hubs : <br>" >> index.html
 echo "<a target="_blank" href=\"E_hubAddresses.txt\" >E_hubAddresses.txt</a>" >> index.html
 echo "<hr />" >> index.html
 
-mkdir description_page_files
-
 ln -s ../../COMBINED_allFinalCounts.txt description_page_files/.
 ln -s ../../COMBINED_allFinalCounts_table.txt description_page_files/.
 ln -s ../../../B_mapAndDivideFastqs/multiqcReports description_page_files/.
+
 
 ln -s ../../../B_mapAndDivideFastqs/qsubLogFiles description_page_files/B_folderLogs
 ln -s ../../../C_combineOligoWise/qsubLogFiles description_page_files/C_folderLogs
@@ -2695,6 +2751,16 @@ mkdir description_page_files/B_folderLogs_symlinks
 mkdir description_page_files/C_folderLogs_symlinks
 mkdir description_page_files/D_folderLogs_symlinks
 
+echo 'Oligo coordinates : <br>' >> index.html
+if [ $(($(cat description_page_files/oligo_coordinates.txt | grep -c ""))) -lt 21 ]; then
+echo '<pre>' >> index.html
+cat description_page_files/oligo_coordinates.txt >> index.html
+echo '<br>( the same as a file here : <a target="_blank" href="description_page_files/oligo_coordinates.txt" >oligo_coordinates.txt</a> )' >> index.html
+echo '</pre>' >> index.html
+else
+echo '<a target="_blank" href="description_page_files/oligo_coordinates.txt" >oligo_coordinates.txt</a>' >> index.html
+fi
+echo '<hr />' >> index.html
 
 echo 'Oligo-wise counts (table) : <br>' >> index.html
 echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a>' >> index.html
