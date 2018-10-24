@@ -2713,7 +2713,7 @@ do
 ln -s ../../${file} description_page_files/B_folderLogs_symlinks/$(basename ${file}).txt
 echo '<li><a target="_blank" href="B_folderLogs_symlinks/'$(basename ${file}).txt'" >'$(basename ${file})'</a></li>' >> description_page_files/folderB.html
 done
-echo '<li><a target="_blank" href="description_page_files/folderB.html" >folderB.html</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/folderB.html" >folderB.html</a> ( fastq-wise analysis - output logs ) </li>' >> index.html
 # --------------------------------------
 echo '<p>Folder C (bam-combining) - output logs :</p>' > description_page_files/folderC.html
 for file in description_page_files/C_folderLogs/${CCversion}*
@@ -2721,7 +2721,7 @@ do
 ln -s ../../${file} description_page_files/C_folderLogs_symlinks/$(basename ${file}).txt
 echo '<li><a target="_blank" href="C_folderLogs_symlinks/'$(basename ${file}).txt'" >'$(basename ${file})'</a></li>' >> description_page_files/folderC.html
 done
-echo '<li><a target="_blank" href="description_page_files/folderC.html" >folderC.html</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/folderC.html" >folderC.html</a> ( bam-combining - output logs ) </li>' >> index.html
 # --------------------------------------
 echo '<p>Folder D (oligo-wise analysis) - output logs :</p>' > description_page_files/folderD.html
 for file in description_page_files/D_folderLogs/${CCversion}*
@@ -2729,7 +2729,7 @@ do
 ln -s ../../${file} description_page_files/D_folderLogs_symlinks/$(basename ${file}).txt
 echo '<li><a target="_blank" href="D_folderLogs_symlinks/'$(basename ${file}).txt'" >'$(basename ${file})'</a></li>' >> description_page_files/folderD.html
 done
-echo '<li><a target="_blank" href="description_page_files/folderD.html" >folderD.html</a></li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/folderD.html" >folderD.html</a> ( oligo-wise analysis - output logs ) </li>' >> index.html
 # --------------------------------------
 
 echo '<hr />' >> index.html
