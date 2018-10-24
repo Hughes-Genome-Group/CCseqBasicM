@@ -2367,7 +2367,7 @@ echo '</pre>' >> index.html
 # CCanalyser counters ..
 
 echo '<hr />' >> index.html
-echo '<h3>CCanalyser runs (duplicate filtering, final counts) :</h3>' >> index.html
+echo '<h3>CCanalyser runs (duplicate filtering, cis/trans reporters) :</h3>' >> index.html
 
 echo '<pre>' >> index.html
 head -n 20 ${rainbowRunTOPDIR}/D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt | sed 's/\/.*\///' >> index.html
@@ -2426,7 +2426,7 @@ echo '</br>(hover over to see the counts)' >> index.html
 # Quantile ranges ..
 
 echo '<hr />' >> index.html
-echo '<h3>CCanalyser runs (duplicate filtering, final counts) :</h3>' >> index.html
+echo '<h3>CCanalyser runs - final counts :</h3>' >> index.html
 
 if [ "${tiled}" -eq 1 ]; then
     echo '( tiled reporters = all fragments - except exclusion zone fragments - within reads where at least one frag within the tile )' >> index.html
