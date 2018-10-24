@@ -2724,6 +2724,8 @@ echo " <body>" >> index.html
 TimeStamp=($( date | sed 's/[: ]/_/g' ))
 DateTime="$(date)"
 
+echo '<h2>Run '${samplename}/${CCversion}_${REenzyme}' </h2>' >> index.html
+
 echo "<p>Data produced ${DateTime} with CapC pipeline (coded by James Davies, pipelined and parallelised by Jelena Telenius, located in ${MainScriptPath} )</p>" >> index.html
 
 echo "<hr />" >> index.html
