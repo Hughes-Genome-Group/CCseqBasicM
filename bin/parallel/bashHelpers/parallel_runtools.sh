@@ -510,20 +510,20 @@ tail -n 1 TMPmedians.txt | tr '\t' '\n' >  TEMP_max.txt
 
 quanType="medians"
 oneMedianRound
-rm -f TMP${quanType}
+rm -f TMP${quanType}.txt
 
 # ------lower--------------
 
 quanType="medians_lower"
 oneMedianRound
-rm -f TMP${quanType}
+rm -f TMP${quanType}.txt
 rm -f TMP${quanType}_lower.txt TMP${quanType}_upper.txt
 
 # ------upper--------------
 
 quanType="medians_upper"
 oneMedianRound
-rm -f TMP${quanType}
+rm -f TMP${quanType}.txt
 rm -f TMP${quanType}_lower.txt TMP${quanType}_upper.txt
 
 # ------------------------
@@ -533,8 +533,7 @@ rm -f TMP${quanType}_lower.txt TMP${quanType}_upper.txt
 # head TEMP_m*
 
 paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_medians_lower.txt TEMP_medians.txt TEMP_medians_upper.txt TEMP_max.txt > COMBINED_meanStdMedianQuantiles_overOligos.txt
-rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt
-
+rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_medians_lower.txt TEMP_medians.txt TEMP_medians_upper.txt TEMP_max.txt
 
 # ###############################
 # Usage reports
@@ -2411,6 +2410,7 @@ fi
 
 # for small oligo counts we print all of them :
 if [ $(($(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 21 ]; then
+echo '<h4>Full reporter counts table for all '${oligoStringName}'s :</h4>' >> index.html
 echo '<pre>' >> index.html
 cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt | sort -k3,3n >> index.html
 echo '</pre>' >> index.html
