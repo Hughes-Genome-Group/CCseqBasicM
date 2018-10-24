@@ -375,6 +375,50 @@ cdToThis="${weWereHereDir}"
 checkCdSafety  
 cd ${weWereHereDir}
  
+# ------------------------------------------
+}
+
+# ------------------------------------------
+
+oneMedianRound(){
+# ------------------------------------------
+
+echo "oneMedianRound for ${quanType}"
+
+oligoCountHalf=$(($(($(cat TMP${quanType}.txt | grep -c "")))/2))
+cat TMP${quanType}.txt | head -n ${oligoCountHalf} > TMP${quanType}_lower.txt
+cat TMP${quanType}.txt | tail -n ${oligoCountHalf} > TMP${quanType}_upper.txt
+
+oddOrEven=$(($(($(cat TMP${quanType}.txt | grep -c "")))%2))
+
+echo "oligoCountHalf ${oligoCountHalf} ; oddOrEven ${oddOrEven} "
+
+if [ "${oddOrEven}" -eq 1 ]; then
+    cat TMP${quanType}.txt | head -n $((${oligoCountHalf}+1)) > TMP${quanType}_lower.txt
+    cat TMP${quanType}.txt | tail -n $((${oligoCountHalf}+1)) > TMP${quanType}_upper.txt
+
+    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 1 | tr '\t' '\n' > TEMP_${quanType}.txt
+else
+    
+    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 1 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol2
+    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 2 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol3
+    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 3 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol4
+    if [ "${tiled}" -eq 0 ];then
+    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 4 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol5
+    fi
+    if [ "${tiled}" -eq 0 ];then
+    cat TMPcol2 TMPcol3 TMPcol4 TMPcol5  > TEMP_${quanType}.txt
+    else
+    cat TMPcol2 TMPcol3 TMPcol4 > TEMP_${quanType}.txt
+    fi
+    rm -f TMPcol2 TMPcol3 TMPcol4 TMPcol5     
+fi
+
+# for testing purposes
+# head TEMP_${quanType}.txt
+
+# for testing purposes
+# head TMP*
 
 # ------------------------------------------
 }
@@ -440,56 +484,56 @@ print"Mean TRANS repFrags count :\t"tM"\t with std of :\t"sqrt((t2-tM*tM*N)/(N-1
     
 fi
 
+# Median and quartiles - this is exact, as now supporting also small amount of oligos.
 
-# Median and quartiles - this is not exact, but close enough.
-# Only doing this if at least 4 oligos !
-
-oligoCountHalf=$(($(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c "")))/2))
-oligoCountOneFourth=$(($(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c "")))/4))
-
-if [ "${oligoCountOneFourth}" -ge 1 ]; then
-
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n 1 >  TEMP_min.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n 1 >> TEMP_min.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | head -n 1 >> TEMP_min.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n > TMPcol2
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n > TMPcol3
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n > TMPcol4
 if [ "${tiled}" -eq 0 ];then
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | head -n 1 >> TEMP_min.txt
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n > TMPcol5
 fi
 
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | tail -n 1 >  TEMP_max.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | tail -n 1 >> TEMP_max.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | tail -n 1 >> TEMP_max.txt
 if [ "${tiled}" -eq 0 ];then
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | tail -n 1 >> TEMP_max.txt
-fi
-
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >  TEMP_medians.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >> TEMP_medians.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >> TEMP_medians.txt
-if [ "${tiled}" -eq 0 ];then
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | head -n ${oligoCountHalf} | tail -n 1 >> TEMP_medians.txt
-fi
-
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >  TEMP_lower.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >> TEMP_lower.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >> TEMP_lower.txt
-if [ "${tiled}" -eq 0 ];then
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | head -n ${oligoCountOneFourth} | tail -n 1 >> TEMP_lower.txt
-fi
-
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >  TEMP_upper.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
-if [ "${tiled}" -eq 0 ];then
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n | tail -n ${oligoCountOneFourth} | head -n 1 >> TEMP_upper.txt
-fi
-
-paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt > COMBINED_meanStdMedianQuantiles_overOligos.txt
-rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt
-
+paste TMPcol2 TMPcol3 TMPcol4 TMPcol5 > TMPmedians.txt
 else
-    mv -f TEMP_meansAndStds.txt COMBINED_meanStdMedian_overOligos.txt
+paste TMPcol2 TMPcol3 TMPcol4 > TMPmedians.txt
 fi
+rm -f TMPcol2 TMPcol3 TMPcol4 TMPcol5
+
+head -n 1 TMPmedians.txt | tr '\t' '\n' >  TEMP_min.txt
+tail -n 1 TMPmedians.txt | tr '\t' '\n' >  TEMP_max.txt
+
+# for testing purposes
+# head TEMP_m*
+
+# ------median--------------
+
+quanType="medians"
+oneMedianRound
+rm -f TMP${quanType}
+
+# ------lower--------------
+
+quanType="medians_lower"
+oneMedianRound
+rm -f TMP${quanType}
+rm -f TMP${quanType}_lower.txt TMP${quanType}_upper.txt
+
+# ------upper--------------
+
+quanType="medians_upper"
+oneMedianRound
+rm -f TMP${quanType}
+rm -f TMP${quanType}_lower.txt TMP${quanType}_upper.txt
+
+# ------------------------
+
+# for testing purposes
+# echo
+# head TEMP_m*
+
+paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_medians_lower.txt TEMP_medians.txt TEMP_medians_upper.txt TEMP_max.txt > COMBINED_meanStdMedianQuantiles_overOligos.txt
+rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_lower.txt TEMP_medians.txt TEMP_upper.txt TEMP_max.txt
 
 
 # ###############################
@@ -2365,6 +2409,13 @@ if [ "${tiled}" -eq 1 ]; then
     oligoStringName="tile"
 fi
 
+# for small oligo counts we print all of them :
+if [ $(($(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 21 ]; then
+echo '<pre>' >> index.html
+cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt | sort -k3,3n >> index.html
+echo '</pre>' >> index.html
+fi
+
 # if [ "${tiled}" -ne 0 ]; then
 
 countIN=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | tail -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
@@ -2373,6 +2424,7 @@ echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
+echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
 echo '<pre>' >> index.html
 tail -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
@@ -2384,6 +2436,7 @@ echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
+echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
 echo '<pre>' >> index.html
 tail -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
@@ -2395,6 +2448,7 @@ echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
+echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
 echo '<pre>' >> index.html
 tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
@@ -2411,6 +2465,7 @@ echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '</p>' >> index.html
+echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
 echo '<pre>' >> index.html
 head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
