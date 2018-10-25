@@ -692,6 +692,14 @@ print $1"\tprepF1\t"a["prepF1"]"\tF2\t"a["F2"]"\tF3\t"a["F3"]"\tF5\t"a["F5"]"\tF
 > usageReports/wholerunTasksForExcel.txt
 
 fi
+
+# ###############################
+# Parameter file
+# ###############################
+
+TEMPfirstfile=$( ls -1 chr*/*/parameters_capc.log | head -n 1 )
+cat ${TEMPfirstfile} | sed 's/\/bunchWise.*//' | grep -v '^Read' | sed 's/^OligoFile\s.*/OligoFile '$(fp ../A_prepareForRun/OLIGOFILE/oligofile_sorted.txt | sed 's/\//\\\//g')'/' \
+> parameters_capc.log
  
 cdCommand='cd ${weWereHereDir}'
 cdToThis="${weWereHereDir}"
@@ -2743,7 +2751,7 @@ echo "<hr />" >> index.html
 ln -s ../../COMBINED_allFinalCounts.txt description_page_files/.
 ln -s ../../COMBINED_allFinalCounts_table.txt description_page_files/.
 ln -s ../../../B_mapAndDivideFastqs/multiqcReports description_page_files/.
-
+ln -s ../../parameters_capc.log description_page_files/.
 
 ln -s ../../../B_mapAndDivideFastqs/qsubLogFiles description_page_files/B_folderLogs
 ln -s ../../../C_combineOligoWise/qsubLogFiles description_page_files/C_folderLogs
@@ -2773,6 +2781,10 @@ echo '<hr />' >> index.html
 
 echo 'Run output log (main log) : <br>' >> index.html
 echo '<a target="_blank" href="../qsub.out" >qsub.out</a>' >> index.html
+echo '<hr />' >> index.html
+
+echo 'Used run parameters (given to mainrunner.sh , which handles all but parallelisation) : <br>' >> index.html
+echo '<a target="_blank" href="description_page_files/parameters_capc.log" >parameters_capc.log</a>' >> index.html
 echo '<hr />' >> index.html
 
 echo 'Parallel steps - output logs : <br>' >> index.html
