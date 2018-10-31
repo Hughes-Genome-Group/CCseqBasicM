@@ -274,7 +274,7 @@ cat ${folder}/F1_beforeCCanalyser_${samplename}_${CCversion}/flashing.log | grep
 
 done
 
-paste TMP_makingflashLog/* | sed 's/\s/+/g' | sed 's/^++*$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
+paste TMP_makingflashLog/* | sed 's/\s/+/g' | sed 's/^++*$/0/' | sed 's/^$/0/' | bc | sed 's/^0$//' > TMPnumbers.txt
 cat TMP_makingflashLogPerc/* | awk 'BEGIN{s=0}{s=s+$1}END{print s/NR"%"}' >> TMPnumbers.txt
 
 # Heading part ..
