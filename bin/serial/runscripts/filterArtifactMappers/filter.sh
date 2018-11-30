@@ -303,6 +303,16 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
 
     
     fi
+
+# If we actually dont' need to filter anything (the _forBlatAndPloidyFiltering.gff was empty) , we can just use the SAM reporter file as it is ..  
+else
+    printThis="Filtering not needed for reporter ${basename} SAM file ${reporterfile} \n - no reads overlapped the to-be-filtered regions."
+    printToLogFile
+    # Adding to existing file..
+    setStringentFailForTheFollowing
+    cat ${reporterfile} > ${outputfolder}/${basename}_filtered.sam
+    stopStringentFailAfterTheAbove        
+fi
     
     #--------------------------------------
     # Combining filtered SAM files for re-run in CCanalyser..
@@ -346,15 +356,6 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
     ls -lht | grep TEMP >> "/dev/stderr"
     rm -f TEMP_sorted.sam
   
-# If we actually dont' need to filter anything (the _forBlatAndPloidyFiltering.gff was empty) , we can just catenate here ..  
-else
-    printThis="Filtering not needed for reporter ${basename} SAM file ${reporterfile} \n - no reads overlapped the to-be-filtered regions."
-    printToLogFile
-    # Adding to existing file..
-    setStringentFailForTheFollowing
-    cat ${reporterfile} >> TEMP_${dataprefix}_combined.sam
-    stopStringentFailAfterTheAbove        
-fi
 
 # We list them in any case ..
 ls -lht | grep combined >> "/dev/stderr"
