@@ -326,16 +326,29 @@ fi
     # samtools sort -n  - sort by read name : ready for ccanalyser
     # However - now it is via unix commands for the time being.
     
-    ls -lht ${outputfolder}/${basename}_filtered.sam
+    ls -lhtL ${outputfolder}/${basename}_filtered.sam
     ls -lht ${datafolder}/${dataprefix}_capture_${basename}.sam
 
-    ls -lht ${outputfolder}/${basename}_filtered.sam >> "/dev/stderr"
+    ls -lhtL ${outputfolder}/${basename}_filtered.sam >> "/dev/stderr"
     ls -lht ${datafolder}/${dataprefix}_capture_${basename}.sam >> "/dev/stderr"
 
     setStringentFailForTheFollowing
     cat ${outputfolder}/${basename}_filtered.sam | grep -v "^@" > TEMP.sam
-    cat ${datafolder}/${dataprefix}_capture_${basename}.sam  | grep -v "^@" >> TEMP.sam
     stopStringentFailAfterTheAbove
+    
+    # This is allowed to be empty for tiled runs
+    if [ $(($( head -n 1000 ${datafolder}/${dataprefix}_capture_${basename}.sam  | grep -cv "^@" ))) -ne 0 ]; then
+        setStringentFailForTheFollowing
+        cat ${datafolder}/${dataprefix}_capture_${basename}.sam  | grep -v "^@" >> TEMP.sam
+        stopStringentFailAfterTheAbove
+    else
+        echo "No capture fragments left - if this is not a TILED run, this means problems !"
+        echo "(Tiled runs mark all fragments as 'reporters' - so missing captures here is just fine)"
+        echo
+        echo "No capture fragments left - if this is not a TILED run, this means problems !" >> "/dev/stderr"
+        echo "(Tiled runs mark all fragments as 'reporters' - so missing captures here is just fine)" >> "/dev/stderr"
+        echo
+    fi
 
     ls -lht | grep TEMP >> "/dev/stderr"
 
