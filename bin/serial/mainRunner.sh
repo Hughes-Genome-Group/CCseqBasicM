@@ -311,7 +311,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,e:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,tiled,strandSpecificDuplicates,onlyCCanalyser,onlyHub,onlyCapturesiteDivision,onlyREdigest,flash,noFlash,onlyCis,onlyBlat,UMI,useSymbolicLinks,useClusterDiskArea,noPloidyFilter,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,bowtie1,bowtie2,processors:,CCversion:,BLATforREUSEfolderPath:,globin:,parallelSubsample:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,chunkmb:,window:,increment:,ada3read1:,ada3read2:,extend:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,sonicationSize:,parallel:,capturesitesPerBunch:,monitorRunLogFile: -- "$@"`
+OPTS=`getopt -o h,m:,M:,e:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,tiled,strandSpecificDuplicates,onlyCCanalyser,onlyHub,onlyCapturesiteDivision,onlyREdigest,flash,noFlash,onlyCis,onlyBlat,UMI,useSymbolicLinks,useClusterDiskArea,noPloidyFilter,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,bowtie1,bowtie2,processors:,CCversion:,BLATforREUSEfolderPath:,globin:,parallelSubsample:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,chunkmb:,window:,increment:,ada3read1:,ada3read2:,extend:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,ampliconSize:,sonicationSize:,parallel:,capturesitesPerBunch:,monitorRunLogFile: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -366,7 +366,8 @@ while true ; do
         --ada3read2) ADA32=$2 ; shift 2;;
         --extend) extend=$2 ; shift 2;;
         --noPloidyFilter) ploidyFilter="--noploidyfilter " ; shift;;
-        --sonicationSize) sonicationSize=$2 ; shift 2;;
+        --sonicationSize) ampliconSize=$2 ; shift 2;;
+        --ampliconSize) ampliconSize=$2 ; shift 2;;
         --strandSpecificDuplicates) otherParameters="${otherParameters} --stranded"; strandSpecificDuplicates=1 ; shift;;
         --dump) otherParameters="${otherParameters} --dump" ; shift;;
         --snp) otherParameters="${otherParameters} --snp" ; shift;;
@@ -663,7 +664,7 @@ else
     fullPathDpnGenome=$(pwd)"/genome_${REenzyme}_coordinates.txt"
 fi
 
-# RE enzyme genome blacklist generation (regions farther than sonication lenght from the cut site)
+# RE enzyme genome blacklist generation (regions farther than amplicon lenght from the cut site)
 fullPathDpnBlacklist=""
 if [[ ${PARALLEL} -eq "0" ]]; then
     generateReBlacklist

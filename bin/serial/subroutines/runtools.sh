@@ -87,7 +87,7 @@ rm -f genome_${REenzyme}_blacklist.bed
 
 # Plus/minus 300 bases to both directions
 setStringentFailForTheFollowing
-cat ${fullPathDpnGenome} | sed 's/:/\t/' | sed 's/-/\t/' | awk '{if(($3-$2)>(2*'${sonicationSize}')){print "chr"$1"\t"$2+'${sonicationSize}'"\t"$3-'${sonicationSize}'}}' > genome_${REenzyme}_blacklist.bed
+cat ${fullPathDpnGenome} | sed 's/:/\t/' | sed 's/-/\t/' | awk '{if(($3-$2)>(2*'${ampliconSize}')){print "chr"$1"\t"$2+'${ampliconSize}'"\t"$3-'${ampliconSize}'}}' > genome_${REenzyme}_blacklist.bed
 stopStringentFailAfterTheAbove
 
 testedFile="genome_${REenzyme}_blacklist.bed"
@@ -914,7 +914,7 @@ ls -lht FLASHED_REdig.sam
 ls -lht NONFLASHED_REdig.sam
 
 echo
-echo "Read counts - in sonication size filtered sam files : "
+echo "Read counts - in amplicon size filtered sam files : "
 echo
 flashstatus="FLASHED"
 echo ${flashstatus}_REdig.sam

@@ -1102,7 +1102,7 @@ rm -f TEMPcounts1_*.txt TEMPcounts2_*.txt TEMP.tableheading
 
 echo
 echo '-----------------------------------------------------------------------------------------------------------------'
-echo "Filtered sam reads - these reads are now filtered from father-away-from RE cut sites than +/- ${sonicationSize} : "
+echo "Filtered sam reads - these reads are now filtered from father-away-from RE cut sites than +/- ${ampliconSize} : "
 echo
 cat LOOP5_${flashstatus}_filter_table.txt
 echo

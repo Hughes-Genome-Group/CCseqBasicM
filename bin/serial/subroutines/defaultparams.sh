@@ -83,7 +83,7 @@ echo "maxIntron ${maxIntron}" >> parameters_capc.log
 echo "oneOff ${oneOff}" >> parameters_capc.log
 echo "extend ${extend}"  >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
-echo "sonicationSize ${sonicationSize}"  >> parameters_capc.log
+echo "ampliconSize ${ampliconSize}"  >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
 echo "ploidyFilter ${ploidyFilter}"  >> parameters_capc.log
 echo "------------------------------" >> parameters_capc.log
@@ -157,7 +157,7 @@ PublicPath="UNDETERMINED"
 ploidyFilter=""
 extend=20000
 
-sonicationSize=300
+ampliconSize=300
 
 # If we have many capture-site (REfragment)s, the stuff can be eased up by analysing only in cis.
 onlyCis=0

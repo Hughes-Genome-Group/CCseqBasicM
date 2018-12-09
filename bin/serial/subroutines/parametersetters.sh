@@ -234,8 +234,8 @@ checkThis="${extend}"
 checkedName='extend'
 checkParse
 
-checkThis="${sonicationSize}"
-checkedName='sonicationSize'
+checkThis="${ampliconSize}"
+checkedName='ampliconSize'
 checkParse
 
 checkThis="${PublicPath}"

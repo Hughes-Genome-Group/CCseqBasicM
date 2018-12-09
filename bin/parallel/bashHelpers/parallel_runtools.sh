@@ -2361,10 +2361,10 @@ echo 'Abbreviations :' >> index.html
 echo '' >> index.html
 echo '         mappedR = mapped reads' >> index.html
 echo '      multifragR = reads with more than 1 fragment (can potentially report interaction)' >> index.html
-echo '         hascapR = reads containing fragment(s) overlapping any of the '${capSiteName}'s (within +/- sonicationSize from RE cut sites)' >> index.html
+echo '         hascapR = reads containing fragment(s) overlapping any of the '${capSiteName}'s (within +/- ampliconSize from RE cut sites)' >> index.html
 echo '      singlecapR = reads which can be resolved to a single '${capSiteName}' (not reporting multiple different '${capSiteName}'s within same read)' >> index.html
 echo '      singlecapF = fragment count in reads which can be resolved to a single '${capSiteName}' (not reporting multiple different '${capSiteName}'s within same read)' >> index.html
-echo 'withinSonicSizeF = fragments within +/- sonicationSize from RE cut sites (filters out mapping errors)' >> index.html
+echo 'withinSonicSizeF = fragments within +/- ampliconSize from RE cut sites (filters out mapping errors)' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
