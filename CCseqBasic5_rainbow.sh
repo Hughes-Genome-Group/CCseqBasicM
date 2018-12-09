@@ -71,12 +71,12 @@ trap finish EXIT
 # The serial execution order is :
 
 # 1) check forbidden flags (not allowing sub-level flags --onlyREdigest, --parallel 1 --parallel 2 --R1 --R2 --outfile --errfile)
-# 2) sort oligo file, check fastq integrity
+# 2) sort capture-site (REfragment) file, check fastq integrity
 # 3) mainRunner.sh --onlyREdigest
 # 4) for each fastq in the list : mainRunner.sh --parallel 1
 # 5) combine results
 # 6) mainRunner.sh --onlyBlat
-# 7) for each oligo bunch in the list : mainRunner.sh --parallel 2
+# 7) for each capture-site (REfragment) bunch in the list : mainRunner.sh --parallel 2
 # 8) visualise
 
 # For eachof these 8 steps the main script needs to be an EXCECUTABLE SCRIPT (so that the logic is exactly parallel to that what will be in the parallel nextFlow run )
@@ -91,7 +91,7 @@ CCseqBasicVersion="CCseqBasic5_rainbow"
 
 # -----------------------------------------
 
-MainScriptPath="$( echo $0 | sed 's/\/'${CCseqBasicVersion}'.sh$//' )"
+MainScriptPath="$( which $0 | sed 's/\/'${CCseqBasicVersion}'.sh$//' )"
 
 CaptureParallelPath="${MainScriptPath}/bin/parallel"
 CaptureSerialPath="${MainScriptPath}/bin/serial"
@@ -152,7 +152,7 @@ reGenomeFilePath="UNDEFINED"
 reBlacklistFilePath="UNDEFINED"
 reWhitelistFilePath="UNDEFINED"
 
-oligofile="UNDEFINED"
+capturesitefile="UNDEFINED"
 
 onlyblat=0
 
@@ -237,7 +237,7 @@ exitStatus=$( echo $? )
 
 parameterList=$( cat TEMP.param | sed 's/\s*END$//' | sed 's/^PARAMETERS\s*//' )
 
-oligofile=$( cat TEMP.mainparam | grep '^oligofile\s' | sed 's/\s\s*/\t/' | cut -f 2 )
+capturesitefile=$( cat TEMP.mainparam | grep '^capturesitefile\s' | sed 's/\s\s*/\t/' | cut -f 2 )
 inputgenomename=$( cat TEMP.mainparam | grep '^inputgenomename\s' | sed 's/\s\s*/\t/' | cut -f 2 )
 samplename=$( cat TEMP.mainparam | grep '^samplename\s' | sed 's/\s\s*/\t/' | cut -f 2 )
 REenzyme=$( cat TEMP.mainparam | grep '^REenzyme\s' | sed 's/\s\s*/\t/' | cut -f 2 )
@@ -247,8 +247,8 @@ tiled=$( cat TEMP.mainparam | grep '^tiled\s' | sed 's/\s\s*/\t/' | cut -f 2 )
 useTMPDIRforThis=$( cat TEMP.mainparam | grep '^useTMPDIRforThis\s' | sed 's/\s\s*/\t/' | cut -f 2 )
 useWholenodeQueue=$( cat TEMP.mainparam | grep '^useWholenodeQueue\s' | sed 's/\s\s*/\t/' | cut -f 2 )
 
-checkThis="${oligofile}"
-checkedName='oligofile'
+checkThis="${capturesitefile}"
+checkedName='capturesitefile'
 checkParse
 checkThis="${inputgenomename}"
 checkedName='inputgenomename'
@@ -326,7 +326,7 @@ echo "Parameters after parsing :"
 echo "${parameterList}"
 echo "onlyblat ${onlyblat}"
 echo "reuseblatpath ${reuseblatpath}"
-echo "oligofile ${oligofile}"
+echo "capturesitefile ${capturesitefile}"
 echo "inputgenomename ${inputgenomename}"
 echo "samplename ${samplename}"
 echo "REenzyme ${REenzyme}"
@@ -383,21 +383,21 @@ if [ "${onlyHub}" -eq 1 ] ; then
 
   makeCombinedBamVisualisation
   
-  printThis="Oligo summary counts .. "
+  printThis="capture-site (REfragment)summary counts .. "
   printNewChapterToLogFile
   
   flashstatus="FLASHED"
-  makeOligorunSummaries
+  makeCapturesiterunSummaries
   flashstatus="NONFLASHED"
-  makeOligorunSummaries
+  makeCapturesiterunSummaries
 
-  makeCombinedOligorunSummaries
+  makeCombinedCapturesiterunSummaries
   
   # Summary of summaries ..
-  head -n 20 D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
+  head -n 20 D_analyseCapturesiteWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
   echo >> D_analysisSummaryCounts.txt
-  echo "==> D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt <==" >> D_analysisSummaryCounts.txt
-  cat D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> D_analysisSummaryCounts.txt
+  echo "==> D_analyseCapturesiteWise/COMBINED_meanStdMedian_overCapturesites.txt <==" >> D_analysisSummaryCounts.txt
+  cat D_analyseCapturesiteWise/COMBINED_meanStdMedian_overCapturesites.txt >> D_analysisSummaryCounts.txt
 
 
   printThis="Generate data hub .. "
@@ -423,11 +423,11 @@ ${CaptureParallelPath}/fastqExistenceChecks.sh
 exitStatus=$( echo $? ); if [ "${exitStatus}" -ne 0 ]; then { exit 1 ; }; fi
 #------------------------------------------
 
-printThis="Check oligo file, sort coordinate-wise .. "
+printThis="Check capture-site (REfragment) file, sort coordinate-wise .. "
 printNewChapterToLogFile
 echo
-echo "oligofile ${oligofile}"
-ls -lht ${oligofile}
+echo "capturesitefile ${capturesitefile}"
+ls -lht ${capturesitefile}
 echo
 
 # -----------------------------------------
@@ -438,39 +438,39 @@ cd A_prepareForRun
 
 stepAmiddir=$(pwd)
 
-# 2b) sort oligo file
+# 2b) sort capture-site (REfragment) file
 
-mkdir OLIGOFILE
-sort -k2,2n -k3,3n ${oligofile} > OLIGOFILE/oligofile_sorted.txt
-oligofile="$(pwd)/OLIGOFILE/oligofile_sorted.txt"
+mkdir CAPTURESITEFILE
+sort -k2,2n -k3,3n ${capturesitefile} > CAPTURESITEFILE/capturesitefile_sorted.txt
+capturesitefile="$(pwd)/CAPTURESITEFILE/capturesitefile_sorted.txt"
 
-# Make oneliners for all oligos, to be used in the combining stage..
+# Make oneliners for all capture-site (REfragment)s, to be used in the combining stage..
 
 # Chr folders
-mkdir OLIGOSindividualFiles
-for TEMPnumber in $(cut -f 2 ${oligofile} | uniq)
+mkdir CAPTURESITESindividualFiles
+for TEMPnumber in $(cut -f 2 ${capturesitefile} | uniq)
 do
-    mkdir OLIGOSindividualFiles/chr${TEMPnumber}
+    mkdir CAPTURESITESindividualFiles/chr${TEMPnumber}
 done
 
-# Make temp commands to make all the Chr/oligo folders (each folder has only one oligo ! )
-cat ${oligofile} | cut -f 1-2 | awk '{print "mkdir OLIGOSindividualFiles/chr"$2"/"$1}' > TEMPcommands.sh
+# Make temp commands to make all the Chr/capturesite folders (each folder has only one capture-site (REfragment) ! )
+cat ${capturesitefile} | cut -f 1-2 | awk '{print "mkdir CAPTURESITESindividualFiles/chr"$2"/"$1}' > TEMPcommands.sh
 chmod u+x TEMPcommands.sh
 ./TEMPcommands.sh
 rm -f TEMPcommands.sh
 
-# Oligo wise oligo files into each oligo folder
-cat ${oligofile} | awk '{print $0 >> "OLIGOSindividualFiles/chr"$2"/"$1"/oligoFileOneliner.txt"}'
+# capture-site (REfragment)wise capture-site (REfragment) files into each capture-site (REfragment) folder
+cat ${capturesitefile} | awk '{print $0 >> "CAPTURESITESindividualFiles/chr"$2"/"$1"/capturesiteFileOneliner.txt"}'
 
 # Now the whole thing can be cp -r:d to become the initial structure of folder C !
-# A_prepareForRun/OLIGOSindividualFiles
+# A_prepareForRun/CAPTURESITESindividualFiles
 
 #------------------------------------------
 
 echo
 echo "After coordinate-wise sorting :"
-echo "oligofile ${oligofile}"
-printThis=$( ls -lht ${oligofile} )
+echo "capturesitefile ${capturesitefile}"
+printThis=$( ls -lht ${capturesitefile} )
 printToLogFile
 echo
 # -----------------------------------------
@@ -484,8 +484,8 @@ mkdir REdigest
 cd REdigest
 digestOK=1
 
-echo "${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${oligofile} --${REenzymeShort} --onlyREdigest --pf ${publicfolder} --outfile runRE.out --errfile runRE.err"
-${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${oligofile} --${REenzymeShort} --onlyREdigest --pf ${publicfolder} --outfile runRE.out --errfile runRE.err 1> runRE.out 2> runRE.err
+echo "${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${capturesitefile} --${REenzymeShort} --onlyREdigest --pf ${publicfolder} --outfile runRE.out --errfile runRE.err"
+${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${capturesitefile} --${REenzymeShort} --onlyREdigest --pf ${publicfolder} --outfile runRE.out --errfile runRE.err 1> runRE.out 2> runRE.err
 # --------------------------
 if [ "$?" -ne 0 ];then
     printThis="Digest generation run reported error !"
@@ -518,7 +518,7 @@ fi
 if [ "${digestOK}" -eq 1 ]; then {
   reGenomeFilePath=$(    cat REdigest.log | grep fullPathDpnGenome    | sed 's/\s\s*/\t/' | cut -f 2)
   reBlacklistFilePath=$( cat REdigest.log | grep fullPathDpnBlacklist | sed 's/\s\s*/\t/' | cut -f 2)
-  reWhitelistFilePath=$( cat REdigest.log | grep fullPathOligoWhitelist | sed 's/\s\s*/\t/' | cut -f 2)
+  reWhitelistFilePath=$( cat REdigest.log | grep fullPathCapturesiteWhitelist | sed 's/\s\s*/\t/' | cut -f 2)
 }
 else {
   printThis="Restriction Enzyme digest generation failed "
@@ -596,7 +596,7 @@ if [ "${onlyblat}" -eq 1 ] ; then
     
     printThis="This was --onlyBlat  run, so finishing up "
     printToLogFile
-    printThis="All oligos are now BLAT-analysed "
+    printThis="All capture-site (REfragment)s are now BLAT-analysed "
     printToLogFile
     
     copyRainbowLogFiles
@@ -631,8 +631,8 @@ cd B_mapAndDivideFastqs
 
 FqOrOl="Fq"
 fqOrOL="fq"
-fastqOrOligo="fastq"
-FastqOrOligo="Fastq"
+fastqOrCapturesite="fastq"
+FastqOrCapturesite="Fastq"
 foundFoldersCount=$(($(ls -1 | grep '^fastq_' | grep -c "")))
 checkThis="${foundFoldersCount}"
 checkedName='foundFoldersCount'
@@ -698,7 +698,7 @@ fi
 
 # Now, if we are not --onlyBlat run, we run folders F1 and F2 normally , in folder D.
 
-# 5) Combining oligo bunches in folder C , continuing to folder D to generate F1 and F2 folders
+# 5) Combining capture-site (REfragment) bunches in folder C , continuing to folder D to generate F1 and F2 folders
 
 B_FOLDER_PATH="UNDEFINED"
 # Checking we have folders A and B - so we have at least somewhat functional structure at this point ..
@@ -721,30 +721,30 @@ if [ "${onlyCCanalyser}" -eq 1 ]; then
 else
     
 
-# 5a) for each oligo bunch in the list : combine with samtools bam catenate, to corresponding folder in D
-printThis="Combining the output bams to single files per oligo bunch : flashed and nonflashed separately "
+# 5a) for each capture-site (REfragment) bunch in the list : combine with samtools bam catenate, to corresponding folder in D
+printThis="Combining the output bams to single files per capture-site (REfragment) bunch : flashed and nonflashed separately "
 printNewChapterToLogFile
 
-C_FOLDER_PATH="$(pwd)/C_combineOligoWise"
+C_FOLDER_PATH="$(pwd)/C_combineCapturesiteWise"
 
-rm -rf C_combineOligoWise
-# mkdir C_combineOligoWise
-cp -r A_prepareForRun/OLIGOSindividualFiles C_combineOligoWise
+rm -rf C_combineCapturesiteWise
+# mkdir C_combineCapturesiteWise
+cp -r A_prepareForRun/CAPTURESITESindividualFiles C_combineCapturesiteWise
 
 bamCombinePrepareRun
-checkBamsOfThisDir="C_combineOligoWise"
+checkBamsOfThisDir="C_combineCapturesiteWise"
 checkBamprepcombineErrors
 
 doQuotaTesting
 
-cd C_combineOligoWise
+cd C_combineCapturesiteWise
 
 # Here the divider between WHOLENODEQUEUE runs and NORMAL MULTITASK jobs
 
 FqOrOl="BAM"
 fqOrOL="Bam"
-fastqOrOligo="bamcombine"
-FastqOrOligo="Bamcombine"
+fastqOrCapturesite="bamcombine"
+FastqOrCapturesite="Bamcombine"
 
 
 foundFoldersCount=$(($( cat runlist.txt | grep -c "" )))
@@ -780,8 +780,8 @@ fi
 
 makeCombinedBamVisualisation
 
-# echo "${CaptureParallelPath}/parallelVisualisationLogs.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme} ${inputgenomename} ${tiled} $(basename ${B_FOLDER_PATH}) $(basename ${C_FOLDER_PATH}) ${oligofile}"
-# ${CaptureParallelPath}/parallelVisualisationLogs.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme} ${inputgenomename} ${tiled} $(basename ${B_FOLDER_PATH}) $(basename ${C_FOLDER_PATH}) ${oligofile}
+# echo "${CaptureParallelPath}/parallelVisualisationLogs.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme} ${inputgenomename} ${tiled} $(basename ${B_FOLDER_PATH}) $(basename ${C_FOLDER_PATH}) ${capturesitefile}"
+# ${CaptureParallelPath}/parallelVisualisationLogs.sh ${publicfolder} ${samplename} ${CCversion} ${REenzyme} ${inputgenomename} ${tiled} $(basename ${B_FOLDER_PATH}) $(basename ${C_FOLDER_PATH}) ${capturesitefile}
 
 cdCommand='cd ${rainbowRunTOPDIR} where rainbowRunTOPDIR is '${rainbowRunTOPDIR}
 cdToThis="${rainbowRunTOPDIR}"
@@ -807,9 +807,9 @@ fi
 
 C_FOLDER_PATH="UNDEFINED"
 # Checking we have folders A and B - so we have at least somewhat functional structure at this point ..
-if [ ! -d A_prepareForRun ] || [ ! -d B_mapAndDivideFastqs ] || [ ! -d C_combineOligoWise ]; then
+if [ ! -d A_prepareForRun ] || [ ! -d B_mapAndDivideFastqs ] || [ ! -d C_combineCapturesiteWise ]; then
     
-    printThis="Cannot find output folder A_prepareForRun and/or B_mapAndDivideFastqs and/or C_combineOligoWise . "
+    printThis="Cannot find output folder A_prepareForRun and/or B_mapAndDivideFastqs and/or C_combineCapturesiteWise . "
     printToLogFile
     printThis="EXITING "
     printToLogFile
@@ -841,7 +841,7 @@ if [ "${onlyCCanalyser}" -eq 1 ] || [ "${startAfterFolderB}" -eq 1 ]; then
 
 fi
 
-C_FOLDER_PATH="$(pwd)/C_combineOligoWise"
+C_FOLDER_PATH="$(pwd)/C_combineCapturesiteWise"
 
 # Setting the RE-genome path ..
 
@@ -853,19 +853,19 @@ C_FOLDER_PATH="$(pwd)/C_combineOligoWise"
   
 # ------------------------------------
 
-# 7) for each oligo bunch in the list : mainRunner.sh --parallel 2
+# 7) for each capture-site (REfragment) bunch in the list : mainRunner.sh --parallel 2
 
 prepareParallelCCanalyserRun
 # doQuotaTesting
 
-cd D_analyseOligoWise
+cd D_analyseCapturesiteWise
 
 # Here the divider between WHOLENODEQUEUE runs and NORMAL MULTITASK jobs
 
 FqOrOl="Ol"
 fqOrOL="OL"
-fastqOrOligo="oligo"
-FastqOrOligo="Oligo"
+fastqOrCapturesite="capturesite"
+FastqOrCapturesite="Capturesite"
 
 
 foundFoldersCount=$(($( cat runlist.txt | grep -c "" )))
@@ -888,17 +888,17 @@ cd ${rainbowRunTOPDIR}
 # Make summaries
 
 flashstatus="FLASHED"
-makeOligorunSummaries
+makeCapturesiterunSummaries
 flashstatus="NONFLASHED"
-makeOligorunSummaries
+makeCapturesiterunSummaries
 
-makeCombinedOligorunSummaries
+makeCombinedCapturesiterunSummaries
 
 # Summary of summaries ..
-head -n 20 D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
+head -n 20 D_analyseCapturesiteWise/*FLASHED_percentagesAndFinalCounts.txt > D_analysisSummaryCounts.txt
 echo "" >> D_analysisSummaryCounts.txt
-echo "==> D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt <==" >> D_analysisSummaryCounts.txt
-cat D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> D_analysisSummaryCounts.txt
+echo "==> D_analyseCapturesiteWise/COMBINED_meanStdMedian_overCapturesites.txt <==" >> D_analysisSummaryCounts.txt
+cat D_analyseCapturesiteWise/COMBINED_meanStdMedian_overCapturesites.txt >> D_analysisSummaryCounts.txt
 
 # Check for errors
 

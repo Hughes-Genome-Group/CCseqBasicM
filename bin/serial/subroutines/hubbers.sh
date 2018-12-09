@@ -107,7 +107,7 @@ doOneColorChild(){
 # Child name ends with the _1.bw where _1 is the number of the color.
 # These get set in the analyseMappedReads.pl when bigwigs are generated
 
-# Name being just the oligo name, without the number.
+# Name being just the capture-site (REfragment) name, without the number.
 # This parse works upto 99 colors
 name=$(echo $file | sed 's/_.\.bw//' | sed 's/_..\.bw//')
 # Number being just the color number.
@@ -251,7 +251,7 @@ cp -f ./out.hist "${PublicPath}/${Sample}_logFiles/flash.hist"
 cp -f ./NONFLASHED_${REenzyme}digestion.log "${PublicPath}/${Sample}_logFiles/."
 cp -f ./FLASHED_${REenzyme}digestion.log "${PublicPath}/${Sample}_logFiles/."
 
-cat ${OligoFile} | cut -f 1-4 | awk '{print $1"\tchr"$2"\t"$3"\t"$4}' > "${PublicPath}/${Sample}_logFiles/usedOligoFile.txt"
+cat ${CapturesiteFile} | cut -f 1-4 | awk '{print $1"\tchr"$2"\t"$3"\t"$4}' > "${PublicPath}/${Sample}_logFiles/usedCapturesiteFile.txt"
 
 cdCommand='cd ${runDir}'
 cdToThis="${runDir}"
@@ -271,7 +271,7 @@ mkdir -p "${PublicPath}/${Sample}_logFiles"
 printThis="Copying log files to public folder"
 printToLogFile
 
-cat ${OligoFile} | cut -f 1-4 | awk '{print $1"\tchr"$2"\t"$3"\t"$4}' > "${PublicPath}/${Sample}_logFiles/usedOligoFile.txt"
+cat ${CapturesiteFile} | cut -f 1-4 | awk '{print $1"\tchr"$2"\t"$3"\t"$4}' > "${PublicPath}/${Sample}_logFiles/usedCapturesiteFile.txt"
 
 cp -fr  ../${B_FOLDER_BASENAME}/multiqcReports "${PublicPath}/."
 cp -f   ../${B_FOLDER_BASENAME}/fastqRoundSuccess.log "${PublicPath}/."
@@ -301,12 +301,12 @@ printToLogFile
 cp -fr  ../${C_FOLDER_BASENAME}/bamlistings "${PublicPath}/."
 cp -f   ../${C_FOLDER_BASENAME}/bamcombineSuccess.log "${PublicPath}/."
 
-mkdir -p "${PublicPath}/OLIGObunches"
+mkdir -p "${PublicPath}/CAPTURESITEbunches"
 
-for oligoTxtFile in ../OLIGObunches/DIVIDEDoligos/oligofile_sorted_BUNCH_*.txt
+for capturesiteTxtFile in ../CAPTURESITEbunches/DIVIDEDcapturesites/capturesitefile_sorted_BUNCH_*.txt
 do
-    TEMPbasename=$(basename ${oligoTxtFile})
-    cat ${oligoTxtFile} | cut -f 1-4 | awk '{print $1"\tchr"$2"\t"$3"\t"$4}' > "${PublicPath}/OLIGObunches/${TEMPbasename}"
+    TEMPbasename=$(basename ${capturesiteTxtFile})
+    cat ${capturesiteTxtFile} | cut -f 1-4 | awk '{print $1"\tchr"$2"\t"$3"\t"$4}' > "${PublicPath}/CAPTURESITEbunches/${TEMPbasename}"
 done
 
 
@@ -432,15 +432,15 @@ updateCCanalyserReportsToPublic
 #samForCCanalyser="F1_${Sample}_pre${CCversion}/Combined_reads_REdig.sam"
 #samBasename=$( echo ${samForCCanalyser} | sed 's/.*\///' | sed 's/\_FLASHED.sam$//' | sed 's/\_NONFLASHED.sam$//' )
     
-# Make the bigbed file from the bed file of oligo coordinates and used exlusions ..
+# Make the bigbed file from the bed file of capture-site (REfragment) coordinates and used exlusions ..
 
-tail -n +2 "${OligoFile}" | sort -k1,1 -k2,2n > tempBed.bed
-bedOrigName=$( echo "${OligoFile}" | sed 's/\..*//' | sed 's/.*\///' )
-bedname=$( echo "${OligoFile}" | sed 's/\..*//' | sed 's/.*\///' | sed 's/^/'${Sample}'_/' )
+tail -n +2 "${CapturesiteFile}" | sort -k1,1 -k2,2n > tempBed.bed
+bedOrigName=$( echo "${CapturesiteFile}" | sed 's/\..*//' | sed 's/.*\///' )
+bedname=$( echo "${CapturesiteFile}" | sed 's/\..*//' | sed 's/.*\///' | sed 's/^/'${Sample}'_/' )
 
-# Oligo coordinates 
+# Capturesite coordinates 
 tail -n +2 "${sampleForCCanalyser}_${CCversion}/${bedOrigName}.bed" | awk 'NR%2==1' | sort -k1,1 -k2,2n > tempBed.bed
-bedToBigBed -type=bed9 tempBed.bed ${ucscBuild} "${sampleForCCanalyser}_${CCversion}/${bedname}_oligo.bb"
+bedToBigBed -type=bed9 tempBed.bed ${ucscBuild} "${sampleForCCanalyser}_${CCversion}/${bedname}_capturesite.bb"
 rm -f tempBed.bed
 
 # Exclusion fragments
@@ -457,10 +457,10 @@ thisPublicFolder="${publicPathForCCanalyser}"
 thisPublicFolderName='${publicPathForCCanalyser}'
 isThisPublicFolderParsedFineAndMineToMeddle
 
-mv -f "${sampleForCCanalyser}_${CCversion}/${bedname}_oligo.bb" ${publicPathForCCanalyser}
+mv -f "${sampleForCCanalyser}_${CCversion}/${bedname}_capturesite.bb" ${publicPathForCCanalyser}
 mv -f "${sampleForCCanalyser}_${CCversion}/${bedname}_exclusion.bb" ${publicPathForCCanalyser}
 
-    fileName=$( echo ${publicPathForCCanalyser}/${bedname}_oligo.bb | sed 's/^.*\///' )
+    fileName=$( echo ${publicPathForCCanalyser}/${bedname}_capturesite.bb | sed 's/^.*\///' )
     trackName=$( echo ${fileName} | sed 's/\.bb$//' )
     longLabel="${trackName}_coordinates"
     trackColor="133,0,122"
@@ -792,7 +792,7 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
 
  rm -f TEMP_tracks.txt
  
-    # Adding the combined files and the oligo tracks
+    # Adding the combined files and the capture-site (REfragment) tracks
     
     # Here used to be also sed 's/visibility hide/visibility full/' : to set only the COMBINED tracks visible.
     # As multi-capture samples grep more frequent, this was taken out of the commands below.
@@ -899,8 +899,8 @@ writeBeginningOfDescription(){
     echo "Restriction enzyme and genome build : ( ${REenzyme} ) ( ${GENOME} )" >> temp_description.html
     echo "<hr />" >> temp_description.html
     
-    echo "Oligo coordinates given to the run : <br>" >> temp_description.html
-    echo "<a target="_blank" href=\"${ServerAndPath}/${Sample}_logFiles/usedOligoFile.txt\" >${Sample}_usedOligoFile.txt</a>" >> temp_description.html
+    echo "Capturesite coordinates given to the run : <br>" >> temp_description.html
+    echo "<a target="_blank" href=\"${ServerAndPath}/${Sample}_logFiles/usedCapturesiteFile.txt\" >${Sample}_usedCapturesiteFile.txt</a>" >> temp_description.html
     echo "<hr />" >> temp_description.html
     
 #    echo "<p>User manual - to understand the pipeline and the output :  <a target="_blank" href=\"http://sara.molbiol.ox.ac.uk/public/jdavies/MANUAL_for_pipe/PipeUserManual.pdf\" >CapturePipeUserManual.pdf</a></p>" >> temp_description.html
@@ -998,12 +998,12 @@ writeBamcombineReports(){
     
 # BAM combining logs ------------------------------------------------------------
 
-    echo "<h4>Oligo bunches here : </h4>" >> temp_description.html
+    echo "<h4>Capturesite bunches here : </h4>" >> temp_description.html
     
-    for oligoTxtFile in ${publicPathForCCanalyser}/OLIGObunches/oligofile_sorted_BUNCH_*.txt
+    for capturesiteTxtFile in ${publicPathForCCanalyser}/CAPTURESITEbunches/capturesitefile_sorted_BUNCH_*.txt
     do
-        TEMPbasename=$(basename ${oligoTxtFile})
-        echo "<li><a target="_blank" href=\"OLIGObunches/${TEMPbasename}\" > ${TEMPbasename} </a></li> "  >> temp_description.html   
+        TEMPbasename=$(basename ${capturesiteTxtFile})
+        echo "<li><a target="_blank" href=\"CAPTURESITEbunches/${TEMPbasename}\" > ${TEMPbasename} </a></li> "  >> temp_description.html   
     done
     
     echo "<hr />" >> temp_description.html
@@ -1057,7 +1057,7 @@ writeBunchDivisionpartsOfDescription(){
     echo "<hr />" >> temp_description.html
     
     echo "<b>Preliminary tile-wise counters : </b>" >> temp_description.html
-    echo "- from CCanalyser oligo-bunch-wise division reports (no duplicate filtering)"  >> temp_description.html
+    echo "- from CCanalyser capture-site (REfragment)-bunch-wise division reports (no duplicate filtering)"  >> temp_description.html
     echo "<li>Flashed reads " : >> temp_description.html  
     echo " ( <a target="_blank" href=\"${ServerAndPath}/RAW_${Sample}_logFiles/FLASHED_REdig_report_${CCversion}.txt\"  >FULL report</a> ) "  >> temp_description.html    
     echo "</li>"  >> temp_description.html

@@ -58,7 +58,7 @@ use Pod::Usage;
   1. A file of all of the restriction enzyme fragments in the genome.  This is best made using the script dpngenome.pl.
     The coordinates are of the middle of the restriction fragment in the format chr:start-stop
   
-  2. A file of the input coordinates of the capture oligonucleotides it needs to in the following 9 column tab separated format.
+  2. A file of the input coordinates of the capture capturesitenucleotides it needs to in the following 9 column tab separated format.
     Be careful to ensure the /n new line is used rather than /r (as can be inserted by excel for example).
           1. Name of capture (avoid spaces in the names please)
           2. Chromosome of capture fragment
@@ -81,14 +81,14 @@ use Pod::Usage;
 
 =head1 EXAMPLE
 
- CCanalyser.pl -f input_sam_file.sam -o input_oligo_file.txt -r input_restriction_enzyme_coordinates_file.txt -s short_sample_name -pf public_folder -pu public_url
+ CCanalyser.pl -f input_sam_file.sam -o input_capturesite_file.txt -r input_restriction_enzyme_coordinates_file.txt -s short_sample_name -pf public_folder -pu public_url
  
 
 =head1 OPTIONS
 
  -f             Input filename 
  -r             Restriction coordinates filename 
- -o             Oligonucleotide position filename 
+ -o             Capturesitenucleotide position filename 
  -pf            Your public folder (e.g. /hts/data0/public/username)
  -pu            Your public url (e.g. sara.molbiol.ox.ac.uk/public/username)
  -s             Sample name (and the name of the folder it goes into)
@@ -128,7 +128,7 @@ my $email = 'jelena.telenius@gmail.com';
 my $version = "CM5";
 
 # Obligatory parameters :
-my $oligo_filename = "UNDEFINED";
+my $capturesite_filename = "UNDEFINED";
 
 my $exclusion_filename = "UNDEFINED";
 
@@ -160,8 +160,8 @@ my $duplfilter = 1;
 my $use_parp = 0; # whether this is parp run or not (parp artificial chromosome to be filtered before visualisation files)
 my $use_umi = 0; # whether this is UMI run or not, if yes, filter based on UMI indices : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this
 my $wobble_bin_width = 20 ; # wobble bin width. default 1(turned off). UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
-my $only_cis = 0 ; # analysing only cis-reads (easing up the computational load for many-oligo samples which continue straight to PeakC which is essentially a cis program)
-my $oligos_per_bunch = 100; # How many oligos we have per folder, per one thread of the parallel run, per .. (shortly : the parallelisation unit)
+my $only_cis = 0 ; # analysing only cis-reads (easing up the computational load for many-capturesite samples which continue straight to PeakC which is essentially a cis program)
+my $capturesites_per_bunch = 100; # How many capturesites we have per folder, per one thread of the parallel run, per .. (shortly : the parallelisation unit)
 my $cutter_type = "fourcutter"; # If we have fourcutter (symmetric fourcutter like dpnII or nlaIII), if we have sixcutter (asymmetric sixcutter 1:5 like hindIII)
 
 # If most things are to be skipped (only generating bams for output - parallel run first stage) ..
@@ -169,8 +169,8 @@ my $only_divide_bams = 0;
 
 # If only generating blat filter parameter file :
 my $only_filtering_params = 0;
-# If only generating oligo division listing for blat runs parallelisation :
-my $only_divide_oligos = 0;
+# If only generating capturesite division listing for blat runs parallelisation :
+my $only_divide_capturesites = 0;
 
 # If first step of tiled analysis :
 my $tiled_analysis = 0;
@@ -194,8 +194,8 @@ my $man=0;
 my $prefix_for_output="UNDEF"; # to set default.
 
 # Arrays
-my @oligo_data; # contains the data for the positions of the oligos and the exclusion limits - or only the oligo in question (for parallel runs last step)
-my @exclusion_data; # contains the data for the positions of the oligos and the exclusion limits - parallel runs last step only
+my @capturesite_data; # contains the data for the positions of the capturesites and the exclusion limits - or only the capturesite in question (for parallel runs last step)
+my @exclusion_data; # contains the data for the positions of the capturesites and the exclusion limits - parallel runs last step only
 my @samheadder; # contains the headder of the sam file
 
 # Hashes of arrays
@@ -213,7 +213,7 @@ my %nonflashedcounters;  # contains the counter for non-flashed-reads coordinate
 my %counter_helpers; # contains some counters, for which values are iterated over the while loop, and then in the end added ot %counters hash for printing
 my %cap_samhash;
 my %duplicates;
-my %oligo_bunch_numbers;
+my %capturesite_bunch_numbers;
 
 # Looper testers
 
@@ -231,8 +231,8 @@ print STDOUT "\n" ;
 (
  "f=s"=>\ $input_filename_path,          # -f Input filename 
  "r=s"=>\ $restriction_enzyme_coords_file,  # -r Restriction coordinates filename 
- "o=s"=>\ $oligo_filename,                  # -o Oligonucleotide position filename : all oligos (normal runs), only a single oligo (parallel runs last step)
- "e=s"=>\ $exclusion_filename,              # -e Oligonucleotide position filename : the "other oligos" (parallel runs last step)
+ "o=s"=>\ $capturesite_filename,                  # -o Capturesitenucleotide position filename : all capturesites (normal runs), only a single capturesite (parallel runs last step)
+ "e=s"=>\ $exclusion_filename,              # -e Capturesitenucleotide position filename : the "other capturesites" (parallel runs last step)
  "pf=s"=>\ $public_folder,                  # -pf Your public folder (e.g. /hts/data0/public/username)
  "pu=s"=>\ $public_url,                     # -pu Your public url (e.g. sara.molbiol.ox.ac.uk/public/username)
  "s=s"=>\ $sample,                          # -s Sample name (and the name of the folder it goes into)
@@ -242,7 +242,7 @@ print STDOUT "\n" ;
  "snp"=>\ $use_snp,                         # -snp Force all capture points to contain a particular SNP
  "parp"=>\ $use_parp,                       # -parp Run contains artificial chromosome PARP, which is to be removed before visualisation
  "umi"=>\ $use_umi,                         # -umi Run contains UMI indices - alter the duplicate filter accordingly : ask Damien Downes how to prepare your files for pipeline, if you are interested in doing this
- "onlycis"=>\ $only_cis,                    # -onlycis analysing only cis-reads (easing up the computational load for many-oligo samples which continue straight to PeakC which is essentially a cis program)
+ "onlycis"=>\ $only_cis,                    # -onlycis analysing only cis-reads (easing up the computational load for many-capturesite samples which continue straight to PeakC which is essentially a cis program)
  "wobble=i"=>\ $wobble_bin_width,           # -wobble This is the wobble bin width. UMI runs recommendation 20, i.e. +/- 10bases wobble. to turn this off, set it to 1 base.
  "limit=i"=>\ $use_limit,                   # -limit Limit the analysis to the first n reads of the file
  "stranded"=>\ $use_stranded,               # -stranded To replicate the strand-specific (i.e. wrong) duplicate filter of CB3a/CC3 and CB4a/CC4
@@ -255,11 +255,11 @@ print STDOUT "\n" ;
  "flashed=i"=>\ $flashed,                   # -flashed 1 or 0 (are the reads in input sam combined via flash or not ? - run out.extended with 1 and out.not_combined with 0)
  "duplfilter=i"=>\ $duplfilter,             # -duplfilter 1 or 0 (will the reads be duplicate diltered or not ? )
  "CCversion=s"=>\ $version,                 # -CCversion Cb3 or Cb4 or Cb5 (will the reads be duplicate filtered CC3 or CC4 or CC5 style ? )
- "onlyoligobunches"=>\ $only_divide_bams,   # Just mark the fragments belonging to different oligo bunch - parallel run first step
+ "onlycapturesitebunches"=>\ $only_divide_bams,   # Just mark the fragments belonging to different capturesite bunch - parallel run first step
  "onlyparamsforfiltering"=>\ $only_filtering_params,   # Just generate parameters for filtering run.
- "onlyoligofile"=>\ $only_divide_oligos,    # Just mark the oligos belonging to different oligo bunch - parallel run blat preparation
+ "onlycapturesitefile"=>\ $only_divide_capturesites,    # Just mark the capturesites belonging to different capturesite bunch - parallel run blat preparation
  "tiled"=>\ $tiled_analysis,                # Tiled capture analysis : do not filter stuff which contains only capture fragments (each tile is to be given as one region) - these are valid fragments 
- "oligosperbunch=i"=>\ $oligos_per_bunch,   # When the above $only_divide_bams is in action - how many oligos per visualisation unit (i.e. parallelisation unit i.e. output folder). Default 100.
+ "capturesitesperbunch=i"=>\ $capturesites_per_bunch,   # When the above $only_divide_bams is in action - how many capturesites per visualisation unit (i.e. parallelisation unit i.e. output folder). Default 100.
  "normalisedtracks"=>\ $normalised_tracks,  # Make also normalised bigwigs - parallel run last step
  "symlinks"=>\ $use_symlinks,	            # -symlinks	To make symlinks to bigwigs into the public area, instead of actually storing the bigwigs there.
  "cutter=s"=>\ $cutter_type,	            # If we have fourcutter (symmetric fourcutter like dpnII or nlaIII - this is default), if we have sixcutter (asymmetric sixcutter 1:5 like hindIII)
@@ -284,12 +284,12 @@ $store_bigwigs_here_folder=$public_folder;
 print STDOUT "Starting run with parameters :\n" ;
 print STDOUT "\n" ;
 
-print STDOUT "oligo_filename $oligo_filename\n";
+print STDOUT "capturesite_filename $capturesite_filename\n";
 print STDOUT "sample $sample\n" ;
 print STDOUT "version $version\n";
 
 # If we just generate the filtering params, we don't care about other output (even to the log files) ..
-if ( ( ! $only_filtering_params ) && ( ! $only_divide_oligos ) ){
+if ( ( ! $only_filtering_params ) && ( ! $only_divide_capturesites ) ){
 
 # Fetching the genome sizes elsewhere .. (if ucscsizes was not defined ..)
 if ( ($ucscsizes eq "UNDEFINED") && ($use_parp==1)){
@@ -329,14 +329,14 @@ print STDOUT "normalised_tracks $normalised_tracks \n";
 }
 
 print STDOUT "only_divide_bams $only_divide_bams \n";
-print STDOUT "only_divide_oligos $only_divide_oligos \n";
-print STDOUT "oligos_per_bunch $oligos_per_bunch \n";
+print STDOUT "only_divide_capturesites $only_divide_capturesites \n";
+print STDOUT "capturesites_per_bunch $capturesites_per_bunch \n";
 
 my $parameter_filename = "parameters_for_filtering.log";
 unless (open(PARAMETERLOG, ">$parameter_filename")){die "Cannot open file $parameter_filename $! , stopped "};
 
 print PARAMETERLOG "public_folder $public_folder \n" ;
-print PARAMETERLOG "oligo_filename $oligo_filename\n";
+print PARAMETERLOG "capturesite_filename $capturesite_filename\n";
 
 if ( $exclusion_filename != "UNDEFINED" ){
 print PARAMETERLOG "exclusion_filename $exclusion_filename\n";  
@@ -349,14 +349,14 @@ print PARAMETERLOG "genome $genome\n";
 print PARAMETERLOG "globin $globin \n";
 
 # If we just generate the filtering params, we don't care about other output (even to the log files) ..
-if ( ( ! $only_filtering_params ) && ( ! $only_divide_oligos ) ){
+if ( ( ! $only_filtering_params ) && ( ! $only_divide_capturesites ) ){
 
 pod2usage(2) unless ($input_filename_path); 
 
 # Check parameters - fail if obligatory ones not given :
 
 pod2usage(2) unless ($input_filename_path);
-if ( ($oligo_filename eq "UNDEFINED") or ($restriction_enzyme_coords_file eq "UNDEFINED") or ($genome eq "UNDEFINED") ) { pod2usage(2);}
+if ( ($capturesite_filename eq "UNDEFINED") or ($restriction_enzyme_coords_file eq "UNDEFINED") or ($genome eq "UNDEFINED") ) { pod2usage(2);}
 
 }
 
@@ -384,21 +384,21 @@ else {mkdir $bunches_output_path};
 }
 
 
-if ( $only_divide_bams || $only_divide_oligos ){
-my $bunches_oligos_output_path= "$current_directory/$sample\_$version/DIVIDEDoligos";
-print STDOUT "divided_oligofolder $bunches_oligos_output_path \n";
+if ( $only_divide_bams || $only_divide_capturesites ){
+my $bunches_capturesites_output_path= "$current_directory/$sample\_$version/DIVIDEDcapturesites";
+print STDOUT "divided_capturesitefolder $bunches_capturesites_output_path \n";
 
-if (-d $bunches_oligos_output_path){
+if (-d $bunches_capturesites_output_path){
 # Remove existing files (flashed and nonflashed update same files)
-unlink glob $bunches_oligos_output_path."/*";
+unlink glob $bunches_capturesites_output_path."/*";
 }
-else {mkdir $bunches_oligos_output_path}; 
+else {mkdir $bunches_capturesites_output_path}; 
 }
 
 
 # ___________________________________________
 
-if ( (!$only_divide_bams) && (!$only_divide_oligos) ) {
+if ( (!$only_divide_bams) && (!$only_divide_capturesites) ) {
 
 # If user did not define public folder - setting public files to be saved in the output folder :
 if ( $public_folder eq "DATA_FOR_PUBLIC_FOLDER" )
@@ -435,7 +435,7 @@ else {mkdir $store_bigwigs_here_folder};
 
 print STDOUT "Opening input and output files.. \n";
 
-if ( (!$only_filtering_params) && (!$only_divide_oligos) ){
+if ( (!$only_filtering_params) && (!$only_divide_capturesites) ){
   
 #Splits out the filename from the path
 $input_filename=$input_filename_path;
@@ -471,7 +471,7 @@ my $report2_filename = $outputfilename."_report2_$version.txt";
 my $report3_filename = $outputfilename."_report3_$version.txt";
 my $report4_filename = $outputfilename."_report4_$version.txt";
 
-my $oligo_bunch_count_filename = $outputfilename."_oligobunchCount_".$version.".txt";
+my $capturesite_bunch_count_filename = $outputfilename."_capturesitebunchCount_".$version.".txt";
 my $header_sam_filename = $outputfilename."_header_".$version.".sam";
 my $all_sam_filename = $outputfilename."_all_capture_reads_".$version.".sam";
 # my $all_typed_sam_filename = $outputfilename."_all_typed_reads_$version.sam";
@@ -488,136 +488,136 @@ unless (open(DUMPOUTPUT, ">$outputfilename\_dump.fastq")){die "Cannot open file 
 # unless (open(ALLSAMFH, ">$all_sam_filename")){die "Cannot open file $all_sam_filename , stopped ";};
 # unless (open(ALLTYPEDSAMFH, ">$all_typed_sam_filename")){die "Cannot open file $all_sam_filename , stopped ";}
 
-if ( !($only_divide_bams) && !($only_divide_oligos) ){
+if ( !($only_divide_bams) && !($only_divide_capturesites) ){
 unless (open(CAPSAMFH, ">$cap_sam_filename")){die "Cannot open file $cap_sam_filename , stopped ";}; 
 # unless (open(COORDSTRINGFH, ">$coord_filename")){die "Cannot open file $coord_filename , stopped ";};
 }
 
-print STDOUT "Loading in oligo coordinate file.. \n";
+print STDOUT "Loading in capturesite coordinate file.. \n";
 
-# Uploads coordinates of capture oligos and exclusion regions into the array @oligo_data
+# Uploads coordinates of capture capturesites and exclusion regions into the array @capturesite_data
 # 0=name; 1=capture chr; 2 = capture start; 3 = capture end; 4= exclusion chr; 5 = exclusion start; 6 = exclusion end; 7 = snp position; 8 = SNP sequence
-open(OLIGOFH, $oligo_filename) or die "Cannot open file $oligo_filename , stopped ";
+open(CAPTURESITEFH, $capturesite_filename) or die "Cannot open file $capturesite_filename , stopped ";
 #Splits out the filename from the path
-my $oligo_file=$oligo_filename; my $oligo_path;
-if ($oligo_file =~ /(.*)\/(\V++)/) {$oligo_path = $1; $oligo_file = $2};
-unless ($oligo_file =~ /(.*)\.(.*)/) {die"Cant regex oligo filename"};
-my $oligo_basename = $1;
-my $oligo_bed_out_filename = "$sample\_$version/".$oligo_basename.".bed";
+my $capturesite_file=$capturesite_filename; my $capturesite_path;
+if ($capturesite_file =~ /(.*)\/(\V++)/) {$capturesite_path = $1; $capturesite_file = $2};
+unless ($capturesite_file =~ /(.*)\.(.*)/) {die"Cant regex capturesite filename"};
+my $capturesite_basename = $1;
+my $capturesite_bed_out_filename = "$sample\_$version/".$capturesite_basename.".bed";
 
 # ___________________________________________
-if ( !($only_divide_bams) && !($only_divide_oligos) ){
-unless (open(OLIGOBED, ">$oligo_bed_out_filename")){die "Cannot open oligo_bed out file $oligo_bed_out_filename\n";}
-print OLIGOBED "track name=CaptureC_oligos description=CaptureC_oligos visibility=1 itemRgb=On\n";
+if ( !($only_divide_bams) && !($only_divide_capturesites) ){
+unless (open(CAPTURESITEBED, ">$capturesite_bed_out_filename")){die "Cannot open capturesite_bed out file $capturesite_bed_out_filename\n";}
+print CAPTURESITEBED "track name=CaptureC_capturesites description=CaptureC_capturesites visibility=1 itemRgb=On\n";
 
 if ($use_snp)
 {
-print STDOUT "\nname\tchr\tstr\tstp\tchr\tstr\tstp\tpos\tbase\toligoLinesIn\toligoLinesSaved\n";
+print STDOUT "\nname\tchr\tstr\tstp\tchr\tstr\tstp\tpos\tbase\tcapturesiteLinesIn\tcapturesiteLinesSaved\n";
 }
 else
 {
-print STDOUT "\nname\tchr\tstr\tstp\tchr\tstr\tstp\toligoLinesIn\toligoLinesSaved\n";
+print STDOUT "\nname\tchr\tstr\tstp\tchr\tstr\tstp\tcapturesiteLinesIn\tcapturesiteLinesSaved\n";
 }
 }
 # ___________________________________________
 
 
 my $temp_line_counter=0;
-my $temp_oligo_bunch_number=1;
-while ( my $wholeline = <OLIGOFH> )
+my $temp_capturesite_bunch_number=1;
+while ( my $wholeline = <CAPTURESITEFH> )
 {
   chomp $wholeline;
   
   my @line = split /\s++/, $wholeline;
-  push @oligo_data, [ @line ];
+  push @capturesite_data, [ @line ];
   $temp_line_counter++;
   $counters{"01 Number of capture sites loaded:"}++;
   
 	
   # And now - check for existence for all columns..
-  unless (defined($line[0]) && defined($line[1]) && exists($line[2]) &&  exists($line[3]) && defined($line[4]) && exists($line[5]) && exists($line[6])) {die "Cannot parse oligo coordinate file (cannot find the 7 first columns)\n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
+  unless (defined($line[0]) && defined($line[1]) && exists($line[2]) &&  exists($line[3]) && defined($line[4]) && exists($line[5]) && exists($line[6])) {die "Cannot parse capturesite coordinate file (cannot find the 7 first columns)\n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
   if ($use_snp) {
-    unless ( exists($line[7]) && defined($line[8])) {die "Cannot parse SNP columns of oligo coordinate file \n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
+    unless ( exists($line[7]) && defined($line[8])) {die "Cannot parse SNP columns of capturesite coordinate file \n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
   }
   # File format check and cleanup for wrong kind of data :
-  # Oligo file format is :
+  # Capturesite file format is :
   # 0    1   2   3   4   5   6   7   8
   # name chr str stp chr str stp pos base
   
   #str stp str stp
-  if ( ! ( ($line[2] =~ /^\d+$/) || ($line[2] == 0) ) ) {die "Oligo RE fragment start coordinate (3rd column) not numeric\n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
-  if ( ! ( ($line[3] =~ /^\d+$/) || ($line[3] == 0) ) ) {die "Oligo RE fragment end coordinate (4th column) not numeric\n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
-  if ( ! ( ($line[5] =~ /^\d+$/) || ($line[5] == 0) ) ) {die "Exclusion region start coordinate (6th column) not numeric\n In file:\n".$oligo_path."/".$oligo_file." , stopped ";} 
-  if ( ! ( ($line[6] =~ /^\d+$/) || ($line[6] == 0) ) ) {die "Exclusion region end coordinate (7th column) not numeric\n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
+  if ( ! ( ($line[2] =~ /^\d+$/) || ($line[2] == 0) ) ) {die "Capturesite RE fragment start coordinate (3rd column) not numeric\n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
+  if ( ! ( ($line[3] =~ /^\d+$/) || ($line[3] == 0) ) ) {die "Capturesite RE fragment end coordinate (4th column) not numeric\n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
+  if ( ! ( ($line[5] =~ /^\d+$/) || ($line[5] == 0) ) ) {die "Exclusion region start coordinate (6th column) not numeric\n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";} 
+  if ( ! ( ($line[6] =~ /^\d+$/) || ($line[6] == 0) ) ) {die "Exclusion region end coordinate (7th column) not numeric\n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
   
   # chr chr
-  #if ( ! ($line[1] =~ /^chr\w+$/) ) {die "Chromosome name of RE fragment (2nd column) not proper format \n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
-  #if ( ! ($line[4] =~ /^chr\w+$/) ) {die "Chromosome name of exclusion region(5th column) not proper format In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
-  if ( ! ( ($line[1] =~ /^\w+$/)) ) {die "Chromosome name of RE fragment (2nd column) not proper format \n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
-  if ( ! ( ($line[4] =~ /^\w+$/)) ) {die "Chromosome name of exclusion region(5th column) not proper format In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
+  #if ( ! ($line[1] =~ /^chr\w+$/) ) {die "Chromosome name of RE fragment (2nd column) not proper format \n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
+  #if ( ! ($line[4] =~ /^chr\w+$/) ) {die "Chromosome name of exclusion region(5th column) not proper format In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
+  if ( ! ( ($line[1] =~ /^\w+$/)) ) {die "Chromosome name of RE fragment (2nd column) not proper format \n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
+  if ( ! ( ($line[4] =~ /^\w+$/)) ) {die "Chromosome name of exclusion region(5th column) not proper format In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
   
-  if ( ! ($line[1] eq $line[4]) ) {die "Chromosome of RE fragment and its exclusion (2nd column and 5th column) are different chromosomes - not allowed ! \n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
+  if ( ! ($line[1] eq $line[4]) ) {die "Chromosome of RE fragment and its exclusion (2nd column and 5th column) are different chromosomes - not allowed ! \n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
 
   # name - all weird characters plus whitespace is worth of death :)
-  if ( !($line[0] =~ /^[a-zA-Z0-9\-\_]+$/ )  ) {die "Oligo name contains whitespace or weird characters. Only allowed to have numbers[0-9], letters[a-zA-Z] and underscore [_] \n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
+  if ( !($line[0] =~ /^[a-zA-Z0-9\-\_]+$/ )  ) {die "Capturesite name contains whitespace or weird characters. Only allowed to have numbers[0-9], letters[a-zA-Z] and underscore [_] \n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
   
   if ($use_snp) {
-    if ( ! ( ($line[7] =~ /^\d+$/) || ($line[7] == 0) ) ) {die "SNP coordinate (8th column) not numeric\n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
-    if ( !($line[8] =~ /^[ATCG]$/) ) {die "SNP base (9th column) is not [ATCG]\n In file:\n".$oligo_path."/".$oligo_file." , stopped ";}
+    if ( ! ( ($line[7] =~ /^\d+$/) || ($line[7] == 0) ) ) {die "SNP coordinate (8th column) not numeric\n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
+    if ( !($line[8] =~ /^[ATCG]$/) ) {die "SNP base (9th column) is not [ATCG]\n In file:\n".$capturesite_path."/".$capturesite_file." , stopped ";}
   }
 
-  # bunch_numbers{oligoname}=1 (writing down which bunch the oligo belongs to)
-  $oligo_bunch_numbers{$line[0]} = $temp_oligo_bunch_number;
+  # bunch_numbers{capturesitename}=1 (writing down which bunch the capturesite belongs to)
+  $capturesite_bunch_numbers{$line[0]} = $temp_capturesite_bunch_number;
   
 # ___________________________________________
-if ( (!$only_divide_bams) && (!$only_divide_oligos) ){
-  print OLIGOBED "chr$line[1]\t".($line[2]-1)."\t$line[3]\t$line[0]\t1\t+\t$line[2]\t$line[3]\t133,0,122\n";
-  print OLIGOBED "chr$line[4]\t".($line[5]-1)."\t$line[6]\t$line[0]\t1\t+\t$line[5]\t$line[6]\t133,0,0\n";
+if ( (!$only_divide_bams) && (!$only_divide_capturesites) ){
+  print CAPTURESITEBED "chr$line[1]\t".($line[2]-1)."\t$line[3]\t$line[0]\t1\t+\t$line[2]\t$line[3]\t133,0,122\n";
+  print CAPTURESITEBED "chr$line[4]\t".($line[5]-1)."\t$line[6]\t$line[0]\t1\t+\t$line[5]\t$line[6]\t133,0,0\n";
   
- print STDOUT "\nOligo number : $temp_line_counter ------------------------------------------------------------------";
+ print STDOUT "\nCapturesite number : $temp_line_counter ------------------------------------------------------------------";
   if ($use_snp)
   {
-  print STDOUT "\n$line[0]\t$line[1]\t$line[2]\t$line[3]\t$line[4]\t$line[5]\t$line[6]\t$line[7]\t$line[8]\t$temp_line_counter\t".scalar(@oligo_data)."\n";
+  print STDOUT "\n$line[0]\t$line[1]\t$line[2]\t$line[3]\t$line[4]\t$line[5]\t$line[6]\t$line[7]\t$line[8]\t$temp_line_counter\t".scalar(@capturesite_data)."\n";
   }
   else
   {
-  print STDOUT "\n$line[0]\t$line[1]\t$line[2]\t$line[3]\t$line[4]\t$line[5]\t$line[6]\t$temp_line_counter\t".scalar(@oligo_data)."\n";
+  print STDOUT "\n$line[0]\t$line[1]\t$line[2]\t$line[3]\t$line[4]\t$line[5]\t$line[6]\t$temp_line_counter\t".scalar(@capturesite_data)."\n";
   }
   print STDOUT "---------------------------------------------------------------------------------------------------";
  }
 else{
-  unless (open(BUNCHFILE, ">>$sample\_$version/DIVIDEDoligos/$oligo_basename\_BUNCH_$temp_oligo_bunch_number\.txt")){die "Cannot open file $oligo_basename\_BUNCH_$temp_oligo_bunch_number\.txt , stopped ";};
+  unless (open(BUNCHFILE, ">>$sample\_$version/DIVIDEDcapturesites/$capturesite_basename\_BUNCH_$temp_capturesite_bunch_number\.txt")){die "Cannot open file $capturesite_basename\_BUNCH_$temp_capturesite_bunch_number\.txt , stopped ";};
   print BUNCHFILE $wholeline."\n";
   close BUNCHFILE ;   
 }
 # ___________________________________________
 
-  # For parallel code, we need to know how manyeth oligo bunch we are dealing with.
+  # For parallel code, we need to know how manyeth capturesite bunch we are dealing with.
   # This is done also for serial run, as this hash is small.
-  if ( $temp_line_counter%$oligos_per_bunch == 0 ){
-   $temp_oligo_bunch_number++;
+  if ( $temp_line_counter%$capturesites_per_bunch == 0 ){
+   $temp_capturesite_bunch_number++;
   }
 
 };
-close OLIGOFH ;
-close OLIGOBED ;
+close CAPTURESITEFH ;
+close CAPTURESITEBED ;
 
 # Parallel runs last step - exclusions defined in a different manner !
 
 
 if ( $exclusion_filename ne "UNDEFINED" ){
 my $exclusion_file;my $exclusion_path;my $exclusion_basename;
-# Uploads coordinates of capture oligos and exclusion regions into the array @exclusion_data
+# Uploads coordinates of capture capturesites and exclusion regions into the array @exclusion_data
 # 0=name; 1=capture chr; 2 = capture start; 3 = capture end; 4= exclusion chr; 5 = exclusion start; 6 = exclusion end; 7 = snp position; 8 = SNP sequence
 open(EXCLUSIONFH, $exclusion_filename) or die "Cannot open file $exclusion_filename , stopped ";
 #Splits out the filename from the path
 $exclusion_file=$exclusion_filename; 
 if ($exclusion_file =~ /(.*)\/(\V++)/) {$exclusion_path = $1; $exclusion_file = $2};
-unless ($exclusion_file =~ /(.*)\.(.*)/) {die"Cant regex oligo filename"};
+unless ($exclusion_file =~ /(.*)\.(.*)/) {die"Cant regex capturesite filename"};
 $exclusion_basename = $1;
 my $exclusion_bed_out_filename = "$sample\_$version/".$exclusion_basename.".bed";
 
-unless (open(EXCLUSIONBED, ">$exclusion_bed_out_filename")){die "Cannot open oligo_bed out file $exclusion_bed_out_filename\n";}
+unless (open(EXCLUSIONBED, ">$exclusion_bed_out_filename")){die "Cannot open capturesite_bed out file $exclusion_bed_out_filename\n";}
 print EXCLUSIONBED "track name=CaptureC_exclusions description=CaptureC_exclusions visibility=1 itemRgb=On\n";
 
 while ( my $wholeline = <EXCLUSIONFH> )
@@ -630,18 +630,18 @@ while ( my $wholeline = <EXCLUSIONFH> )
   
 	
   # And now - check for existence for all columns..
-  unless (defined($line[0]) && defined($line[1]) && exists($line[2]) &&  exists($line[3]) && defined($line[4]) && exists($line[5]) && exists($line[6])) {die "Cannot parse oligo coordinate file (cannot find the 7 first columns)\n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
+  unless (defined($line[0]) && defined($line[1]) && exists($line[2]) &&  exists($line[3]) && defined($line[4]) && exists($line[5]) && exists($line[6])) {die "Cannot parse capturesite coordinate file (cannot find the 7 first columns)\n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
   if ($use_snp) {
-    unless ( exists($line[7]) && defined($line[8])) {die "Cannot parse SNP columns of oligo coordinate file \n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
+    unless ( exists($line[7]) && defined($line[8])) {die "Cannot parse SNP columns of capturesite coordinate file \n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
   }
   # File format check and cleanup for wrong kind of data :
-  # Oligo file format is :
+  # Capturesite file format is :
   # 0    1   2   3   4   5   6   7   8
   # name chr str stp chr str stp pos base
   
   #str stp str stp
-  if ( ! ( ($line[2] =~ /^\d+$/) || ($line[2] == 0) ) ) {die "Oligo RE fragment start coordinate (3rd column) not numeric\n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
-  if ( ! ( ($line[3] =~ /^\d+$/) || ($line[3] == 0) ) ) {die "Oligo RE fragment end coordinate (4th column) not numeric\n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
+  if ( ! ( ($line[2] =~ /^\d+$/) || ($line[2] == 0) ) ) {die "Capturesite RE fragment start coordinate (3rd column) not numeric\n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
+  if ( ! ( ($line[3] =~ /^\d+$/) || ($line[3] == 0) ) ) {die "Capturesite RE fragment end coordinate (4th column) not numeric\n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
   if ( ! ( ($line[5] =~ /^\d+$/) || ($line[5] == 0) ) ) {die "Exclusion region start coordinate (6th column) not numeric\n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";} 
   if ( ! ( ($line[6] =~ /^\d+$/) || ($line[6] == 0) ) ) {die "Exclusion region end coordinate (7th column) not numeric\n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
   
@@ -654,7 +654,7 @@ while ( my $wholeline = <EXCLUSIONFH> )
   if ( ! ($line[1] eq $line[4]) ) {die "Chromosome of RE fragment and its exclusion (2nd column and 5th column) are different chromosomes - not allowed ! \n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
 
   # name - all weird characters plus whitespace is worth of death :)
-  if ( !($line[0] =~ /^[a-zA-Z0-9\-\_]+$/ )  ) {die "Oligo name contains whitespace or weird characters. Only allowed to have numbers[0-9], letters[a-zA-Z] and underscore [_] \n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
+  if ( !($line[0] =~ /^[a-zA-Z0-9\-\_]+$/ )  ) {die "Capturesite name contains whitespace or weird characters. Only allowed to have numbers[0-9], letters[a-zA-Z] and underscore [_] \n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
   
   if ($use_snp) {
     if ( ! ( ($line[7] =~ /^\d+$/) || ($line[7] == 0) ) ) {die "SNP coordinate (8th column) not numeric\n In file:\n".$exclusion_path."/".$exclusion_file." , stopped ";}
@@ -674,17 +674,17 @@ close EXCLUSIONBED ;
 # --------------------------------------
 
 if ( $only_divide_bams ){
-unless (open(BUNCHLOGFH, ">$oligo_bunch_count_filename")){die "Cannot open file $oligo_bunch_count_filename , stopped ";};
-print BUNCHLOGFH $temp_oligo_bunch_number."\n";
+unless (open(BUNCHLOGFH, ">$capturesite_bunch_count_filename")){die "Cannot open file $capturesite_bunch_count_filename , stopped ";};
+print BUNCHLOGFH $temp_capturesite_bunch_number."\n";
 close BUNCHLOGFH ;
 }
 
-my $oligo_bunch_total_count=$temp_oligo_bunch_number;
+my $capturesite_bunch_total_count=$temp_capturesite_bunch_number;
 
 # ___________________________________________
 
-# Early exit for $only_divide_oligos
-if ($only_divide_oligos){
+# Early exit for $only_divide_capturesites
+if ($only_divide_capturesites){
 
 exit ;
 
@@ -692,7 +692,7 @@ exit ;
 
 # ___________________________________________
 
-# print Dumper (\@oligo_data);
+# print Dumper (\@capturesite_data);
 
 print STDOUT "\nLoading in in-silico restriction enzyme digested genome.. \n";
 
@@ -796,13 +796,13 @@ while (my $line = <INFH>)  #loops through all the lines of the sam file
     
   if ($line =~ /^(@.*)/){push @samheadder, $line;
       # print ALLSAMFH $line."\n";
-      if ( !($only_divide_bams) && !($only_divide_oligos) ){
+      if ( !($only_divide_bams) && !($only_divide_capturesites) ){
       print CAPSAMFH $line."\n";
       }
       if ($only_divide_bams){
         # Get the header to all subfiles too ..
-        for (my $i=1; $i < ($oligo_bunch_total_count); $i++){
-          my $this_bunch_filename = "$sample\_$version/DIVIDEDsams/$prefix_for_output\_oligoBunch_".$i."_$version.sam";
+        for (my $i=1; $i < ($capturesite_bunch_total_count); $i++){
+          my $this_bunch_filename = "$sample\_$version/DIVIDEDsams/$prefix_for_output\_capturesiteBunch_".$i."_$version.sam";
           unless (open(BUNCHFH, ">>$this_bunch_filename")){die "Cannot open file $this_bunch_filename , stopped ";};           
           print BUNCHFH $line."\n";
           close BUNCHFH ;
@@ -1228,7 +1228,7 @@ while (my $line = <INFH>)  #loops through all the lines of the sam file
             $data{$readname}{$pe}{$readno}{"Proximity_exclusion"}="no";
             
 #------------------------------------------------------------------------------------------------------------------
-# OLIGO FILE FOR LOOPS - whether our fragment is a CAPTURE or EXCLUSION fragment
+# CAPTURESITE FILE FOR LOOPS - whether our fragment is a CAPTURE or EXCLUSION fragment
 #------------------------------------------------------------------------------------------------------------------
 
 #This part of the code defines whether the read is a capture or reporter read or whether it is proximity excluded
@@ -1239,28 +1239,28 @@ while (my $line = <INFH>)  #loops through all the lines of the sam file
             # Parallel runs last step
             if ( $exclusion_filename != "UNDEFINED" ){
               
-              #Loops through the @oligo_data array to see whether the fragment meets the criteria to be a capture fragment
-              for (my$i=0; $i< scalar (@oligo_data); $i++)
+              #Loops through the @capturesite_data array to see whether the fragment meets the criteria to be a capture fragment
+              for (my$i=0; $i< scalar (@capturesite_data); $i++)
               {
                   #Defines if the fragment lies within the exclusion limits around the capture
-                  if ($data{$readname}{$pe}{$readno}{"chr"} eq $oligo_data[$i][4] and $data{$readname}{$pe}{$readno}{"readstart"}>=$oligo_data[$i][5] and $data{$readname}{$pe}{$readno}{"readend"}<=$oligo_data[$i][6]) 
+                  if ($data{$readname}{$pe}{$readno}{"chr"} eq $capturesite_data[$i][4] and $data{$readname}{$pe}{$readno}{"readstart"}>=$capturesite_data[$i][5] and $data{$readname}{$pe}{$readno}{"readend"}<=$capturesite_data[$i][6]) 
                   {
                     $exclusionFlag=1;
                   }
                   # Defines if the fragment lies within the capture region (trumping the exclusion limits)
                   # NB this version of the script requires the whole read to be contained within the capture area
-                  #print"Outside if:$i\t$oligo_data[$i][1]\t$oligo_data[$i][2]\t$oligo_data[$i][3]\n";
-                  if (($data{$readname}{$pe}{$readno}{"chr"} eq $oligo_data[$i][1]) and ($data{$readname}{$pe}{$readno}{"readstart"}>=$oligo_data[$i][2] and $data{$readname}{$pe}{$readno}{"readend"}<=$oligo_data[$i][3])) 
+                  #print"Outside if:$i\t$capturesite_data[$i][1]\t$capturesite_data[$i][2]\t$capturesite_data[$i][3]\n";
+                  if (($data{$readname}{$pe}{$readno}{"chr"} eq $capturesite_data[$i][1]) and ($data{$readname}{$pe}{$readno}{"readstart"}>=$capturesite_data[$i][2] and $data{$readname}{$pe}{$readno}{"readend"}<=$capturesite_data[$i][3])) 
                   {
                     if ($use_snp ==1) #checks if the specified snp is in the capture read
                     {
-                      if (snp_caller($data{$readname}{$pe}{$readno}{"chr"}, $data{$readname}{$pe}{$readno}{"readstart"}, $data{$readname}{$pe}{$readno}{"sequence"},$oligo_data[$i][1], $oligo_data[$i][7], $oligo_data[$i][8]) eq "Y")
+                      if (snp_caller($data{$readname}{$pe}{$readno}{"chr"}, $data{$readname}{$pe}{$readno}{"readstart"}, $data{$readname}{$pe}{$readno}{"sequence"},$capturesite_data[$i][1], $capturesite_data[$i][7], $capturesite_data[$i][8]) eq "Y")
                       {
                       $captureFlag=1;
                       # setting cis chromosome
                       $data{$readname}{"cis_chr"}=$data{$readname}{$pe}{$readno}{"chr"};
-                      # setting oligo name
-                      $data{$readname}{"oligo"}=$oligo_data[$i][0];
+                      # setting capturesite name
+                      $data{$readname}{"capturesite"}=$capturesite_data[$i][0];
                       }
                     }
                     else #if SNP is not specified
@@ -1268,8 +1268,8 @@ while (my $line = <INFH>)  #loops through all the lines of the sam file
                       $captureFlag=1;
                       # setting cis chromosome
                       $data{$readname}{"cis_chr"}=$data{$readname}{$pe}{$readno}{"chr"};		    
-                      # setting oligo name
-                      $data{$readname}{"oligo"}=$oligo_data[$i][0];
+                      # setting capturesite name
+                      $data{$readname}{"capturesite"}=$capturesite_data[$i][0];
                     }
                     
                   # If found, break loop here :
@@ -1306,28 +1306,28 @@ while (my $line = <INFH>)  #loops through all the lines of the sam file
             
             # All other run types except parallel runs last step
             else {
-              #Loops through the @oligo_data array to see whether the fragment meets the criteria to be a capture or exclusion fragment
-              for (my$i=0; $i< scalar (@oligo_data); $i++)
+              #Loops through the @capturesite_data array to see whether the fragment meets the criteria to be a capture or exclusion fragment
+              for (my$i=0; $i< scalar (@capturesite_data); $i++)
               {
                   #Defines if the fragment lies within the exclusion limits around the capture
-                  if ($data{$readname}{$pe}{$readno}{"chr"} eq $oligo_data[$i][4] and $data{$readname}{$pe}{$readno}{"readstart"}>=$oligo_data[$i][5] and $data{$readname}{$pe}{$readno}{"readend"}<=$oligo_data[$i][6]) 
+                  if ($data{$readname}{$pe}{$readno}{"chr"} eq $capturesite_data[$i][4] and $data{$readname}{$pe}{$readno}{"readstart"}>=$capturesite_data[$i][5] and $data{$readname}{$pe}{$readno}{"readend"}<=$capturesite_data[$i][6]) 
                   {
                     $exclusionFlag=1;
                   }
                   # Defines if the fragment lies within the capture region (trumping the exclusion limits)
                   # NB this version of the script requires the whole read to be contained within the capture area
-                  #print"Outside if:$i\t$oligo_data[$i][1]\t$oligo_data[$i][2]\t$oligo_data[$i][3]\n";
-                  if (($data{$readname}{$pe}{$readno}{"chr"} eq $oligo_data[$i][1]) and ($data{$readname}{$pe}{$readno}{"readstart"}>=$oligo_data[$i][2] and $data{$readname}{$pe}{$readno}{"readend"}<=$oligo_data[$i][3])) 
+                  #print"Outside if:$i\t$capturesite_data[$i][1]\t$capturesite_data[$i][2]\t$capturesite_data[$i][3]\n";
+                  if (($data{$readname}{$pe}{$readno}{"chr"} eq $capturesite_data[$i][1]) and ($data{$readname}{$pe}{$readno}{"readstart"}>=$capturesite_data[$i][2] and $data{$readname}{$pe}{$readno}{"readend"}<=$capturesite_data[$i][3])) 
                   {
                     if ($use_snp ==1) #checks if the specified snp is in the capture read
                     {
-                      if (snp_caller($data{$readname}{$pe}{$readno}{"chr"}, $data{$readname}{$pe}{$readno}{"readstart"}, $data{$readname}{$pe}{$readno}{"sequence"},$oligo_data[$i][1], $oligo_data[$i][7], $oligo_data[$i][8]) eq "Y")
+                      if (snp_caller($data{$readname}{$pe}{$readno}{"chr"}, $data{$readname}{$pe}{$readno}{"readstart"}, $data{$readname}{$pe}{$readno}{"sequence"},$capturesite_data[$i][1], $capturesite_data[$i][7], $capturesite_data[$i][8]) eq "Y")
                       {
                       $captureFlag=1;
                       # setting cis chromosome
                       $data{$readname}{"cis_chr"}=$data{$readname}{$pe}{$readno}{"chr"};
-                      # setting oligo name
-                      $data{$readname}{"oligo"}=$oligo_data[$i][0];
+                      # setting capturesite name
+                      $data{$readname}{"capturesite"}=$capturesite_data[$i][0];
                       }
                     }
                     else #if SNP is not specified
@@ -1335,8 +1335,8 @@ while (my $line = <INFH>)  #loops through all the lines of the sam file
                       $captureFlag=1;
                       # setting cis chromosome
                       $data{$readname}{"cis_chr"}=$data{$readname}{$pe}{$readno}{"chr"};		    
-                      # setting oligo name
-                      $data{$readname}{"oligo"}=$oligo_data[$i][0];
+                      # setting capturesite name
+                      $data{$readname}{"capturesite"}=$capturesite_data[$i][0];
                     }
                     
                   # If found, break loop here :
@@ -1439,7 +1439,7 @@ unless (open(REPORT2FH, ">$report2_filename")){die "Cannot open file $report2_fi
 unless (open(REPORT3FH, ">$report3_filename")){die "Cannot open file $report3_filename, stopped "}; print REPORT3FH "\nFinal counts\n\n";
 unless (open(REPORT4FH, ">$report4_filename")){die "Cannot open file $report4_filename, stopped "}; print REPORT4FH "\nFinal reporter counts\n\n";
 
-my $inputFileInfo="\nSample name: $sample \nScript version:$version \n\nInput path/file: $input_path/$input_filename\nRestriction enzyme coords file: $restriction_enzyme_coords_file\nOligo coordinate input file: $oligo_filename\nPublic folder: $public_folder\nPublic URL: $public_url\n";
+my $inputFileInfo="\nSample name: $sample \nScript version:$version \n\nInput path/file: $input_path/$input_filename\nRestriction enzyme coords file: $restriction_enzyme_coords_file\nCapturesite coordinate input file: $capturesite_filename\nPublic folder: $public_folder\nPublic URL: $public_url\n";
 my $scriptStartInfo="Script started at: $mday/$mon/$year $hour:$min\n\n";
 
 print REPORTFH $inputFileInfo;
@@ -1467,32 +1467,32 @@ close REPORT4FH;
 if ( ! $only_divide_bams ){
 
 #makes the sam files using the subroutines
-for (my $i=0; $i< (scalar (@oligo_data)); $i++)
+for (my $i=0; $i< (scalar (@capturesite_data)); $i++)
 {
-output_hash_sam(\%samhash, $outputfilename."_".$oligo_data[$i][0],$oligo_data[$i][0],\@samheadder);
+output_hash_sam(\%samhash, $outputfilename."_".$capturesite_data[$i][0],$capturesite_data[$i][0],\@samheadder);
 }
 
-for (my $i=0; $i< (scalar (@oligo_data)); $i++)
+for (my $i=0; $i< (scalar (@capturesite_data)); $i++)
 {
-output_hash_sam(\%cap_samhash, $outputfilename."_capture_".$oligo_data[$i][0],$oligo_data[$i][0],\@samheadder)
+output_hash_sam(\%cap_samhash, $outputfilename."_capture_".$capturesite_data[$i][0],$capturesite_data[$i][0],\@samheadder)
 }
  
 #makes the mig, wig files using the subroutines wigout and wigtobigwig
-for (my $i=0; $i< (scalar (@oligo_data)); $i++)
+for (my $i=0; $i< (scalar (@capturesite_data)); $i++)
 {
-frag_to_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0]);
-cisfrag_to_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0],$oligo_data[$i][1]);
+frag_to_wigout(\%fraghash, $outputfilename."_".$capturesite_data[$i][0],"full",$capturesite_data[$i][0]);
+cisfrag_to_wigout(\%fraghash, $outputfilename."_".$capturesite_data[$i][0],"full",$capturesite_data[$i][0],$capturesite_data[$i][1]);
 
-print $counters{$oligo_data[$i][0]." 17a Reporter fragments (final count) :"};
-print $counters{$oligo_data[$i][0]." 17b Reporter fragments CIS (final count) :"};
-frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0],$counters{$oligo_data[$i][0]." 17a Reporter fragments (final count) :"});
-cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0],$counters{$oligo_data[$i][0]." 17a Reporter fragments (final count) :"},$oligo_data[$i][1]);
-frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$oligo_data[$i][0]."_CIS","full",$oligo_data[$i][0],$counters{$oligo_data[$i][0]." 17b Reporter fragments CIS (final count) :"});
-cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$oligo_data[$i][0]."_CIS","full",$oligo_data[$i][0],$counters{$oligo_data[$i][0]." 17b Reporter fragments CIS (final count) :"},$oligo_data[$i][1]);
+print $counters{$capturesite_data[$i][0]." 17a Reporter fragments (final count) :"};
+print $counters{$capturesite_data[$i][0]." 17b Reporter fragments CIS (final count) :"};
+frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$capturesite_data[$i][0],"full",$capturesite_data[$i][0],$counters{$capturesite_data[$i][0]." 17a Reporter fragments (final count) :"});
+cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$capturesite_data[$i][0],"full",$capturesite_data[$i][0],$counters{$capturesite_data[$i][0]." 17a Reporter fragments (final count) :"},$capturesite_data[$i][1]);
+frag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$capturesite_data[$i][0]."_CIS","full",$capturesite_data[$i][0],$counters{$capturesite_data[$i][0]." 17b Reporter fragments CIS (final count) :"});
+cisfrag_to_wigout_normto10k(\%fraghash, $outputfilename."_".$capturesite_data[$i][0]."_CIS","full",$capturesite_data[$i][0],$counters{$capturesite_data[$i][0]." 17b Reporter fragments CIS (final count) :"},$capturesite_data[$i][1]);
 
-frag_to_windowed_wigout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0], $window, $increment);
-frag_to_migout(\%fraghash, $outputfilename."_".$oligo_data[$i][0],"full",$oligo_data[$i][0]);
-# frag_to_migout(\%fraghash, $outputfilename."_".$oligo_data[$i][0]."_CIS","cis",$oligo_data[$i][0]);
+frag_to_windowed_wigout(\%fraghash, $outputfilename."_".$capturesite_data[$i][0],"full",$capturesite_data[$i][0], $window, $increment);
+frag_to_migout(\%fraghash, $outputfilename."_".$capturesite_data[$i][0],"full",$capturesite_data[$i][0]);
+# frag_to_migout(\%fraghash, $outputfilename."_".$capturesite_data[$i][0]."_CIS","cis",$capturesite_data[$i][0]);
 }
 
 #makes a combined track of HbA1 and A2 
@@ -1502,7 +1502,7 @@ if ($globin ==1 or $globin == 2)
 my @tracks_to_combine = qw(Hba-1 Hba-2);
 my $combined_name = "HbaCombined";
 my @combined_name = ("HbaCombined", 11, 320000, 330000, 11, 320000, 320000);
-push @oligo_data, [@combined_name];
+push @capturesite_data, [@combined_name];
 my $norm_value=0;
 my $cis_norm_value=0;
 
@@ -1543,7 +1543,7 @@ if ($globin ==2)
 my @tracks_to_combine = qw(Hbb-b1 Hbb-b2);
 my $combined_name = "HbbCombined";
 my @combined_name = ("HbbCombined", 7, 110961967, 110962817, 7, 110961967, 110962817);
-push @oligo_data, [@combined_name];
+push @capturesite_data, [@combined_name];
 my $norm_value=0;
 my $cis_norm_value=0;
 
@@ -1598,9 +1598,9 @@ http://$public_url/$sample\_$version\_hub.txt
 This URL just needs to be pasted into the UCSC genome browser\n\n";
 
 # Loops throught the different capture points and converts the wig to a bigwig if the file is over 1000 bytes and updates the track hub tracks.txt file
-for (my$i=0; $i< (scalar (@oligo_data)); $i++)
+for (my$i=0; $i< (scalar (@capturesite_data)); $i++)
 {
-  my $filename_out = $outputfilename."_".$oligo_data[$i][0].".wig";
+  my $filename_out = $outputfilename."_".$capturesite_data[$i][0].".wig";
   my $filesize = 0;
   if ( -f $filename_out ){ $filesize = -s $filename_out; }# checks the filesize
   print "$filename_out\t$filesize\n";
@@ -1608,18 +1608,18 @@ for (my$i=0; $i< (scalar (@oligo_data)); $i++)
   #if ($filesize >1000)	# ensures that wigtobigwig is not run on files containing no data
   if ($filesize >0)	# ensures that wigtobigwig is not run on files containing no data
   {
-    wigtobigwig($outputfilename."_".$oligo_data[$i][0], \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-    wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_CISonly", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-    wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_win", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+    wigtobigwig($outputfilename."_".$capturesite_data[$i][0], \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$capturesite_data[$i][0]");
+    wigtobigwig($outputfilename."_".$capturesite_data[$i][0]."_CISonly", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$capturesite_data[$i][0]");
+    wigtobigwig($outputfilename."_".$capturesite_data[$i][0]."_win", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$capturesite_data[$i][0]");
 
     if ($normalised_tracks) {
-      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_normTo10k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_normTo10k_CISonly", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_CIS_normTo10k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
-      wigtobigwig($outputfilename."_".$oligo_data[$i][0]."_CIS_normTo10k_CISonly", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$oligo_data[$i][0]");
+      wigtobigwig($outputfilename."_".$capturesite_data[$i][0]."_normTo10k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$capturesite_data[$i][0]");
+      wigtobigwig($outputfilename."_".$capturesite_data[$i][0]."_normTo10k_CISonly", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$capturesite_data[$i][0]");
+      wigtobigwig($outputfilename."_".$capturesite_data[$i][0]."_CIS_normTo10k", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$capturesite_data[$i][0]");
+      wigtobigwig($outputfilename."_".$capturesite_data[$i][0]."_CIS_normTo10k_CISonly", \*REPORTFH, $store_bigwigs_here_folder, $public_folder, $public_url, "CaptureC_gene_$capturesite_data[$i][0]");
     }
     
-    my $short_filename = $outputfilename."_".$oligo_data[$i][0];
+    my $short_filename = $outputfilename."_".$capturesite_data[$i][0];
     
     if ($short_filename =~ /(.*)\/(\V++)/) {$short_filename = $2};
     my $flashstatus="_NOTSET";
@@ -1630,10 +1630,10 @@ for (my$i=0; $i< (scalar (@oligo_data)); $i++)
     
     
     print TRACKHUBC
-"track $sample\_$oligo_data[$i][0]$flashstatus
+"track $sample\_$capturesite_data[$i][0]$flashstatus
 type bigWig
-longLabel CC_$sample\_$oligo_data[$i][0]$flashstatus
-shortLabel $sample\_$oligo_data[$i][0]$flashstatus
+longLabel CC_$sample\_$capturesite_data[$i][0]$flashstatus
+shortLabel $sample\_$capturesite_data[$i][0]$flashstatus
 bigDataUrl $public_folder/$short_filename.bw
 visibility hide
 priority 200
@@ -1641,10 +1641,10 @@ color 0,0,0
 autoScale on
 alwaysZero on
 
-track cis_$sample\_$oligo_data[$i][0]$flashstatus
+track cis_$sample\_$capturesite_data[$i][0]$flashstatus
 type bigWig
-longLabel CC_cis_$sample\_$oligo_data[$i][0]$flashstatus
-shortLabel cis_$sample\_$oligo_data[$i][0]$flashstatus
+longLabel CC_cis_$sample\_$capturesite_data[$i][0]$flashstatus
+shortLabel cis_$sample\_$capturesite_data[$i][0]$flashstatus
 bigDataUrl $public_folder/$short_filename\_CISonly.bw
 visibility hide
 priority 200
@@ -1652,10 +1652,10 @@ color 0,0,0
 autoScale on
 alwaysZero on
 
-track win_$sample\_$oligo_data[$i][0]$flashstatus
+track win_$sample\_$capturesite_data[$i][0]$flashstatus
 type bigWig
-longLabel CC_win_$sample\_$oligo_data[$i][0]$flashstatus
-shortLabel win_$sample\_$oligo_data[$i][0]$flashstatus
+longLabel CC_win_$sample\_$capturesite_data[$i][0]$flashstatus
+shortLabel win_$sample\_$capturesite_data[$i][0]$flashstatus
 bigDataUrl $public_folder/$short_filename\_win.bw
 visibility hide
 priority 200
@@ -1668,10 +1668,10 @@ alwaysZero on
 if ($normalised_tracks) {
 
     print TRACKHUBC
-"track norm10k_$sample\_$oligo_data[$i][0]$flashstatus
+"track norm10k_$sample\_$capturesite_data[$i][0]$flashstatus
 type bigWig
-longLabel CC_norm10k_$sample\_$oligo_data[$i][0]$flashstatus
-shortLabel norm10k_$sample\_$oligo_data[$i][0]$flashstatus
+longLabel CC_norm10k_$sample\_$capturesite_data[$i][0]$flashstatus
+shortLabel norm10k_$sample\_$capturesite_data[$i][0]$flashstatus
 bigDataUrl $public_folder/$short_filename\_norm10k.bw
 visibility hide
 priority 200
@@ -1679,10 +1679,10 @@ color 0,0,0
 autoScale on
 alwaysZero on
 
-track norm10k_CIS_$sample\_$oligo_data[$i][0]$flashstatus
+track norm10k_CIS_$sample\_$capturesite_data[$i][0]$flashstatus
 type bigWig
-longLabel CC_CISnorm10k_$sample\_$oligo_data[$i][0]$flashstatus
-shortLabel CIS_norm10k_$sample\_$oligo_data[$i][0]$flashstatus
+longLabel CC_CISnorm10k_$sample\_$capturesite_data[$i][0]$flashstatus
+shortLabel CIS_norm10k_$sample\_$capturesite_data[$i][0]$flashstatus
 bigDataUrl $public_folder/$short_filename\_CIS_norm10k.bw
 visibility hide
 priority 200
@@ -1690,10 +1690,10 @@ color 0,0,0
 autoScale on
 alwaysZero on
 
-track cisOnly_norm10k_CIS_$sample\_$oligo_data[$i][0]$flashstatus
+track cisOnly_norm10k_CIS_$sample\_$capturesite_data[$i][0]$flashstatus
 type bigWig
-longLabel CC_cisonly_CISnorm10k_$sample\_$oligo_data[$i][0]$flashstatus
-shortLabel cisonly_CIS_norm10k_$sample\_$oligo_data[$i][0]$flashstatus
+longLabel CC_cisonly_CISnorm10k_$sample\_$capturesite_data[$i][0]$flashstatus
+shortLabel cisonly_CIS_norm10k_$sample\_$capturesite_data[$i][0]$flashstatus
 bigDataUrl $public_folder/$short_filename\_CIS_normTo10k_CISonly.bw
 visibility hide
 priority 200
@@ -1803,11 +1803,11 @@ sub readAnalysisLoop
           {
           if ($data{$analysis_read}{$pe}{$readno}{"type"} eq "capture")
           {
-            for (my $oligo=0; $oligo< (scalar (@oligo_data)); $oligo++)
+            for (my $capturesite=0; $capturesite< (scalar (@capturesite_data)); $capturesite++)
             {
-              if (($data{$analysis_read}{$pe}{$readno}{"chr"} eq $oligo_data[$oligo][1]) and ($data{$analysis_read}{$pe}{$readno}{"readstart"}>=$oligo_data[$oligo][2] and $data{$analysis_read}{$pe}{$readno}{"readend"}<=$oligo_data[$oligo][3]))
+              if (($data{$analysis_read}{$pe}{$readno}{"chr"} eq $capturesite_data[$capturesite][1]) and ($data{$analysis_read}{$pe}{$readno}{"readstart"}>=$capturesite_data[$capturesite][2] and $data{$analysis_read}{$pe}{$readno}{"readend"}<=$capturesite_data[$capturesite][3]))
               {
-              my $tempname="".$oligo_data[$oligo][0]."";
+              my $tempname="".$capturesite_data[$capturesite][0]."";
               $capturenames{$tempname}++;
               }
             }
@@ -1851,10 +1851,10 @@ sub readAnalysisLoop
         }
       }
       
-      foreach my $foundoligo (sort keys %capturenames)
+      foreach my $foundcapturesite (sort keys %capturenames)
       {
-        $capturename.="".$foundoligo."";
-        $capturecomposition.=$foundoligo.":".$capturenames{$foundoligo}." " ;
+        $capturename.="".$foundcapturesite."";
+        $capturecomposition.=$foundcapturesite.":".$capturenames{$foundcapturesite}." " ;
       }
       
       }
@@ -1906,7 +1906,7 @@ sub readAnalysisLoop
       # Last filter before analysis : double captures are excluded :
       
       # Now we check again, if we REALLY want to analyse this read - if it is a double capture, we kick it out now.
-      # We allow for reads which have multicapture in SAME capture oligo, though.
+      # We allow for reads which have multicapture in SAME capture capturesite, though.
       
       if (scalar keys %capturenames == 1 )
       {
@@ -2036,9 +2036,9 @@ if ( ! $only_divide_bams ){
 if ( ! $only_divide_bams ){
 
       if (exists $coords_hash{$data{$analysis_read}{"cis_chr"}}){
-      if (exists $coords_hash{$data{$analysis_read}{"cis_chr"}}{$data{$analysis_read}{"oligo"}}){
-      if (exists $coords_hash{$data{$analysis_read}{"cis_chr"}}{$data{$analysis_read}{"oligo"}}{$data{$analysis_read}{"coord string"}}){
-        $coords_hash{$data{$analysis_read}{"cis_chr"}}{$data{$analysis_read}{"oligo"}}{$data{$analysis_read}{"coord string"}}++;
+      if (exists $coords_hash{$data{$analysis_read}{"cis_chr"}}{$data{$analysis_read}{"capturesite"}}){
+      if (exists $coords_hash{$data{$analysis_read}{"cis_chr"}}{$data{$analysis_read}{"capturesite"}}{$data{$analysis_read}{"coord string"}}){
+        $coords_hash{$data{$analysis_read}{"cis_chr"}}{$data{$analysis_read}{"capturesite"}}{$data{$analysis_read}{"coord string"}}++;
         if ( $duplfilter == 1 ) {       
                  $counters{"16c Duplicate reads:"}++ ; $weNeedToFilterThis=1 }
                else {
@@ -2058,7 +2058,7 @@ if ( ! $only_divide_bams ){
 # ___________________________________________
 if ( ! $only_divide_bams ){
 
-          $coords_hash{$data{$analysis_read}{"cis_chr"}}{$data{$analysis_read}{"oligo"}}{$data{$analysis_read}{"coord string"}}++;
+          $coords_hash{$data{$analysis_read}{"cis_chr"}}{$data{$analysis_read}{"capturesite"}}{$data{$analysis_read}{"coord string"}}++;
           $counters{"16 Non-duplicated reads:"}++;
           
           $counters{"16b Non-duplicated reads having captures in composition $capturecomposition : "}++;
@@ -2113,13 +2113,13 @@ for (my $pe=1;$pe<=2;$pe++)  # loops through PE1 and PE2
 	  
           # All reads to a single file ..
           # print CAPSAMFH $data{$analysis_read}{$pe}{$readno}{"whole line"};
-          # print CAPSAMFH "\tCO:Z:oligoBunch_";
-          # print CAPSAMFH $oligo_bunch_numbers{$data{$analysis_read}{"captures"}};
+          # print CAPSAMFH "\tCO:Z:capturesiteBunch_";
+          # print CAPSAMFH $capturesite_bunch_numbers{$data{$analysis_read}{"captures"}};
           # print CAPSAMFH "\n";
           
-          # Reads belonging to this bunch of oligos ..
+          # Reads belonging to this bunch of capturesites ..
           
-          my $this_bunch_filename = "$sample\_$version/DIVIDEDsams/$prefix_for_output\_oligoBunch_".$oligo_bunch_numbers{$data{$analysis_read}{"captures"}}."_$version.sam";
+          my $this_bunch_filename = "$sample\_$version/DIVIDEDsams/$prefix_for_output\_capturesiteBunch_".$capturesite_bunch_numbers{$data{$analysis_read}{"captures"}}."_$version.sam";
           
           unless (open(BUNCHFH, ">>$this_bunch_filename")){die "Cannot open file $this_bunch_filename , stopped ";};           
           print BUNCHFH $data{$analysis_read}{$pe}{$readno}{"whole line"};

@@ -159,9 +159,9 @@ printNewChapterToLogFile
     
     # Starting the memory monitoring ..
     
-    echo './tmpdirMemoryasker.sh ${oligoCounter} ${TMPDIR} ${SGE_O_WORKDIR}/ & '
+    echo './tmpdirMemoryasker.sh ${capturesiteCounter} ${TMPDIR} ${SGE_O_WORKDIR}/ & '
     echo "i.e."
-    echo "./tmpdirMemoryasker.sh ${oligoCounter} ${TMPDIR} ${SGE_O_WORKDIR}/ & "
+    echo "./tmpdirMemoryasker.sh ${capturesiteCounter} ${TMPDIR} ${SGE_O_WORKDIR}/ & "
     ./tmpdirMemoryasker.sh ${fastqCounter} ${TMPDIR} ${SGE_O_WORKDIR}/ &
     tmpdirMmemoryAskerProcessnumber=$!
 
@@ -180,13 +180,13 @@ printNewChapterToLogFile
       printToLogFile
         
       runOK=1
-      # ${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${oligofile} --R1 READ1.fastq --R2 READ2.fastq --parallel 1 --parallelSubsample fastq_${fastqCounter} --${REenzymeShort} --pf ${publicfolder}  ${parameterList}  --outfile runB.out --errfile runB.err  1> runB.out 2> runB.err
+      # ${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${capturesitefile} --R1 READ1.fastq --R2 READ2.fastq --parallel 1 --parallelSubsample fastq_${fastqCounter} --${REenzymeShort} --pf ${publicfolder}  ${parameterList}  --outfile runB.out --errfile runB.err  1> runB.out 2> runB.err
       ./runFastqs.sh
       if [ $? != 0 ]; then
       {
         runOK=0    
 
-        printThis="Fastq run and/or dividing bam files along oligo file coordinates failed on line ${fastqCounter} of PIPE_fastqPaths.txt ! "
+        printThis="Fastq run and/or dividing bam files along capturesite file coordinates failed on line ${fastqCounter} of PIPE_fastqPaths.txt ! "
         printToLogFile
         
       }

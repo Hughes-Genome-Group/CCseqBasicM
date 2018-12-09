@@ -311,7 +311,7 @@ echo
 
 #------------------------------------------
 
-OPTS=`getopt -o h,m:,M:,e:,o:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,tiled,strandSpecificDuplicates,onlyCCanalyser,onlyHub,onlyOligoDivision,onlyREdigest,flash,noFlash,onlyCis,onlyBlat,UMI,useSymbolicLinks,useClusterDiskArea,noPloidyFilter,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,bowtie1,bowtie2,processors:,CCversion:,BLATforREUSEfolderPath:,globin:,parallelSubsample:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,chunkmb:,window:,increment:,ada3read1:,ada3read2:,extend:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,sonicationSize:,parallel:,oligosPerBunch:,monitorRunLogFile: -- "$@"`
+OPTS=`getopt -o h,m:,M:,e:,o:,c:,s:,w:,i:,v: --long help,dump,snp,dpn,nla,hind,tiled,strandSpecificDuplicates,onlyCCanalyser,onlyHub,onlyCapturesiteDivision,onlyREdigest,flash,noFlash,onlyCis,onlyBlat,UMI,useSymbolicLinks,useClusterDiskArea,noPloidyFilter,saveGenomeDigest,dontSaveGenomeDigest,trim,noTrim,bowtie1,bowtie2,processors:,CCversion:,BLATforREUSEfolderPath:,globin:,parallelSubsample:,outfile:,errfile:,limit:,pf:,genome:,R1:,R2:,chunkmb:,window:,increment:,ada3read1:,ada3read2:,extend:,qmin:,flashBases:,flashMismatch:,stringent,trim3:,trim5:,seedmms:,seedlen:,maqerr:,stepSize:,tileSize:,minScore:,maxIntron:,oneOff:,wobblyEndBinWidth:,sonicationSize:,parallel:,capturesitesPerBunch:,monitorRunLogFile: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -324,7 +324,8 @@ while true ; do
         -h) usage ; shift;;
         -m) LOWERCASE_M=$2 ; shift 2;;
         -M) CAPITAL_M=$2 ; shift 2;;
-        -o) OligoFile=$2 ; shift 2;;
+        -o) CapturesiteFile=$2 ; shift 2;;
+        -c) CapturesiteFile=$2 ; shift 2;;
         -e) otherParameters="${otherParameters} -e $2" ; shift 2;;
         -w) WINDOW=$2 ; shift 2;;
         -i) INCREMENT=$2 ; shift 2;;
@@ -341,7 +342,7 @@ while true ; do
         --onlyCCanalyser) ONLY_CC_ANALYSER=1 ; shift;;
         --onlyHub) ONLY_HUB=1 ; shift;;
         --onlyBlat) ONLY_BLAT=1 ; shift;;
-        --onlyOligoDivision) ONLY_DIVIDE_OLIGOS=1 ; shift;;
+        --onlyCapturesiteDivision) ONLY_DIVIDE_CAPTURESITES=1 ; shift;;
         --onlyREdigest) ONLY_RE_DIGESTS=1 ; shift;;
         --onlyCis) onlyCis=1;otherParameters="${otherParameters} --onlycis"; shift;;
         --R1) Read1=$2 ; shift 2;;
@@ -391,7 +392,7 @@ while true ; do
         --errfile) QSUBERRFILE=$2 ; shift 2;;
         --parallelSubsample) PARALLELSUBSAMPLE=$2 ; shift 2;;
         --wobblyEndBinWidth) otherParameters="${otherParameters} --wobble $2" ; shift 2;;
-        --oligosPerBunch) otherParameters="${otherParameters} --oligosperbunch $2" ; shift 2;;
+        --capturesitesPerBunch) otherParameters="${otherParameters} --capturesitesperbunch $2" ; shift 2;;
         --) shift; break;;
     esac
 done
@@ -404,29 +405,29 @@ echo "SetParams" > ${JustNowLogFile}
 
 # -----------------------------------------------
 
-# Shortcut to the --onlyOligoBunches run type : bypasses most of the setup ..
+# Shortcut to the --onlyCapturesiteBunches run type : bypasses most of the setup ..
 
 # Currently this is NOT USED at all (the flag is never called)
 # - but the user case is preserved in order to bring back TILED analysis (which may need this, possibly)
 
-if [[ ${ONLY_DIVIDE_OLIGOS} -eq "1" ]]; then
+if [[ ${ONLY_DIVIDE_CAPTURESITES} -eq "1" ]]; then
     
-  oligoRunIsFine=1
+  capturesiteRunIsFine=1
   
-  checkThis="${OligoFile}"
-  checkedName='OligoFile'
+  checkThis="${CapturesiteFile}"
+  checkedName='CapturesiteFile'
   checkParse
-  testedFile="${OligoFile}"
+  testedFile="${CapturesiteFile}"
   doInputFileTesting
 
-  printThis="Running ONLY OLIGO FILE DIVISION (parallel run - preparing for oligo-file wise loops)"
+  printThis="Running ONLY CAPTURESITE FILE DIVISION (parallel run - preparing for capture-site (REfragment)-file wise loops)"
   printToLogFile
 
   CCscriptname="${captureScript}.pl"
-  runCCanalyserOnlyOligos
+  runCCanalyserOnlyCapturesites
   
-  if [ "${oligoRunIsFine}" -eq 0 ]; then
-        printThis="Oligo file division failed. EXITING !"
+  if [ "${capturesiteRunIsFine}" -eq 0 ]; then
+        printThis="capture-site (REfragment)file division failed. EXITING !"
         printToLogFile
       exit 1
   fi
@@ -509,13 +510,13 @@ echo "Whole genome fasta file path : ${GenomeFasta}"
 echo "Bowtie genome index path : ${BowtieGenome}"
 echo "Chromosome sizes for UCSC bigBed generation will be red from : ${ucscBuild}"
 
-checkThis="${OligoFile}"
-checkedName='OligoFile'
+checkThis="${CapturesiteFile}"
+checkedName='CapturesiteFile'
 checkParse
-testedFile="${OligoFile}"
+testedFile="${CapturesiteFile}"
 doInputFileTesting
 
-# Doing the ONLY_BLAT  user case first - they doesn't need existing input files (except the oligo file) - so we shouldn't enter any testing of parameters here.
+# Doing the ONLY_BLAT  user case first - they doesn't need existing input files (except the capture-site (REfragment) file) - so we shouldn't enter any testing of parameters here.
 
 if [[ "${ONLY_BLAT}" -eq "1" ]]; then
 {
@@ -670,15 +671,15 @@ else
     fullPathDpnBlacklist=$(pwd)"/genome_${REenzyme}_blacklist.bed"
 fi
 
-# We need also the oligo white list - to speed up large runs ..
+# We need also the capture-site (REfragment) white list - to speed up large runs ..
 
-fullPathOligoWhitelist=""
-fullPathOligoWhitelistChromosomes=""
+fullPathCapturesiteWhitelist=""
+fullPathCapturesiteWhitelistChromosomes=""
 if [[ ${PARALLEL} -eq "0" ]]; then
-    generateOligoWhitelist
+    generateCapturesiteWhitelist
 else
-    fullPathOligoWhitelist=$(pwd)"/genome_${REenzyme}_oligo_overlap.bed"
-    fullPathOligoWhitelistChromosomes=$(pwd)"/genome_${REenzyme}_oligo_chromosomes.txt"
+    fullPathCapturesiteWhitelist=$(pwd)"/genome_${REenzyme}_capturesite_overlap.bed"
+    fullPathCapturesiteWhitelistChromosomes=$(pwd)"/genome_${REenzyme}_capturesite_chromosomes.txt"
 fi
 
 # Early exit for ONLY_RE_DIGESTS
@@ -694,8 +695,8 @@ echo "fullPathDpnGenome ${fullPathDpnGenome}" >> REdigest.log
 echo >> REdigest.log
 echo "genome_${REenzyme}_blacklist.bed" >> REdigest.log
 echo "fullPathDpnBlacklist ${fullPathDpnBlacklist}" >> REdigest.log
-echo "fullPathOligoWhitelist ${fullPathOligoWhitelist}" >> REdigest.log
-echo "fullPathOligoWhitelistChromosomes ${fullPathOligoWhitelistChromosomes}" >> REdigest.log
+echo "fullPathCapturesiteWhitelist ${fullPathCapturesiteWhitelist}" >> REdigest.log
+echo "fullPathCapturesiteWhitelistChromosomes ${fullPathCapturesiteWhitelistChromosomes}" >> REdigest.log
 echo >> REdigest.log
 
 copyMainrunnerLogFiles
@@ -704,17 +705,17 @@ exit 0
 fi
 
 
-# Save oligo file full path (to not to lose the file when we cd into the folder, if we used relative paths ! )
-TEMPdoWeStartWithSlash=$(($( echo ${OligoFile} | awk '{print substr($1,1,1)}' | grep -c '/' )))
+# Save capture-site (REfragment) file full path (to not to lose the file when we cd into the folder, if we used relative paths ! )
+TEMPdoWeStartWithSlash=$(($( echo ${CapturesiteFile} | awk '{print substr($1,1,1)}' | grep -c '/' )))
 if [ "${TEMPdoWeStartWithSlash}" -eq 0 ]
 then
- OligoFile=$(pwd)"/"${OligoFile}
+ CapturesiteFile=$(pwd)"/"${CapturesiteFile}
 fi
 
-checkThis="${OligoFile}"
-checkedName='OligoFile'
+checkThis="${CapturesiteFile}"
+checkedName='CapturesiteFile'
 checkParse
-testedFile="${OligoFile}"
+testedFile="${CapturesiteFile}"
 doInputFileTesting
 
 
@@ -763,7 +764,7 @@ printToLogFile
 if [[ ${PARALLEL} -ne "1" ]]; then
 printThis="Running CCanalyser without filtering - generating the RED graphs.."
 else
-printThis="Running CCanalyser to divide the bam to oligo bunches.."
+printThis="Running CCanalyser to divide the bam to capture-site (REfragment) bunches.."
 fi
 printToLogFile
 printThis="##################################"
@@ -778,7 +779,7 @@ JamesUrlForCCanalyser="${JamesUrl}/RAW"
 
 # If first part of parallel run - skipping visualisations and all filtering and counters at and after step 16 (duplicate filter). Only printing mock sam file for parallel run to parse. ..
 if [[ ${PARALLEL} -eq 1 ]]; then
-  otherParameters="${otherParameters} --onlyoligobunches"
+  otherParameters="${otherParameters} --onlycapturesitebunches"
 fi
 
 ################################
@@ -1142,7 +1143,7 @@ cp filtering.log ${publicPathForCCanalyser}/.
 
 if [ "${TEMPreturnvalue}" -ne 0 ]; then
     
-    printThis="Filtering after BLAT was crashed ! - maybe you had no reads left in either FLASHED or NONFLASHED file for thi/es(e) oligo(s), in folder F3/preFiltered ? "
+    printThis="Filtering after BLAT was crashed ! - maybe you had no reads left in either FLASHED or NONFLASHED file for thi/es(e) capture-site (REfragment)(s), in folder F3/preFiltered ? "
     printToLogFile
     
     printThis="EXITING !"

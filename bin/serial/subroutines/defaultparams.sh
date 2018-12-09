@@ -41,11 +41,11 @@ echo "Read1 ${Read1}" >> parameters_capc.log
 echo "Read2 ${Read2}" >> parameters_capc.log
 echo "GENOME ${GENOME}" >> parameters_capc.log
 echo "GenomeIndex ${GenomeIndex}" >> parameters_capc.log
-echo "OligoFile ${OligoFile}" >> parameters_capc.log
+echo "CapturesiteFile ${CapturesiteFile}" >> parameters_capc.log
 echo "onlyCis ${onlyCis}" >> parameters_capc.log
 echo "REenzyme ${REenzyme}" >> parameters_capc.log
 echo "ONLY_CC_ANALYSER ${ONLY_CC_ANALYSER}" >> parameters_capc.log
-echo "ONLY_HUB ${ONLY_HUB} : ONLY_RE_DIGESTS ${ONLY_RE_DIGESTS} ONLY_DIVIDE_OLIGOS ${ONLY_DIVIDE_OLIGOS}" >> parameters_capc.log
+echo "ONLY_HUB ${ONLY_HUB} : ONLY_RE_DIGESTS ${ONLY_RE_DIGESTS} ONLY_DIVIDE_CAPTURESITES ${ONLY_DIVIDE_CAPTURESITES}" >> parameters_capc.log
 echo "ONLY_BLAT ${ONLY_BLAT}" >> parameters_capc.log
 echo "TILED ${TILED}" >> parameters_capc.log
 echo "PARALLEL ${PARALLEL} : PARALLELSUBSAMPLE ${PARALLELSUBSAMPLE}" >> parameters_capc.log
@@ -110,7 +110,7 @@ echo "ucscBuild ${ucscBuild}" >> parameters_capc.log
 QSUBOUTFILE="qsub.out"
 QSUBERRFILE="qsub.err"
 
-OligoFile="UNDEFINED_OLIGOFILE"
+CapturesiteFile="UNDEFINED_CAPTURESITEFILE"
 TRIM=1
 FLASH=1
 GENOME="UNDEFINED_GENOME"
@@ -159,7 +159,7 @@ extend=20000
 
 sonicationSize=300
 
-# If we have many oligos, the stuff can be eased up by analysing only in cis.
+# If we have many capture-site (REfragment)s, the stuff can be eased up by analysing only in cis.
 onlyCis=0
 
 # Blat flags
@@ -184,8 +184,8 @@ ONLY_HUB=0
 ONLY_RE_DIGESTS=0
 # Only run the blatting
 ONLY_BLAT=0
-# Only running oligo division - to parallelise F2-F6 in the runs
-ONLY_DIVIDE_OLIGOS=0
+# Only running capture-site (REfragment) division - to parallelise F2-F6 in the runs
+ONLY_DIVIDE_CAPTURESITES=0
 # Run as first steps of TILED analysis
 TILED=0
 

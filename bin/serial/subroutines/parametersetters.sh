@@ -141,8 +141,8 @@ checkThis="${CAPITAL_M}"
 checkedName='CAPITAL_M'
 checkParse
 
-checkThis="${OligoFile}"
-checkedName='OligoFile'
+checkThis="${CapturesiteFile}"
+checkedName='CapturesiteFile'
 checkParse
 
 checkThis="${WINDOW}"
@@ -182,8 +182,8 @@ checkThis="${ONLY_BLAT}"
 checkedName='ONLY_BLAT'
 checkParse
 
-checkThis="${ONLY_DIVIDE_OLIGOS}"
-checkedName='ONLY_DIVIDE_OLIGOS'
+checkThis="${ONLY_DIVIDE_CAPTURESITES}"
+checkedName='ONLY_DIVIDE_CAPTURESITES'
 checkParse
 
 checkThis="${ONLY_RE_DIGESTS}"

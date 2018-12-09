@@ -787,9 +787,9 @@ do
     printThis="LOOPs 2,3,4,5 ${flashstatus} : for chromosome ${thisChr}"
     printNewChapterToLogFile
 
-    # Check if we have oligos in this chromosome ..
-    if [ $(($(cat ${fullPathOligoWhitelistChromosomes} | grep -c '^'${thisChr}'$'))) -eq 0 ]; then
-        echo "${thisChr} has no capture oligos - whole chromosome will now be removed from further analysis .."
+    # Check if we have capturesites in this chromosome ..
+    if [ $(($(cat ${fullPathCapturesiteWhitelistChromosomes} | grep -c '^'${thisChr}'$'))) -eq 0 ]; then
+        echo "${thisChr} has no capture capturesites - whole chromosome will now be removed from further analysis .."
         
         rmCommand='rm -f ${thisSamFile1}'
         rmThis="${thisSamFile1}"
@@ -837,13 +837,13 @@ do
     {
     tempDATE=$(date) 
     # ############################################################################
-    printThis="LOOP3 ${flashstatus} ${thisChr} : oligolistOverlapBams ${tempDate}"
+    printThis="LOOP3 ${flashstatus} ${thisChr} : capturesitelistOverlapBams ${tempDate}"
     # ############################################################################
     printToLogFile
     
     thisSamFile=${thisSamFile2}
     thisCapFile=${thisCapFile3}
-    oligolistOverlapBams >> LOOP3_${flashstatus}.log
+    capturesitelistOverlapBams >> LOOP3_${flashstatus}.log
     
     # ------------------------
     # Delete the ones with no captures ..
@@ -1247,7 +1247,7 @@ rm -f ${thisSamFile}
 
 }
 
-oligolistOverlapBams(){
+capturesitelistOverlapBams(){
 
 # This whole thing is built to get rid of "as many reads as quickly as possible",
 # so that we don't need to use the expensive "which capture this thingie possibly belongs to"
@@ -1263,12 +1263,12 @@ echo "------------------"
 echo "thisChr ${thisChr}"
 echo
 echo "thisSamFile ${thisSamFile}"
-echo "fullPathOligoWhitelist ${fullPathOligoWhitelist}"
+echo "fullPathCapturesiteWhitelist ${fullPathCapturesiteWhitelist}"
 echo "flashstatus ${flashstatus}"
 echo
 
-cat ${fullPathOligoWhitelist} | grep '^'${thisChr}'\s' > ${thisChr}_oligoWhitelist.bed
-testedFile="${thisChr}_oligoWhitelist.bed"
+cat ${fullPathCapturesiteWhitelist} | grep '^'${thisChr}'\s' > ${thisChr}_capturesiteWhitelist.bed
+testedFile="${thisChr}_capturesiteWhitelist.bed"
 doTempFileTesting
 
 # ------------------------
@@ -1286,7 +1286,7 @@ echo
 # ------------------------
 
 samtools view -hb ${thisSamFile} | bedtools bamtobed -i stdin | cut -f 1-4 \
-| bedtools intersect -wb -a stdin -b ${thisChr}_oligoWhitelist.bed \
+| bedtools intersect -wb -a stdin -b ${thisChr}_capturesiteWhitelist.bed \
 | cut -f 4,8 | sed 's/:/\t/' | awk '{print $1"\t"$3}' | uniq \
 > LOOP3_${flashstatus}_${thisChr}_temp.txt
 

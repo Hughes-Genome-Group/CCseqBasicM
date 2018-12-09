@@ -20,7 +20,7 @@
 ##########################################################################
 
 # This file fetches the fastqs in plateScreen96.sh style, the way that code was 21Feb2018
-# The sub printRunStartArraysOligo is taken from plateScreen96.sh main script, and modified here.
+# The sub printRunStartArraysCapturesite is taken from plateScreen96.sh main script, and modified here.
 
 function finish {
 
@@ -29,32 +29,32 @@ if [ $? != "0" ]; then
 echo
 date
 echo
-echo "RUN CRASHED ! oneOligoWholenode.sh for ${oligoFolderRelativePath} - check qsub.err to see why !"
-echo "Dumped files in ${wholenodeSubmitDir}/${oligoFolderRelativePath}_CRASHED"
+echo "RUN CRASHED ! oneCapturesiteWholenode.sh for ${capturesiteFolderRelativePath} - check qsub.err to see why !"
+echo "Dumped files in ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}_CRASHED"
 echo
 
 echo "$(pwd) before cleaning up : "
 ls -lht
 
-echo "TMPDIR ${oligoFolderRelativePath} before cleaning up : "
-ls -lht ${TMPDIR}/${oligoFolderRelativePath}
+echo "TMPDIR ${capturesiteFolderRelativePath} before cleaning up : "
+ls -lht ${TMPDIR}/${capturesiteFolderRelativePath}
 
-mkdir ${wholenodeSubmitDir}/${oligoFolderRelativePath}_CRASHED
-mv -f ${TMPDIR}/${oligoFolderRelativePath} ${wholenodeSubmitDir}/${oligoFolderRelativePath}_CRASHED/*
+mkdir ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}_CRASHED
+mv -f ${TMPDIR}/${capturesiteFolderRelativePath} ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}_CRASHED/*
 
 echo "TMPDIR after cleaning up"
 ls -lht ${TMPDIR}
 
-if [ ! -d ${wholenodeSubmitDir}/${oligoFolderRelativePath} ];then
-mkdir ${wholenodeSubmitDir}/${oligoFolderRelativePath}
+if [ ! -d ${wholenodeSubmitDir}/${capturesiteFolderRelativePath} ];then
+mkdir ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}
 fi
-echo "runOK 0" > ${wholenodeSubmitDir}/${oligoFolderRelativePath}/oligoRoundSuccess.log
+echo "runOK 0" > ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}/capturesiteRoundSuccess.log
 
 else
 
 echo
 date
-printThis="oneOligoWholenode.sh : Analysis complete for ${oligoFolderRelativePath} ! "
+printThis="oneCapturesiteWholenode.sh : Analysis complete for ${capturesiteFolderRelativePath} ! "
 printToLogFile
     
 fi
@@ -100,7 +100,7 @@ echo "" >> "/dev/stderr"
 
 # Normal runs (not only help request) starts here ..
 
-echo "oneOligoWholenode.sh - by Jelena Telenius, 26/05/2018"
+echo "oneCapturesiteWholenode.sh - by Jelena Telenius, 26/05/2018"
 echo
 timepoint=$( date )
 echo "run started : ${timepoint}"
@@ -116,7 +116,7 @@ echo "RUNNING IN MACHINE : "
 hostname --long
 
 echo "run called with parameters :"
-echo "oneOligoWholenode.sh" $@
+echo "oneCapturesiteWholenode.sh" $@
 echo
 
 parameterList=$@
@@ -124,13 +124,13 @@ parameterList=$@
 
 
 # The fastq number is the task number ..
-oligoCounter=$1
+capturesiteCounter=$1
 
-printThis="oligo_${oligoCounter} : Run CC analysis oligo-wise (after F1 folder) .. "
+printThis="capturesite_${capturesiteCounter} : Run CC analysis capturesite-wise (after F1 folder) .. "
 printNewChapterToLogFile
   
-    oligoFolderRelativePath=$(cat runlistings/oligo${oligoCounter}.txt | head -n 1 | cut -f 1)
-    submitdirSubfolderForDu=${wholenodeSubmitDir}/${oligoFolderRelativePath}
+    capturesiteFolderRelativePath=$(cat runlistings/capturesite${capturesiteCounter}.txt | head -n 1 | cut -f 1)
+    submitdirSubfolderForDu=${wholenodeSubmitDir}/${capturesiteFolderRelativePath}
     echo "submitdirSubfolderForDu ${submitdirSubfolderForDu}"
     
     # ##########################################
@@ -146,9 +146,9 @@ printNewChapterToLogFile
     pwd
     echo
     
-    mkdir -p ${oligoFolderRelativePath}
-    cp -r ${wholenodeSubmitDir}/${oligoFolderRelativePath}/* ${oligoFolderRelativePath}
-    mv ${wholenodeSubmitDir}/${oligoFolderRelativePath} ${wholenodeSubmitDir}/${oligoFolderRelativePath}_beforeTMPDIR
+    mkdir -p ${capturesiteFolderRelativePath}
+    cp -r ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}/* ${capturesiteFolderRelativePath}
+    mv ${wholenodeSubmitDir}/${capturesiteFolderRelativePath} ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}_beforeTMPDIR
     
     echo
     echo "Copied over the parameter files :"
@@ -156,8 +156,8 @@ printNewChapterToLogFile
     
     ls -lht
     
-    echo "cd ${oligoFolderRelativePath}"
-    cd ${oligoFolderRelativePath}
+    echo "cd ${capturesiteFolderRelativePath}"
+    cd ${capturesiteFolderRelativePath}
     
     ls -lht
     
@@ -166,7 +166,7 @@ printNewChapterToLogFile
     echo "capture analysis started : $(date)"
     
     # Writing the queue environment variables to a log file :
-    # ./echoer_for_SunGridEngine_environment.sh > ${wholenodeSubmitDir}/oligo${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+    # ./echoer_for_SunGridEngine_environment.sh > ${wholenodeSubmitDir}/capturesite${capturesiteCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
     ./echoer_for_SunGridEngine_environment.sh > listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
     
       printThis="$(cat run.sh)"
@@ -178,7 +178,7 @@ printNewChapterToLogFile
       {
         runOK=0    
 
-        printThis="Oligo-wise CC analysis failed on line ${oligoCounter} of C_analyseOligoBunches/runlist.txt ! "
+        printThis="Capturesite-wise CC analysis failed on line ${capturesiteCounter} of C_analyseCapturesiteBunches/runlist.txt ! "
         printToLogFile
         
       }
@@ -205,7 +205,7 @@ printNewChapterToLogFile
     
     printThis="runOK ${runOK}"
     printToLogFile
-    echo "runOK ${runOK}" > oligoRoundSuccess.log
+    echo "runOK ${runOK}" > capturesiteRoundSuccess.log
     
   
     # ##########################################
@@ -219,13 +219,13 @@ printNewChapterToLogFile
     
     ls -lR $(pwd) > TMPareaBeforeMovingBack.log
 
-    mkdir ${wholenodeSubmitDir}/${oligoFolderRelativePath}
-    mv -f * ${wholenodeSubmitDir}/${oligoFolderRelativePath}/.
+    mkdir ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}
+    mv -f * ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}/.
     
-    printThis="returning to "${wholenodeSubmitDir}/${oligoFolderRelativePath}
+    printThis="returning to "${wholenodeSubmitDir}/${capturesiteFolderRelativePath}
     printToLogFile
     
-    cd ${wholenodeSubmitDir}/${oligoFolderRelativePath}
+    cd ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}
     echo
     echo "Here we are :"
     echo
@@ -250,7 +250,7 @@ printNewChapterToLogFile
     # Removing temp if all went fine
     if [ "${runOK}" -eq 1 ];then
         echo "would delete beforeTMPDIR here - but commenterd out "
-        # rm -rf ${wholenodeSubmitDir}/${oligoFolderRelativePath}_beforeTMPDIR
+        # rm -rf ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}_beforeTMPDIR
     fi
     
     cd ${wholenodeSubmitDir}
@@ -263,7 +263,7 @@ printNewChapterToLogFile
     
     printThis="runOK ${runOK}"
     printToLogFile
-    echo "runOK ${runOK}" > ${oligoFolderRelativePath}/oligoRoundSuccess.log
+    echo "runOK ${runOK}" > ${capturesiteFolderRelativePath}/capturesiteRoundSuccess.log
     
 # ----------------------------------------
 # All done !

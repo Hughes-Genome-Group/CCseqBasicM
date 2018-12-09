@@ -300,7 +300,7 @@ unless (open(REPORT2FH, ">$report2_filename")){die "Cannot open file $report2_fi
 unless (open(REPORT3FH, ">$report3_filename")){die "Cannot open file $report3_filename, stopped "}; print REPORT3FH "\nFinal counts\n\n";
 unless (open(REPORT4FH, ">$report4_filename")){die "Cannot open file $report4_filename, stopped "}; print REPORT4FH "\nFinal reporter counts\n\n";
 
-my $inputFileInfo="\nSample name: $sample \nScript version:$version \n\nInput path/file: $input_path/$input_filename\nRestriction enzyme coords file: $restriction_enzyme_coords_file\nOligo coordinate input file: $oligo_filename\nPublic folder: $public_folder\nPublic URL: $public_url\n";
+my $inputFileInfo="\nSample name: $sample \nScript version:$version \n\nInput path/file: $input_path/$input_filename\nRestriction enzyme coords file: $restriction_enzyme_coords_file\nCapturesite coordinate input file: $capturesite_filename\nPublic folder: $public_folder\nPublic URL: $public_url\n";
 my $scriptStartInfo="Script started at: $mday/$mon/$year $hour:$min\n\n";
 
 print REPORTFH $inputFileInfo;
@@ -363,10 +363,10 @@ sub readAnalysisLoop
         }
       }
       
-      foreach my $foundoligo (sort keys %capturenames)
+      foreach my $foundcapturesite (sort keys %capturenames)
       {
-        $capturename.="".$foundoligo."";
-        $capturecomposition.=$foundoligo.":".$capturenames{$foundoligo}." " ;
+        $capturename.="".$foundcapturesite."";
+        $capturecomposition.=$foundcapturesite.":".$capturenames{$foundcapturesite}." " ;
       }
       
       # Resolving the identity of the capture fragments - DONE.
@@ -404,9 +404,9 @@ sub readAnalysisLoop
 #------------------------------------------------------------------------------------------------------------------
 # THE REAL DEAL REPORTING FOR LOOPS - here the destiny of the reads is finally made..
 #------------------------------------------------------------------------------------------------------------------
-      foreach my $foundoligo (sort keys %capturenames)
+      foreach my $foundcapturesite (sort keys %capturenames)
       {
-        my $this_bunch_filename = "$sample\_$version/DIVIDEDsams/$prefix_for_output\_chromosome_".$foundoligo."_$version.sam";    
+        my $this_bunch_filename = "$sample\_$version/DIVIDEDsams/$prefix_for_output\_chromosome_".$foundcapturesite."_$version.sam";    
         unless (open(BUNCHFH, ">>$this_bunch_filename")){die "Cannot open file $this_bunch_filename , stopped ";};
         
         for (my $pe=1;$pe<=2;$pe++)  # loops through PE1 and PE2 

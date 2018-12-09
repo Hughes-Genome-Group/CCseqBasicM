@@ -29,33 +29,33 @@ if [ $? != "0" ]; then
 echo
 date
 echo
-echo "RUN CRASHED ! oneThreadParallelFastqWorkDir.sh for ${oligoFolderRelativePath} - check qsub.err to see why !"
+echo "RUN CRASHED ! oneThreadParallelFastqWorkDir.sh for ${capturesiteFolderRelativePath} - check qsub.err to see why !"
 echo
 
-echo "runOK 0" > ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/oligoRoundSuccess.log
+echo "runOK 0" > ${SGE_O_WORKDIR}/${capturesiteFolderRelativePath}/capturesiteRoundSuccess.log
 
 else
     
 printThis='Deleting all folder D bam and wig files (gff files and bigwig files remain, along with the original bam file in folder C ) '
 printToLogFile
 
-echo "Total disk space Megas (before deleting) : " > ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
-du -sm 2>> /dev/null | cut -f 1 >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
+echo "Total disk space Megas (before deleting) : " > ${SGE_O_WORKDIR}/${capturesiteFolderRelativePath}/bamWigSizesBeforeDeleting.log
+du -sm 2>> /dev/null | cut -f 1 >> ${SGE_O_WORKDIR}/${capturesiteFolderRelativePath}/bamWigSizesBeforeDeleting.log
 
-echo "Total disk space Megas of bam files (before deleting) : " >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
-du -sm F[12345]*/*.bam 2>> /dev/null | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
+echo "Total disk space Megas of bam files (before deleting) : " >> ${SGE_O_WORKDIR}/${capturesiteFolderRelativePath}/bamWigSizesBeforeDeleting.log
+du -sm F[12345]*/*.bam 2>> /dev/null | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> ${SGE_O_WORKDIR}/${capturesiteFolderRelativePath}/bamWigSizesBeforeDeleting.log
 rm -f F[12345]*/*.bam
 
-echo "Total disk space Megas of wig files (before deleting) : " >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
-du -sm F[123456]*/*.wig 2>> /dev/null | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
+echo "Total disk space Megas of wig files (before deleting) : " >> ${SGE_O_WORKDIR}/${capturesiteFolderRelativePath}/bamWigSizesBeforeDeleting.log
+du -sm F[123456]*/*.wig 2>> /dev/null | cut -f 1 | tr '\n' '+' | sed 's/+$/\n/' | bc >> ${SGE_O_WORKDIR}/${capturesiteFolderRelativePath}/bamWigSizesBeforeDeleting.log
 rm -f F[123456]*/*.wig
 
-echo "Total disk space (after deleting) : " >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
-du -sm 2>> /dev/null | cut -f 1 >> ${SGE_O_WORKDIR}/${oligoFolderRelativePath}/bamWigSizesBeforeDeleting.log
+echo "Total disk space (after deleting) : " >> ${SGE_O_WORKDIR}/${capturesiteFolderRelativePath}/bamWigSizesBeforeDeleting.log
+du -sm 2>> /dev/null | cut -f 1 >> ${SGE_O_WORKDIR}/${capturesiteFolderRelativePath}/bamWigSizesBeforeDeleting.log
 
 echo
 date
-printThis="oneThreadParallelFastqWorkDir.sh : Analysis complete for fastq_${oligoCounter} ! "
+printThis="oneThreadParallelFastqWorkDir.sh : Analysis complete for fastq_${capturesiteCounter} ! "
 printToLogFile
     
 fi
@@ -101,7 +101,7 @@ echo "" >> "/dev/stderr"
 
 # Normal runs (not only help request) starts here ..
 
-echo "oneThreadParallelOligoWorkDir.sh - by Jelena Telenius, 26/05/2018"
+echo "oneThreadParallelCapturesiteWorkDir.sh - by Jelena Telenius, 26/05/2018"
 echo
 timepoint=$( date )
 echo "run started : ${timepoint}"
@@ -114,7 +114,7 @@ echo "RUNNING IN MACHINE : "
 hostname --long
 
 echo "run called with parameters :"
-echo "oneThreadParallelOligoWorkDir.sh" $@
+echo "oneThreadParallelCapturesiteWorkDir.sh" $@
 echo
 
 parameterList=$@
@@ -122,18 +122,18 @@ parameterList=$@
 
 
 # The fastq number is the task number ..
-oligoCounter=$SGE_TASK_ID
+capturesiteCounter=$SGE_TASK_ID
 
 # Writing the queue environment variables to a log file :
-# ./${oligoFolderRelativePath}/echoer_for_SunGridEngine_environment.sh > ${SGE_O_WORKDIR}/oligo${SGE_TASK_ID}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
-./${oligoFolderRelativePath}/echoer_for_SunGridEngine_environment.sh > listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+# ./${capturesiteFolderRelativePath}/echoer_for_SunGridEngine_environment.sh > ${SGE_O_WORKDIR}/capturesite${SGE_TASK_ID}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+./${capturesiteFolderRelativePath}/echoer_for_SunGridEngine_environment.sh > listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
 
-printThis="oligo_${oligoCounter} : Run CC analysis oligo-wise (after F1 folder) .. "
+printThis="capturesite_${capturesiteCounter} : Run CC analysis capturesite-wise (after F1 folder) .. "
 printNewChapterToLogFile
   
-    oligoFolderRelativePath=$(cat runlistings/oligo${oligoCounter}.txt | head -n 1 | cut -f 1)
+    capturesiteFolderRelativePath=$(cat runlistings/capturesite${capturesiteCounter}.txt | head -n 1 | cut -f 1)
 
-    cd ${oligoFolderRelativePath}        
+    cd ${capturesiteFolderRelativePath}        
     pwd
     echo
 
@@ -148,7 +148,7 @@ printNewChapterToLogFile
       {
         runOK=0    
 
-        printThis="Oligo-wise CC analysis failed on line ${oligoCounter} of C_analyseOligoBunches/runlist.txt ! "
+        printThis="Capturesite-wise CC analysis failed on line ${capturesiteCounter} of C_analyseCapturesiteBunches/runlist.txt ! "
         printToLogFile
         
       }
@@ -156,7 +156,7 @@ printNewChapterToLogFile
     
     printThis="runOK ${runOK}"
     printToLogFile
-    echo "runOK ${runOK}" > oligoRoundSuccess.log
+    echo "runOK ${runOK}" > capturesiteRoundSuccess.log
     
 # ----------------------------------------
 # All done !

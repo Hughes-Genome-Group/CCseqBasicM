@@ -24,27 +24,27 @@
 . ${CapturePipePath}/runtoolsAfterBowtieFilters.sh
 
 ################################################################
-# Running oligo list overlap to allowed digest sites dpnII generation
+# Running capture-site (REfragment) list overlap to allowed digest sites dpnII generation
 
-generateOligoWhitelist(){
+generateCapturesiteWhitelist(){
     
-printThis="Preparing oligo list overlap to allowed digest sites file for ${REenzyme} cut genome and oligo file ${OligoFile} .."
+printThis="Preparing capture-site (REfragment) list overlap to allowed digest sites file for ${REenzyme} cut genome and capture-site (REfragment) file ${CapturesiteFile} .."
 printToLogFile
 
-rmCommand='rm -f genome_${REenzyme}_oligo_overlap.bed'
-rmThis="genome_${REenzyme}_oligo_overlap.bed"
+rmCommand='rm -f genome_${REenzyme}_capturesite_overlap.bed'
+rmThis="genome_${REenzyme}_capturesite_overlap.bed"
 checkRemoveSafety
-rm -f genome_${REenzyme}_oligo_overlap.bed
+rm -f genome_${REenzyme}_capturesite_overlap.bed
 
-# Oligo file in bed format ..
+# Capturesite file in bed format ..
 
-cat ${OligoFile} | cut -f 1-4 | awk '{print $2"\t"$3"\t"$4"\t"$1}'| sed 's/^/chr/' > oligos.bed
+cat ${CapturesiteFile} | cut -f 1-4 | awk '{print $2"\t"$3"\t"$4"\t"$1}'| sed 's/^/chr/' > capturesites.bed
 
-testedFile="oligos.bed"
+testedFile="capturesites.bed"
 doTempFileTesting
 
-# List of chromosomes which have this oligo ..
-cut -f 1 oligos.bed | uniq | sort | uniq > genome_${REenzyme}_oligo_chromosomes.txt
+# List of chromosomes which have this capturesite ..
+cut -f 1 capturesites.bed | uniq | sort | uniq > genome_${REenzyme}_capturesite_chromosomes.txt
 
 # Plus/minus 300 bases to both directions are fine, rest is not. Using blacklist in subtracting ..
 
@@ -59,14 +59,14 @@ cut -f 1 oligos.bed | uniq | sort | uniq > genome_${REenzyme}_oligo_chromosomes.
 # chr1    19      20      kissa
 
 setStringentFailForTheFollowing
-bedtools subtract -a oligos.bed -b ${fullPathDpnBlacklist} > genome_${REenzyme}_oligo_overlap.bed
+bedtools subtract -a capturesites.bed -b ${fullPathDpnBlacklist} > genome_${REenzyme}_capturesite_overlap.bed
 stopStringentFailAfterTheAbove
 
-testedFile="genome_${REenzyme}_oligo_overlap.bed"
+testedFile="genome_${REenzyme}_capturesite_overlap.bed"
 doTempFileTesting
 
-fullPathOligoWhitelist=$(pwd)"/genome_${REenzyme}_oligo_overlap.bed"
-fullPathOligoWhitelistChromosomes=$(pwd)"/genome_${REenzyme}_oligo_chromosomes.txt"
+fullPathCapturesiteWhitelist=$(pwd)"/genome_${REenzyme}_capturesite_overlap.bed"
+fullPathCapturesiteWhitelistChromosomes=$(pwd)"/genome_${REenzyme}_capturesite_chromosomes.txt"
 
 ls -lht
 
@@ -211,17 +211,17 @@ fi
 
 generateParamsForFiltering(){
 
-testedFile="${OligoFile}"
+testedFile="${CapturesiteFile}"
 doTempFileTesting
 
-printThis="perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion ${CCversion} -o ${OligoFile} --genome ${GENOME} --ucscsizes ${ucscBuild} ${otherParameters}"
+printThis="perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion ${CCversion} -o ${CapturesiteFile} --genome ${GENOME} --ucscsizes ${ucscBuild} ${otherParameters}"
 printToLogFile
 
 # remove parameter file from possible earlier run..
 rm -f parameters_for_filtering.log
 
 setStringentFailForTheFollowing
-perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion "${CCversion}" -o "${OligoFile}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" ${otherParameters}
+perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion "${CCversion}" -o "${CapturesiteFile}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" ${otherParameters}
 stopStringentFailAfterTheAbove
 
 if [ "$?" -ne 0 ];then
@@ -251,19 +251,19 @@ runCCanalyser(){
 printThis="Running CAPTURE-C analyser for the aligned file.."
 printToLogFile
 
-testedFile="${OligoFile}"
+testedFile="${CapturesiteFile}"
 doTempFileTesting
 
 if [ "${PARALLEL}" -ne 1 ]; then
 mkdir -p "${publicPathForCCanalyser}"
 fi
 
-printThis="perl ${RunScriptsPath}/${CCscriptname} --CCversion ${CCversion} -f ${samDirForCCanalyser}/${samForCCanalyser} -o ${OligoFile} -r ${fullPathDpnGenome} --pf ${publicPathForCCanalyser} --pu ${JamesUrlForCCanalyser} -s ${sampleForCCanalyser} --genome ${GENOME} --ucscsizes ${ucscBuild} -w ${WINDOW} -i ${INCREMENT} --flashed ${FLASHED} --duplfilter ${DUPLFILTER} ${otherParameters}"
+printThis="perl ${RunScriptsPath}/${CCscriptname} --CCversion ${CCversion} -f ${samDirForCCanalyser}/${samForCCanalyser} -o ${CapturesiteFile} -r ${fullPathDpnGenome} --pf ${publicPathForCCanalyser} --pu ${JamesUrlForCCanalyser} -s ${sampleForCCanalyser} --genome ${GENOME} --ucscsizes ${ucscBuild} -w ${WINDOW} -i ${INCREMENT} --flashed ${FLASHED} --duplfilter ${DUPLFILTER} ${otherParameters}"
 printToLogFile
 
 echo "-f Input filename "
 echo "-r Restriction coordinates filename "
-echo "-o Oligonucleotide position filename "
+echo "-o Capturesitenucleotide position filename "
 echo "-s Sample name (and the name of the folder it goes into)"
 if [ "${PARALLEL}" -ne 1 ]; then
 echo "--CCversion Cb3 or Cb4 or Cb5 (which version of the duplicate filtering we will perform)"
@@ -288,8 +288,8 @@ fi
 
 runDir=$( pwd )
 
-# Copy used oligo file for archiving purposes..
-cp ${OligoFile} usedOligoFile.txt
+# Copy used capture-site (REfragment) file for archiving purposes..
+cp ${CapturesiteFile} usedCapturesiteFile.txt
 
 # remove parameter file from possible earlier run..
 rm -f parameters_for_filtering.log
@@ -299,7 +299,7 @@ rm -f parameters_for_filtering.log
 # echo perl ${RunScriptsPath}/bamDivideMappedReads.pl --CCversion "${CCversion}" -f "${samDirForCCanalyser}/${samForCCanalyser}" -s "${sampleForCCanalyser}"    
 # perl ${RunScriptsPath}/bamDivideMappedReads.pl --CCversion "${CCversion}" -f "${samDirForCCanalyser}/${samForCCanalyser}" -s "${sampleForCCanalyser}"    
 # else
-perl ${RunScriptsPath}/${CCscriptname} --CCversion "${CCversion}" -f "${samDirForCCanalyser}/${samForCCanalyser}" -o "${OligoFile}" -r "${fullPathDpnGenome}" --pf "${publicPathForCCanalyser}" --pu "${JamesUrlForCCanalyser}" -s "${sampleForCCanalyser}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" -w "${WINDOW}" -i "${INCREMENT}" --flashed "${FLASHED}" --duplfilter "${DUPLFILTER}" ${otherParameters}
+perl ${RunScriptsPath}/${CCscriptname} --CCversion "${CCversion}" -f "${samDirForCCanalyser}/${samForCCanalyser}" -o "${CapturesiteFile}" -r "${fullPathDpnGenome}" --pf "${publicPathForCCanalyser}" --pu "${JamesUrlForCCanalyser}" -s "${sampleForCCanalyser}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" -w "${WINDOW}" -i "${INCREMENT}" --flashed "${FLASHED}" --duplfilter "${DUPLFILTER}" ${otherParameters}
 # fi
 
 echo "Contents of run folder :"
@@ -316,15 +316,15 @@ echo "Counts of output files - by file type :"
 
 count=$( ls -1 ${publicPathForCCanalyser} | grep -c '\.bw$' )
 echo
-echo "${count} bigwig files (should be x2 the amount of oligos, if all had captures)"
+echo "${count} bigwig files (should be x2 the amount of capture-site (REfragment)s, if all had captures)"
 
 count=$( ls -1 ${sampleForCCanalyser}_${CCversion} | grep -c '\.wig$' )
 echo
-echo "${count} wig files (should be x2 the amount of oligos, if all had captures)"
+echo "${count} wig files (should be x2 the amount of capture-site (REfragment)s, if all had captures)"
 
 count=$( ls -1 ${sampleForCCanalyser}_${CCversion} | grep -c '\.gff$')
 echo
-echo "${count} gff files (should be x1 the amount of oligos, if all had captures)"
+echo "${count} gff files (should be x1 the amount of capture-site (REfragment)s, if all had captures)"
 
 fi
 
@@ -347,22 +347,22 @@ runCCanalyserOnlyBlat(){
 printThis="Running onlyBlat CAPTURE-C analyser .."
 printToLogFile
 
-testedFile="${OligoFile}"
+testedFile="${CapturesiteFile}"
 doTempFileTesting
 
-printThis="perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion ${CCversion} -o ${OligoFile} --genome ${GENOME} --ucscsizes ${ucscBuild} ${otherParameters}"
+printThis="perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion ${CCversion} -o ${CapturesiteFile} --genome ${GENOME} --ucscsizes ${ucscBuild} ${otherParameters}"
 printToLogFile
 
 runDir=$( pwd )
 
-# Copy used oligo file for archiving purposes..
-cp ${OligoFile} usedOligoFile.txt
+# Copy used capture-site (REfragment) file for archiving purposes..
+cp ${CapturesiteFile} usedCapturesiteFile.txt
 
 # remove parameter file from possible earlier run..
 rm -f parameters_for_filtering.log
 
 setStringentFailForTheFollowing
-perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion "${CCversion}" -o "${OligoFile}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" ${otherParameters}
+perl ${RunScriptsPath}/${CCscriptname} --onlyparamsforfiltering --CCversion "${CCversion}" -o "${CapturesiteFile}" --genome "${GENOME}" --ucscsizes "${ucscBuild}" ${otherParameters}
 stopStringentFailAfterTheAbove
 
 if [ "$?" -ne 0 ];then
@@ -382,31 +382,31 @@ cat parameters_for_filtering.log
    
 }
 
-runCCanalyserOnlyOligos(){
+runCCanalyserOnlyCapturesites(){
     
 ################################################################
 # Running CAPTURE-C analyser for the aligned file..
 
-printThis="Running onlyOligos CAPTURE-C analyser .."
+printThis="Running onlyCapturesites CAPTURE-C analyser .."
 printToLogFile
 
-testedFile="${OligoFile}"
+testedFile="${CapturesiteFile}"
 doTempFileTesting
 
-printThis="perl ${RunScriptsPath}/${CCscriptname} -o ${OligoFile} -s ${Sample} --onlyoligofile ${otherParameters}"
+printThis="perl ${RunScriptsPath}/${CCscriptname} -o ${CapturesiteFile} -s ${Sample} --onlycapturesitefile ${otherParameters}"
 printToLogFile
 
-echo "-o Oligonucleotide position filename "
+echo "-o Capturesitenucleotide position filename "
 
 runDir=$( pwd )
 
 setStringentFailForTheFollowing
-perl ${RunScriptsPath}/${CCscriptname} -o "${OligoFile}"  -s "${Sample}" --onlyoligofile ${otherParameters}
+perl ${RunScriptsPath}/${CCscriptname} -o "${CapturesiteFile}"  -s "${Sample}" --onlycapturesitefile ${otherParameters}
 stopStringentFailAfterTheAbove
 if [ "$?" -ne 0 ];then
-    printThis="Oligo file bunching run reported error !"
+    printThis="Capturesite file bunching run reported error !"
     printNewChapterToLogFile
-    oligoRunIsFine=0
+    capturesiteRunIsFine=0
 fi
 
 

@@ -63,31 +63,31 @@ else
   echo -n '(skipping parent track), '  
 fi
 
-color=(); oligolist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
+color=(); capturesitelist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
 
-oligoListSetter
-echo -n "${#oligolist[@]} oligos found, "
+capturesiteListSetter
+echo -n "${#capturesitelist[@]} capturesites found, "
 setRainbowColors
 echo -n "using ${#color[@]} colors "
 
 counter=1
 # track_symlinks/${chr}/${folder}/${subfolder}_REdig_CM5_*.bw
-for (( i=0; i<${#oligolist[@]}; i++ ))
+for (( i=0; i<${#capturesitelist[@]}; i++ ))
 do
 
 # to get error if no file found :
-# ls ${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}.bw >> "/dev/null"
+# ls ${folder}/${subfolder}/${bwprefix}_CM5_${capturesitelist[i]}.bw >> "/dev/null"
 
-# echo track_symlinks/chr${folder}/${folder}/${subfolder}_CM5_${oligolist[i]}_1.bw
-if [ -s "${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}${bwsuffix}.bw" ]; then
+# echo track_symlinks/chr${folder}/${folder}/${subfolder}_CM5_${capturesitelist[i]}_1.bw
+if [ -s "${folder}/${subfolder}/${bwprefix}_CM5_${capturesitelist[i]}${bwsuffix}.bw" ]; then
   doOneChild
 else
-  echo -n "( skipping ${oligolist[i]} ) "
-  echo -n "( skipping ${oligolist[i]} ) " >> "/dev/null"
+  echo -n "( skipping ${capturesitelist[i]} ) "
+  echo -n "( skipping ${capturesitelist[i]} ) " >> "/dev/null"
   
   # For testing purposes ..
    echo
-   echo ${folder}/${subfolder}/${bwprefix}_CM5_${oligolist[i]}${bwsuffix}.bw
+   echo ${folder}/${subfolder}/${bwprefix}_CM5_${capturesitelist[i]}${bwsuffix}.bw
   
 fi
 

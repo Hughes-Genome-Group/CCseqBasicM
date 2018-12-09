@@ -64,8 +64,8 @@ fi
 
 # This is the first blat-filter automaton - test code built 11/Sep/2015 by Jelena
 
-#for oligoName in oligoFile
-#this will be some kind of awk thing - commands generated via reading in the oligo file..
+#for capturesiteName in capturesiteFile
+#this will be some kind of awk thing - commands generated via reading in the capture-site (REfragment) file..
 
 # CapturePipePath="/home/molhaem2/telenius/CC2/norm/VS101"
 
@@ -73,7 +73,7 @@ PathForReuseBlatResults="."
 
 CaptureFilterPath="UNDEFINED"
 
-oligofile="UNDEFINED"
+capturesitefile="UNDEFINED"
 genomefasta="UNDEFINED"
 recoordinatefile="UNDEFINED"
 ucscBuild="UNDEFINED"
@@ -83,7 +83,7 @@ onlyCis=0
 # full path to parameter file
 blatparams="UNDEFINED"
 
-OPTS=`getopt -o o:,f:,r:,p:,u:,e: --long genomefasta:,oligofile:,refile:,pipepath:,ucscbuild:,extend:,blatparams:,reusefile:,onlyCis: -- "$@"`
+OPTS=`getopt -o o:,f:,r:,p:,u:,e: --long genomefasta:,capturesitefile:,refile:,pipepath:,ucscbuild:,extend:,blatparams:,reusefile:,onlyCis: -- "$@"`
 if [ $? != 0 ]
 then
     exit 1
@@ -93,13 +93,13 @@ eval set -- "$OPTS"
 
 while true ; do
     case "$1" in
-        -o) oligofile=$2 ; shift 2;;
+        -o) capturesitefile=$2 ; shift 2;;
         -f) genomefasta=$2 ; shift 2;;
         -r) recoordinatefile=$2 ; shift 2;;
         -p) CaptureFilterPath=$2 ; shift 2;;
         -u) ucscBuild=$2 ; shift 2;;
         -e) extend=$2 ; shift 2;;        
-        --oligofile) oligofile=$2 ; shift 2;;
+        --capturesitefile) capturesitefile=$2 ; shift 2;;
         --genomefasta) genomefasta=$2 ; shift 2;;
         --refile) recoordinatefile=$2 ; shift 2;;
         --pipepath) CaptureFilterPath=$2 ; shift 2;;
@@ -154,7 +154,7 @@ rm -f testers_and_loggers_test.out testers_and_loggers_test.err
 
 #------------------------------------------
 
-echo "oligofile ${oligofile}"
+echo "capturesitefile ${capturesitefile}"
 echo "genomefasta ${genomefasta}"
 echo "recoordinatefile ${recoordinatefile}"
 echo "CapturePipePath ${CapturePipePath}"
@@ -169,18 +169,18 @@ echo
 module list 2>&1
 
 echo
-echo "Dividing the oligo file to one-liners.."
-echo "Dividing the oligo file to one-liners.."  >> "/dev/stderr"
-# Dividing the oligo file to one-liners like :
-# chr     str     stp (for the exclusion fragments in the oligo coordinate file)
+echo "Dividing the capture-site (REfragment) file to one-liners.."
+echo "Dividing the capture-site (REfragment) file to one-liners.."  >> "/dev/stderr"
+# Dividing the capture-site (REfragment) file to one-liners like :
+# chr     str     stp (for the exclusion fragments in the capture-site (REfragment) coordinate file)
 
 echo '#!/bin/bash ' > TEMP_commands.sh
-echo "oligofile=${oligofile}"  >> TEMP_commands.sh
-cat ${oligofile} | awk '{print "cat ${oligofile} | grep \"^"$1"\\s\" | awk * > TEMP_"$1"_coordinate.bed"}' | sed 's/*/*\{print \"chr\"$5\"\\t\"$6\"\\t\"$7\}*/' | tr "*" "'" >> TEMP_commands.sh
+echo "capturesitefile=${capturesitefile}"  >> TEMP_commands.sh
+cat ${capturesitefile} | awk '{print "cat ${capturesitefile} | grep \"^"$1"\\s\" | awk * > TEMP_"$1"_coordinate.bed"}' | sed 's/*/*\{print \"chr\"$5\"\\t\"$6\"\\t\"$7\}*/' | tr "*" "'" >> TEMP_commands.sh
 echo "" >> TEMP_commands.sh
 
 # above results in lines like :
-# cat ${oligofile} | grep Hba-1 | awk '{print "chr"$5"\t"$6"\t"$7}' > TEMP_Hba-1_coordinate.bed
+# cat ${capturesitefile} | grep Hba-1 | awk '{print "chr"$5"\t"$6"\t"$7}' > TEMP_Hba-1_coordinate.bed
 
 runTempCommands
 
@@ -230,9 +230,9 @@ basename=$( echo $file | sed 's/_coordinate.bed.fa//' )
 
 
 
-# If cannot find the file - i.e. if this is the first run for these oligos,
+# If cannot find the file - i.e. if this is the first run for these capture-site (REfragment)s,
 #   or if the earlier run didn't find any blat hits (this is unintended consequence of the safety feature :
-#   - we don't want to SKIP blat filter for all oligos BECAUSE OF FILE ADDRESS TYPO here.. )
+#   - we don't want to SKIP blat filter for all capture-site (REfragment)s BECAUSE OF FILE ADDRESS TYPO here.. )
 
 weRunBLAT=1
 if [ -e ${PathForReuseBlatResults}/${basename}_blat.psl ]
@@ -267,7 +267,7 @@ then
         blat ${blatParams} TEMP.fa ${file} ${basename}_blat.psl
         stopStringentFailAfterTheAbove
         if [ "$?" -ne 0 ]; then
-        printThis="CIS blat failed for oligo ${basename} ! \n EXITING !! "
+        printThis="CIS blat failed for capture-site (REfragment) ${basename} ! \n EXITING !! "
         printToLogFile
         exit 1
         fi
@@ -280,7 +280,7 @@ then
     blat ${blatParams} ${genomefasta} ${file} ${basename}_blat.psl
     stopStringentFailAfterTheAbove
     if [ "$?" -ne 0 ]; then
-    printThis="Blat failed for oligo ${basename} ! \n EXITING !! "
+    printThis="Blat failed for capture-site (REfragment) ${basename} ! \n EXITING !! "
     printToLogFile
     exit 1
     fi
@@ -289,8 +289,8 @@ then
 
 else
 
-echo "Found file ${PathForReuseBlatResults}/${basename}_blat.psl - skipping blat for that oligo, using the found file instead !"
-echo "Found file ${PathForReuseBlatResults}/${basename}_blat.psl - skipping blat and that oligo, using the found file instead !" >> "/dev/stderr"
+echo "Found file ${PathForReuseBlatResults}/${basename}_blat.psl - skipping blat for that capture-site (REfragment), using the found file instead !"
+echo "Found file ${PathForReuseBlatResults}/${basename}_blat.psl - skipping blat and that capture-site (REfragment), using the found file instead !" >> "/dev/stderr"
 
 cp ${PathForReuseBlatResults}/${basename}_blat.psl .
 if [ "$?" -ne 0 ]; then
@@ -338,8 +338,8 @@ echo "Preparing the input files for the RE-fragment generation perl script.."  >
 
 
 echo '#!/bin/bash ' > TEMP_commands.sh
-echo "oligofile=${oligofile}"  >> TEMP_commands.sh
-cat ${oligofile} | awk '{print "cat ${oligofile} | grep \"^"$1"\\s\" > TEMP_"$1"_oligocoordinate.txt"}' >> TEMP_commands.sh
+echo "capturesitefile=${capturesitefile}"  >> TEMP_commands.sh
+cat ${capturesitefile} | awk '{print "cat ${capturesitefile} | grep \"^"$1"\\s\" > TEMP_"$1"_capturesitecoordinate.txt"}' >> TEMP_commands.sh
 echo "" >> TEMP_commands.sh
 
 runTempCommands
@@ -369,11 +369,11 @@ do
 basename=$( echo $file | sed 's/_blat.psl//' )
 echo
 echo "-----------------------"
-echo "perl ${CaptureFilterPath}/2_psl_parser.pl -f ${file} -o ${basename}_oligocoordinate.txt -a ${oligofile} -r ${recoordinatefile}"
-echo "perl ${CaptureFilterPath}/2_psl_parser.pl -f ${file} -o ${basename}_oligocoordinate.txt -a ${oligofile} -r ${recoordinatefile}" >> "/dev/stderr"
+echo "perl ${CaptureFilterPath}/2_psl_parser.pl -f ${file} -o ${basename}_capturesitecoordinate.txt -a ${capturesitefile} -r ${recoordinatefile}"
+echo "perl ${CaptureFilterPath}/2_psl_parser.pl -f ${file} -o ${basename}_capturesitecoordinate.txt -a ${capturesitefile} -r ${recoordinatefile}" >> "/dev/stderr"
 echo
 setStringentFailForTheFollowing
-perl ${CaptureFilterPath}/2_psl_parser.pl -f ${file} -o ${basename}_oligocoordinate.txt -a ${oligofile} -r ${recoordinatefile}
+perl ${CaptureFilterPath}/2_psl_parser.pl -f ${file} -o ${basename}_capturesitecoordinate.txt -a ${capturesitefile} -r ${recoordinatefile}
 stopStringentFailAfterTheAbove
 if [ "$?" -ne 0 ]; then
 printThis="Run filtering script (2_psl_parser.pl) for ${basename} crashed ! \n EXITING !! "
@@ -383,7 +383,7 @@ fi
 
 done
 
-rm -f TEMP*_oligocoordinate.txt
+rm -f TEMP*_capturesitecoordinate.txt
 
 # To reuse the blat coordinates..
 rm -rf REUSE_blat

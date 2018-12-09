@@ -32,12 +32,12 @@
 # The serial execution order is :
 
 # 1) check forbidden flags (not allowing sub-level flags --onlyREdigest, --parallel 1 --parallel 2 --R1 --R2 --outfile --errfile)
-# 2) sort oligo file, check fastq integrity
+# 2) sort capture-site (REfragment) file, check fastq integrity
 # 3) mainRunner.sh --onlyREdigest
 # 4) for each fastq in the list : mainRunner.sh --parallel 1
 # 5) combine results
 # 6) mainRunner.sh --onlyBlat
-# 7) for each oligo bunch in the list : mainRunner.sh --parallel 2
+# 7) for each capture-site (REfragment) bunch in the list : mainRunner.sh --parallel 2
 # 8) visualise
 
 # For eachof these 8 steps the main script needs to be an EXCECUTABLE SCRIPT (so that the logic is exactly parallel to that what will be in the parallel nextFlow run )
@@ -385,26 +385,26 @@ oneMedianRound(){
 
 echo "oneMedianRound for ${quanType}"
 
-oligoCountHalf=$(($(($(cat TMP${quanType}.txt | grep -c "")))/2))
-cat TMP${quanType}.txt | head -n ${oligoCountHalf} > TMP${quanType}_lower.txt
-cat TMP${quanType}.txt | tail -n ${oligoCountHalf} > TMP${quanType}_upper.txt
+capturesiteCountHalf=$(($(($(cat TMP${quanType}.txt | grep -c "")))/2))
+cat TMP${quanType}.txt | head -n ${capturesiteCountHalf} > TMP${quanType}_lower.txt
+cat TMP${quanType}.txt | tail -n ${capturesiteCountHalf} > TMP${quanType}_upper.txt
 
 oddOrEven=$(($(($(cat TMP${quanType}.txt | grep -c "")))%2))
 
-echo "oligoCountHalf ${oligoCountHalf} ; oddOrEven ${oddOrEven} "
+echo "capturesiteCountHalf ${capturesiteCountHalf} ; oddOrEven ${oddOrEven} "
 
 if [ "${oddOrEven}" -eq 1 ]; then
-    cat TMP${quanType}.txt | head -n $((${oligoCountHalf}+1)) > TMP${quanType}_lower.txt
-    cat TMP${quanType}.txt | tail -n $((${oligoCountHalf}+1)) > TMP${quanType}_upper.txt
+    cat TMP${quanType}.txt | head -n $((${capturesiteCountHalf}+1)) > TMP${quanType}_lower.txt
+    cat TMP${quanType}.txt | tail -n $((${capturesiteCountHalf}+1)) > TMP${quanType}_upper.txt
 
-    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 1 | tr '\t' '\n' > TEMP_${quanType}.txt
+    head -n $((${capturesiteCountHalf}+1)) TMP${quanType}.txt | tail -n 1 | tr '\t' '\n' > TEMP_${quanType}.txt
 else
     
-    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 1 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol2
-    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 2 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol3
-    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 3 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol4
+    head -n $((${capturesiteCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 1 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol2
+    head -n $((${capturesiteCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 2 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol3
+    head -n $((${capturesiteCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 3 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol4
     if [ "${tiled}" -eq 0 ];then
-    head -n $((${oligoCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 4 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol5
+    head -n $((${capturesiteCountHalf}+1)) TMP${quanType}.txt | tail -n 2 | cut -f 4 | awk '{a[NR]=$1}END{print (a[1]+a[2])/2}' > TMPcol5
     fi
     if [ "${tiled}" -eq 0 ];then
     cat TMPcol2 TMPcol3 TMPcol4 TMPcol5  > TEMP_${quanType}.txt
@@ -425,14 +425,14 @@ fi
 
 # ------------------------------------------
 
-makeCombinedOligorunSummaries(){
+makeCombinedCapturesiterunSummaries(){
 # ------------------------------------------
 
 weWereHereDir=$(pwd)
-cd D_analyseOligoWise
+cd D_analyseCapturesiteWise
 
 # ###############################
-# Oligo final counts master table
+# Capture-site (REfragment) final counts master table
 # ###############################
 
 # All counts - just a list, not in table format
@@ -445,18 +445,18 @@ cat chr*/*/F6_greenGraphs_combined_${samplename}_${CCversion}/COMBINED_report_${
 
 if [ "${tiled}" -eq 0 ];then
 
-echo -e "oligo\tCaptureFrags\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
+echo -e "capturesite\tCaptureFrags\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
 cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
 
 else
     
-echo -e "oligo\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
+echo -e "capturesite\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
 cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
 
 fi
 
 # Mean and std
-# This makes sense only if we have at least 2 oligos.
+# This makes sense only if we have at least 2 capture-site (REfragment)s.
 
 if [ $(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 2 ]; then
 {
@@ -518,11 +518,11 @@ fi
 }
 fi
 
-# Median and quartiles - this is exact, as now supporting also small amount of oligos.
-# This makes sense only if we have at least 4 oligos.
+# Median and quartiles - this is exact, as now supporting also small amount of capture-site (REfragment)s.
+# This makes sense only if we have at least 4 capture-site (REfragment)s.
 
 if [ $(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 4 ]; then
-    cat TEMP_meansAndStds.txt | sed 's/\sand min\/lowerQuart\/median\/upperQuart\/max of://' > COMBINED_meanStdMedian_overOligos.txt
+    cat TEMP_meansAndStds.txt | sed 's/\sand min\/lowerQuart\/median\/upperQuart\/max of://' > COMBINED_meanStdMedian_overCapturesites.txt
     rm -f TEMP_meansAndStds.txt 
 else
 {
@@ -573,7 +573,7 @@ rm -f TMP${quanType}_lower.txt TMP${quanType}_upper.txt
 # echo
 # head TEMP_m*
 
-paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_medians_lower.txt TEMP_medians.txt TEMP_medians_upper.txt TEMP_max.txt > COMBINED_meanStdMedianQuantiles_overOligos.txt
+paste TEMP_meansAndStds.txt TEMP_min.txt TEMP_medians_lower.txt TEMP_medians.txt TEMP_medians_upper.txt TEMP_max.txt > COMBINED_meanStdMedianQuantiles_overCapturesites.txt
 rm -f TEMP_meansAndStds.txt TEMP_min.txt TEMP_medians_lower.txt TEMP_medians.txt TEMP_medians_upper.txt TEMP_max.txt
 }
 fi
@@ -613,11 +613,11 @@ cd ${weWereHereDir}
 
 # ------------------------------------------
 
-makeOligorunSummaries(){
+makeCapturesiterunSummaries(){
 # ------------------------------------------
 
 weWereHereDir=$(pwd)
-cd D_analyseOligoWise
+cd D_analyseCapturesiteWise
 
 # ###############################
 # Duplicate filtering oneliners
@@ -698,7 +698,7 @@ fi
 # ###############################
 
 TEMPfirstfile=$( ls -1 chr*/*/parameters_capc.log | head -n 1 )
-cat ${TEMPfirstfile} | sed 's/\/bunchWise.*//' | grep -v '^Read' | sed 's/^OligoFile\s.*/OligoFile '$(fp ../A_prepareForRun/OLIGOFILE/oligofile_sorted.txt | sed 's/\//\\\//g')'/' \
+cat ${TEMPfirstfile} | sed 's/\/bunchWise.*//' | grep -v '^Read' | sed 's/^CapturesiteFile\s.*/CapturesiteFile '$(fp ../A_prepareForRun/CAPTURESITEFILE/capturesitefile_sorted.txt | sed 's/\//\\\//g')'/' \
 > parameters_capc.log
  
 cdCommand='cd ${weWereHereDir}'
@@ -727,10 +727,10 @@ if [ "${howManyCrashes}" -ne 0 ]; then
   printThis="Some runs crashed UNCONTROLLABLY during the analysis \n ( this is most probably a bug - save your crashed output files and report to Jelena )."
   printNewChapterToLogFile
   
-  printThis="In total ${howManyCrashes} of your ${fastqOrOligo} runs crashed."
+  printThis="In total ${howManyCrashes} of your ${fastqOrCapturesite} runs crashed."
   printToLogFile
   
-  printThis="These ${fastqOrOligo}s crashed :"
+  printThis="These ${fastqOrCapturesite}s crashed :"
   printToLogFile
 
   printThis=$( ls -1 runJustNow_*.log | sed 's/runJustNow_//' | sed 's/.log//' | tr '\n' ' ') 
@@ -909,7 +909,7 @@ do {
     echo ${CaptureParallelPath}/prepareSampleForCCanalyser.sh ${downloadLogBasename} ${JustNowFile}_${fastqCounter}.log > prepareFastqs.sh
     chmod u+x prepareFastqs.sh
     
-    echo ${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${oligofile} --R1 READ1.fastq --R2 READ2.fastq --parallel 1 --parallelSubsample fastq_${fastqCounter} --${REenzymeShort} --pf ${publicfolder} --monitorRunLogFile ${JustNowFile}_${fastqCounter}.log ${parameterList}  > runFastqs.sh
+    echo ${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${capturesitefile} --R1 READ1.fastq --R2 READ2.fastq --parallel 1 --parallelSubsample fastq_${fastqCounter} --${REenzymeShort} --pf ${publicfolder} --monitorRunLogFile ${JustNowFile}_${fastqCounter}.log ${parameterList}  > runFastqs.sh
     chmod u+x runFastqs.sh 
     
     echo 
@@ -1012,7 +1012,7 @@ cd ${checkBamsOfThisDir}
 
 # Double check that no crashes ..
 
-TEMPoriginalCount=$(($( ls -1 ../A_prepareForRun/OLIGOSindividualFiles/*/* | grep -c oligoFileOneliner.txt )))
+TEMPoriginalCount=$(($( ls -1 ../A_prepareForRun/CAPTURESITESindividualFiles/*/* | grep -c capturesiteFileOneliner.txt )))
 TEMPfinishedFineCount=$(($( cat bamcombineprepSuccess.log | grep -v '^#' | cut -f 2 | grep -c '^1$' )))
 folderCountOK=1
 
@@ -1020,10 +1020,10 @@ if [ "${TEMPoriginalCount}" -ne "${TEMPfinishedFineCount}" ]; then
    
   folderCountOK=0 
 
-  printThis="Some oligos crashed when preparing the BAM file combining. (details below)"
+  printThis="Some capture-site (REfragment)s crashed when preparing the BAM file combining. (details below)"
   printNewChapterToLogFile
   
-  printThis="We had ${TEMPoriginalCount} oligos starting the combine preparation.\nBut only ${TEMPfinishedFineCount} of them report finishing fine :"
+  printThis="We had ${TEMPoriginalCount} capture-site (REfragment)s starting the combine preparation.\nBut only ${TEMPfinishedFineCount} of them report finishing fine :"
   printToLogFile
   
   cat bamcombineprepSuccess.log | grep -v '^#' | sort | uniq -c 
@@ -1043,19 +1043,19 @@ checkParse
 
 if [ "${howManyErrors}" -ne 0 ] || [ "${folderCountOK}" -eq 0 ]; then
   
-  printThis="Couldn't prepare some oligos in ${checkBamsOfThisDir} for the bam combining."
+  printThis="Couldn't prepare some capture-site (REfragment)s in ${checkBamsOfThisDir} for the bam combining."
   printNewChapterToLogFile
   
-  echo "These oligos had errors :"
+  echo "These capture-site (REfragment)s had errors :"
   echo
   cat bamcombineprepSuccess.log | grep -v '^#' | grep -v '\s1\s'
   echo
 
   cat bamcombineprepSuccess.log | grep -v '^#' | grep -v '\s1\s' >> failedBamcombineprepList.log
   
-  printThis="Check which oligos failed, and why : $(pwd)/failedBamcombineprepList.log ! "
+  printThis="Check which capture-site (REfragment)s failed, and why : $(pwd)/failedBamcombineprepList.log ! "
   printToLogFile
-  printThis="Detailed rerun instructions (to rescue failed oligos and restart the run) : $(pwd)/rerunInstructions.txt "
+  printThis="Detailed rerun instructions (to rescue failed capture-site (REfragment)s and restart the run) : $(pwd)/rerunInstructions.txt "
   printToLogFile
   
   writeRerunInstructionsFile
@@ -1090,12 +1090,12 @@ bamCombinePrepareRun(){
 # ------------------------------------------
 
 weWereHereDir=$(pwd)
-cd C_combineOligoWise
+cd C_combineCapturesiteWise
 
 echo "# Bam combine - preparing for run - 1 (prepare finished without errors) , 0 (prepare finished with errors)" > bamcombineprepSuccess.log
 
-# We are supposed to have oneliner oligo files of structure :
-# C_combineOligoWise/chr1/Hba-1/oligoFileOneliner.txt
+# We are supposed to have oneliner capture-site (REfragment) files of structure :
+# C_combineCapturesiteWise/chr1/Hba-1/capturesiteFileOneliner.txt
 
 # Copy over the folder structure - for the log files
 mkdir bamlistings
@@ -1111,38 +1111,38 @@ B_subfolderWhereBamsAre="${F1foldername}/LOOP5_filteredSams"
 printThis="B_FOLDER_PATH ${B_FOLDER_PATH}\nB_subfolderWhereBamsAre ${B_subfolderWhereBamsAre}\nF1foldername ${F1foldername}"
 printToLogFile
 
-oligofileCount=1
-for oligoFolder in chr*/*
+capturesitefileCount=1
+for capturesiteFolder in chr*/*
 do
 {
-    printThis="${oligoFolder}"
+    printThis="${capturesiteFolder}"
     printToLogFile
-    thisOligoName=$( basename ${oligoFolder} )
-    checkThis="${thisOligoName}"
-    checkedName='${thisOligoName}'
+    thisCapturesiteName=$( basename ${capturesiteFolder} )
+    checkThis="${thisCapturesiteName}"
+    checkedName='${thisCapturesiteName}'
     checkParse
-    thisChr=$( dirname ${oligoFolder} )
+    thisChr=$( dirname ${capturesiteFolder} )
     checkThis="${thisChr}"
     checkedName='${thisChr}'
     checkParse
-    echo -n "${thisChr}_${thisOligoName}" >> bamcombineprepSuccess.log
+    echo -n "${thisChr}_${thisCapturesiteName}" >> bamcombineprepSuccess.log
     thisBunchIsFine=1
     thisBunchAlreadyReportedFailure=0
     
-    inputbamstringFlashed="${B_FOLDER_PATH}/fastq_*/${B_subfolderWhereBamsAre}/${thisChr}/FLASHED_${thisOligoName}_possibleCaptures.bam"
-    inputbamstringNonflashed="${B_FOLDER_PATH}/fastq_*/${B_subfolderWhereBamsAre}/${thisChr}/NONFLASHED_${thisOligoName}_possibleCaptures.bam"
+    inputbamstringFlashed="${B_FOLDER_PATH}/fastq_*/${B_subfolderWhereBamsAre}/${thisChr}/FLASHED_${thisCapturesiteName}_possibleCaptures.bam"
+    inputbamstringNonflashed="${B_FOLDER_PATH}/fastq_*/${B_subfolderWhereBamsAre}/${thisChr}/NONFLASHED_${thisCapturesiteName}_possibleCaptures.bam"
     firstflashedfile=$( ls -1 ${inputbamstringFlashed} | head -n 1 )
     firstnonflashedfile=$( ls -1 ${inputbamstringNonflashed} | head -n 1 )
-    outputbamsfolder="${thisChr}/${thisOligoName}"
+    outputbamsfolder="${thisChr}/${thisCapturesiteName}"
     outputlogsfolder="."
     
     bamCombineInnerSub
     
     # Run list update
-    echo "${thisChr}/${thisOligoName}" >> runlist.txt
-    echo "${thisChr}/${thisOligoName}" > runlistings/oligo${oligofileCount}.txt
+    echo "${thisChr}/${thisCapturesiteName}" >> runlist.txt
+    echo "${thisChr}/${thisCapturesiteName}" > runlistings/capturesite${capturesitefileCount}.txt
     
-    oligofileCount=$((${oligofileCount}+1))
+    capturesitefileCount=$((${capturesitefileCount}+1))
 
 }
 done
@@ -1172,7 +1172,7 @@ checkRunCrashes
 
 # Double check that no crashes ..
 
-TEMPoriginalCount=$(($( ls -1 ../A_prepareForRun/OLIGOSindividualFiles/*/* | grep -c oligoFileOneliner.txt )))
+TEMPoriginalCount=$(($( ls -1 ../A_prepareForRun/CAPTURESITESindividualFiles/*/* | grep -c capturesiteFileOneliner.txt )))
 TEMPfinishedFineCount=$(($( cat chr*/*/bamcombineSuccess.log | grep -c '\s1$' )))
 folderCountOK=1
 
@@ -1180,10 +1180,10 @@ if [ "${TEMPoriginalCount}" -ne "${TEMPfinishedFineCount}" ]; then
    
   folderCountOK=0 
 
-  printThis="Some oligos crashed during the BAM file combining. (details below)"
+  printThis="Some capture-site (REfragment)s crashed during the BAM file combining. (details below)"
   printNewChapterToLogFile
   
-  printThis="We had ${TEMPoriginalCount} oligos starting the combine.\nBut only ${TEMPfinishedFineCount} of them report finishing fine :"
+  printThis="We had ${TEMPoriginalCount} capture-site (REfragment)s starting the combine.\nBut only ${TEMPfinishedFineCount} of them report finishing fine :"
   printToLogFile
   
   cat chr*/*/bamcombineSuccess.log | sed 's/.* runOK/runOK/' | sort | uniq -c  
@@ -1200,15 +1200,15 @@ rm -f bamcombineSuccess.log
 for file in chr*/*/bamcombineSuccess.log
 do
     
-    thisOligoName=$( basename $( dirname ${file} ))
-    checkThis="${thisOligoName}"
-    checkedName='${thisOligoName}'
+    thisCapturesiteName=$( basename $( dirname ${file} ))
+    checkThis="${thisCapturesiteName}"
+    checkedName='${thisCapturesiteName}'
     checkParse
     thisChr=$( basename  $( dirname $( dirname ${file} )))
     checkThis="${thisChr}"
     checkedName='${thisChr}'
     checkParse
-    echo -en "${thisChr}_${thisOligoName}\t" >> bamcombineSuccess.log    
+    echo -en "${thisChr}_${thisCapturesiteName}\t" >> bamcombineSuccess.log    
     cat $file >> bamcombineSuccess.log
 
 done
@@ -1220,10 +1220,10 @@ checkParse
 
 if [ "${howManyErrors}" -ne 0 ]; then
   
-  printThis="Some oligo bunches in ${checkBamsOfThisDir} crashed during the combining process ( possibly quota issues ? )."
+  printThis="Some capture-site (REfragment) bunches in ${checkBamsOfThisDir} crashed during the combining process ( possibly quota issues ? )."
   printNewChapterToLogFile
   
-  echo "These oligo bunches had errors :"
+  echo "These capture-site (REfragment) bunches had errors :"
   echo
   cat bamcombineSuccess.log | grep -v '^#' | grep -v '\s1$'
   echo
@@ -1305,8 +1305,8 @@ bamCombineChecksSaveThisForFuturePurposes(){
      
      # Globin combining doesn't get the very detailed counters - so asking if detailed counters folder exists ..
      if [ -d  bamlistings ];then
-     echo -e "Combined count :\t${TEMPflashedCount}" >> bamlistings/bamlisting_FLASHED_chr${thisOligoName}.txt
-     echo -e "Combined count :\t${TEMPnonflashedCount}" >> bamlistings/bamlisting_NONFLASHED_chr${thisOligoName}.txt
+     echo -e "Combined count :\t${TEMPflashedCount}" >> bamlistings/bamlisting_FLASHED_chr${thisCapturesiteName}.txt
+     echo -e "Combined count :\t${TEMPnonflashedCount}" >> bamlistings/bamlisting_NONFLASHED_chr${thisCapturesiteName}.txt
      fi 
      
     }
@@ -1318,7 +1318,7 @@ bamCombineChecksSaveThisForFuturePurposes(){
 
 bamCombineInnerSub(){
 
-    echo "thisChr/thisOligoName ${thisChr}/${thisOligoName}"
+    echo "thisChr/thisCapturesiteName ${thisChr}/${thisCapturesiteName}"
     echo "firstflashedfile ${firstflashedfile}"
     echo "firstnonflashedfile ${firstnonflashedfile}"
     echo "inputbamstringFlashed ${inputbamstringFlashed}"
@@ -1326,11 +1326,11 @@ bamCombineInnerSub(){
     echo "outputbamsfolder ${outputbamsfolder}"
     echo "outputlogsfolder ${outputlogsfolder}"
     
-    echo "ls -lht ${inputbamstringFlashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt"
-    ls -lht ${inputbamstringFlashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt
+    echo "ls -lht ${inputbamstringFlashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisCapturesiteName}/bamlisting_FLASHED.txt"
+    ls -lht ${inputbamstringFlashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisCapturesiteName}/bamlisting_FLASHED.txt
     TEMPfine=$?
-    echo "ls -lht ${inputbamstringNonflashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt"
-    ls -lht ${inputbamstringNonflashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt
+    echo "ls -lht ${inputbamstringNonflashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisCapturesiteName}/bamlisting_NONFLASHED.txt"
+    ls -lht ${inputbamstringNonflashed} > ${outputlogsfolder}/bamlistings/${thisChr}/${thisCapturesiteName}/bamlisting_NONFLASHED.txt
     TEMPfine2=$?
     if [ "${TEMPfine}" -ne 0 ] && [ "${TEMPfine2}" -ne 0 ];then thisBunchIsFine=0;fi
 
@@ -1378,7 +1378,7 @@ bamCombineInnerSub(){
     echo 'if [ -s "${tempfile}" ]; then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcountF=$( samtools view -c ${tempfile} )' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcountFtotal=$((${TEMPcountFtotal}+${TEMPcountF}))' >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo -e "${TEMPcountF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'echo -e "${TEMPcountF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisCapturesiteName}/bamlisting_FLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh    
     echo 'echo ${TEMPcountF} >> FLASHEDbamINcounts.txt' >> ${outputbamsfolder}/bamCombineRun.sh
     echo "done" >> ${outputbamsfolder}/bamCombineRun.sh
@@ -1392,7 +1392,7 @@ bamCombineInnerSub(){
     echo 'if [ -s "${tempfile}" ]; then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcountNF=$( samtools view -c ${tempfile} )' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcountNFtotal=$((${TEMPcountNFtotal}+${TEMPcountNF}))' >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo -e "${TEMPcountNF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'echo -e "${TEMPcountNF}\t${tempfile}" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisCapturesiteName}/bamlisting_NONFLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'echo ${TEMPcountNF} >> NONFLASHEDbamINcounts.txt' >> ${outputbamsfolder}/bamCombineRun.sh
     echo "done" >> ${outputbamsfolder}/bamCombineRun.sh
@@ -1420,13 +1420,13 @@ bamCombineInnerSub(){
     echo 'TEMPcount=0' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'if [ "${TEMPcountFtotal}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcount=$( samtools view -c FLASHED_REdig.bam )' >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo -e "${TEMPcount}\t"$(pwd)"/FLASHED_REdig.bam" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisOligoName}/bamlisting_FLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'echo -e "${TEMPcount}\t"$(pwd)"/FLASHED_REdig.bam" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisCapturesiteName}/bamlisting_FLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh   
     echo 'echo ${TEMPcount} >> FLASHEDbamOUTcount.txt' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcount=0' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'if [ "${TEMPcountNFtotal}" -ne 0 ];then' >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'TEMPcount=$( samtools view -c NONFLASHED_REdig.bam )' >> ${outputbamsfolder}/bamCombineRun.sh
-    echo 'echo -e "${TEMPcount}\t"$(pwd)"/NONFLASHED_REdig.bam" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisOligoName}/bamlisting_NONFLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
+    echo 'echo -e "${TEMPcount}\t"$(pwd)"/NONFLASHED_REdig.bam" >> '$(cd ${outputlogsfolder};pwd)"/bamlistings/${thisChr}/${thisCapturesiteName}/bamlisting_NONFLASHED.txt" >> ${outputbamsfolder}/bamCombineRun.sh
     echo 'fi' >> ${outputbamsfolder}/bamCombineRun.sh   
     echo 'echo ${TEMPcount} >> NONFLASHEDbamOUTcount.txt' >> ${outputbamsfolder}/bamCombineRun.sh
 
@@ -1469,7 +1469,7 @@ checkParallelCCanalyserErrors(){
 # ------------------------------------------
 
 weWereHereDir=$(pwd)
-cd D_analyseOligoWise
+cd D_analyseCapturesiteWise
 
 # Check that no run crashes.
 
@@ -1479,24 +1479,24 @@ checkRunCrashes
 
 # Check that no errors.
 
-rm -f oligoRoundSuccess.log
-for file in */*/oligoRoundSuccess.log
+rm -f capturesiteRoundSuccess.log
+for file in */*/capturesiteRoundSuccess.log
 do
     
-    thisOligoName=$( basename $( dirname ${file} ))
-    checkThis="${thisOligoName}"
-    checkedName='${thisOligoName}'
+    thisCapturesiteName=$( basename $( dirname ${file} ))
+    checkThis="${thisCapturesiteName}"
+    checkedName='${thisCapturesiteName}'
     checkParse
     thisChr=$( basename  $( dirname $( dirname ${file} )))
     checkThis="${thisChr}"
     checkedName='${thisChr}'
     checkParse
-    echo -en "${thisChr}_${thisOligoName}\t" >> oligoRoundSuccess.log 
-    cat $file >> oligoRoundSuccess.log
+    echo -en "${thisChr}_${thisCapturesiteName}\t" >> capturesiteRoundSuccess.log 
+    cat $file >> capturesiteRoundSuccess.log
 
 done
 
-howManyErrors=$(($( cat oligoRoundSuccess.log | grep -v '^#' | grep -cv '\s1$' )))
+howManyErrors=$(($( cat capturesiteRoundSuccess.log | grep -v '^#' | grep -cv '\s1$' )))
 checkThis="${howManyErrors}"
 checkedName='${howManyErrors}'
 checkParse
@@ -1506,14 +1506,14 @@ if [ "${howManyErrors}" -ne 0 ]; then
   printThis="Some CC runs crashed ."
   printNewChapterToLogFile
   
-  echo "These oligo bunches had problems in blat :"
+  echo "These capture-site (REfragment) bunches had problems in blat :"
   echo
-  cat oligoRoundSuccess.log | grep -v '^#' | grep -v '\s1$'
+  cat capturesiteRoundSuccess.log | grep -v '^#' | grep -v '\s1$'
   echo
   
-  cat oligoRoundSuccess.log | grep -v '^#' | grep -v '\s1$' > failedOligorunsList.log
+  cat capturesiteRoundSuccess.log | grep -v '^#' | grep -v '\s1$' > failedCapturesiterunsList.log
   
-  printThis="Check which oligo bunches failed, and why : $(pwd)/failedOligorunsList.log ! "
+  printThis="Check which capture-site (REfragment) bunches failed, and why : $(pwd)/failedCapturesiterunsList.log ! "
   printToLogFile
   printThis="Detailed rerun instructions : $(pwd)/rerunInstructions.txt "
   printToLogFile
@@ -1531,7 +1531,7 @@ if [ "${howManyErrors}" -ne 0 ]; then
   weWillExitAfterThis=1
     
 else
-  printThis="All oligo-bunch-wise runs finished - moving on .."
+  printThis="All capture-site (REfragment)-bunch-wise runs finished - moving on .."
   printNewChapterToLogFile   
 fi
 
@@ -1558,26 +1558,26 @@ F1foldername="F1_beforeCCanalyser_${samplename}_${CCversion}"
 
 # Copying the existing structure ..
 
-rm -rf D_analyseOligoWise
-mkdir D_analyseOligoWise
-mkdir D_analyseOligoWise/runlistings
+rm -rf D_analyseCapturesiteWise
+mkdir D_analyseCapturesiteWise
+mkdir D_analyseCapturesiteWise/runlistings
 
-oligofileCount=1
+capturesitefileCount=1
 weSawGlobins=0
-for file in $(pwd)/C_combineOligoWise/*/*/oligoFileOneliner.txt 
+for file in $(pwd)/C_combineCapturesiteWise/*/*/capturesiteFileOneliner.txt 
 do
-    printThis="Oligono ${oligofileCount} --------------------- "
+    printThis="Capture-site (REfragment)no ${capturesitefileCount} --------------------- "
     printToLogFile
-    thisOligoName=$( basename $( dirname $file ))
-    thisOligoChr=$( basename $( dirname $( dirname $file ))) 
+    thisCapturesiteName=$( basename $( dirname $file ))
+    thisCapturesiteChr=$( basename $( dirname $( dirname $file ))) 
     thisChrFolder=$( dirname $( dirname $file ))
     
-    checkThis="${thisOligoName}"
-    checkedName='${thisOligoName}'
+    checkThis="${thisCapturesiteName}"
+    checkedName='${thisCapturesiteName}'
     checkParse
     
-    checkThis="${thisOligoChr}"
-    checkedName='${thisOligoChr}'
+    checkThis="${thisCapturesiteChr}"
+    checkedName='${thisCapturesiteChr}'
     checkParse
     
     checkThis="${thisChrFolder}"
@@ -1585,18 +1585,18 @@ do
     checkParse
     
     # For testing purposes
-    echo "${thisOligoName} with oligo file ${file}"
+    echo "${thisCapturesiteName} with capture-site (REfragment) file ${file}"
 
-    if [ ! -d D_analyseOligoWise/${thisOligoChr} ]; then
-        mkdir D_analyseOligoWise/${thisOligoChr}
+    if [ ! -d D_analyseCapturesiteWise/${thisCapturesiteChr} ]; then
+        mkdir D_analyseCapturesiteWise/${thisCapturesiteChr}
     fi
     
     # Copy over the folder structure - for the log files
-    mkdir -p D_analyseOligoWise/bamlistings/${thisOligoChr}/${thisOligoName}
+    mkdir -p D_analyseCapturesiteWise/bamlistings/${thisCapturesiteChr}/${thisCapturesiteName}
     
-    # If we enter the printing loops for this oligo - by default we do, if we already did that globin, we don't.
-    wePrepareThisOligo=1
-    # If this oligo is globin oligo - by default no.
+    # If we enter the printing loops for this capture-site (REfragment) - by default we do, if we already did that globin, we don't.
+    wePrepareThisCapturesite=1
+    # If this capture-site (REfragment) is globin capture-site (REfragment) - by default no.
     thisIsGlobinRound=0
   
     # ######################################################################    
@@ -1605,23 +1605,23 @@ do
     
 #    # TO BE ADDED : we need to know if we have --globin set so we don't do this so that we duplicate the tracks.
 #
-#    # Hard coding the globin oligos ..    
-#    if [ "${thisOligoName}" == "Hba-1" ] || [ "${thisOligoName}" == "Hba-2" ]; then
-#        thisOligoName="HbaCombined"
-#    elif [ "${thisOligoName}" == "Hbb-b1" ] || [ "${thisOligoName}" == "Hbb-b2" ]; then
-#        thisOligoName="HbbCombined"
+#    # Hard coding the globin capture-site (REfragment)s ..    
+#    if [ "${thisCapturesiteName}" == "Hba-1" ] || [ "${thisCapturesiteName}" == "Hba-2" ]; then
+#        thisCapturesiteName="HbaCombined"
+#    elif [ "${thisCapturesiteName}" == "Hbb-b1" ] || [ "${thisCapturesiteName}" == "Hbb-b2" ]; then
+#        thisCapturesiteName="HbbCombined"
 #    fi
 #
-#    rm -f D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/run.sh
+#    rm -f D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/run.sh
 #    
 #    # Hard coding the globin captures here ..
-#    if [ "${thisOligoName}" == "HbaCombined" ] || [ "${thisOligoName}" == "HbbCombined" ]; then
+#    if [ "${thisCapturesiteName}" == "HbaCombined" ] || [ "${thisCapturesiteName}" == "HbbCombined" ]; then
 #        weSawGlobins=1
 #        thisIsGlobinRound=1
 #        
-#        # We enter these oligos twice, naturally, so doing them only if they aren't there yet ..
-#        if [ -d D_analyseOligoWise/${thisOligoChr}/${thisOligoName} ];then
-#            wePrepareThisOligo=0
+#        # We enter these capture-site (REfragment)s twice, naturally, so doing them only if they aren't there yet ..
+#        if [ -d D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName} ];then
+#            wePrepareThisCapturesite=0
 #        fi
 #    fi
 
@@ -1630,55 +1630,55 @@ do
     
     # Doing the globin, if need be ..
     if [ "${thisIsGlobinRound}" -eq 1 ]; then
-        if [ "${wePrepareThisOligo}" -eq 1 ]; then 
+        if [ "${wePrepareThisCapturesite}" -eq 1 ]; then 
             
-            printThis="Combining globines - preparing ${thisOligoName} for Capture analysis"
+            printThis="Combining globines - preparing ${thisCapturesiteName} for Capture analysis"
             printToLogFile
             
-            echo -n "${thisChr}_${thisOligoName}" >> D_analyseOligoWise/bamcombineSuccess.log
+            echo -n "${thisChr}_${thisCapturesiteName}" >> D_analyseCapturesiteWise/bamcombineSuccess.log
             thisBunchIsFine=1
             thisBunchAlreadyReportedFailure=0
             
-            mkdir D_analyseOligoWise/${thisOligoChr}/${thisOligoName}
-            mkdir D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/${F1foldername}        
+            mkdir D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}
+            mkdir D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/${F1foldername}        
             
             globin1="UNDEF"
             globin2="UNDEF"
             
-            if [ "${thisOligoName}" == "HbaCombined" ]; then
+            if [ "${thisCapturesiteName}" == "HbaCombined" ]; then
                 globin1="Hba-1"
                 globin2="Hba-2"                    
             fi    
-            if [ "${thisOligoName}" == "HbbCombined" ]; then
+            if [ "${thisCapturesiteName}" == "HbbCombined" ]; then
                 globin1="Hbb-b1"
                 globin2="Hbb-b2"                    
             fi                
             
-            # Oligo list - hard coding the globin captures here  ..
-            cat ${thisChrFolder}/${globin1}/oligoFileOneliner.txt ${thisChrFolder}/${globin2}/oligoFileOneliner.txt > D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/oligoFileOneliner.txt
+            # Capture-site (REfragment) list - hard coding the globin captures here  ..
+            cat ${thisChrFolder}/${globin1}/capturesiteFileOneliner.txt ${thisChrFolder}/${globin2}/capturesiteFileOneliner.txt > D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/capturesiteFileOneliner.txt
             # Exclusion list - hard coding the globin captures here  ..
-            cat  A_prepareForRun/OLIGOFILE/oligofile_sorted.txt | grep -v '^'${globin1}'\s' | grep -v '^'${globin2}'\s' > D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/exclusions.txt
+            cat  A_prepareForRun/CAPTURESITEFILE/capturesitefile_sorted.txt | grep -v '^'${globin1}'\s' | grep -v '^'${globin2}'\s' > D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/exclusions.txt
             
             # Catenating the globins to single file ..
             
-            if [ ! -d  D_analyseOligoWise/runlistings ]; then mkdir D_analyseOligoWise/runlistings; fi
+            if [ ! -d  D_analyseCapturesiteWise/runlistings ]; then mkdir D_analyseCapturesiteWise/runlistings; fi
             
             firstflashedfile="${thisChrFolder}/${globin1}/FLASHED_REdig.bam"
             firstnonflashedfile="${thisChrFolder}/${globin1}/NONFLASHED_REdig.bam"
             inputbamstringFlashed="${thisChrFolder}/${globin1}/FLASHED_REdig.bam ${thisChrFolder}/${globin2}/FLASHED_REdig.bam"
             inputbamstringNonflashed="${thisChrFolder}/${globin1}/NONFLASHED_REdig.bam ${thisChrFolder}/${globin2}/NONFLASHED_REdig.bam"
-            outputbamsfolder="D_analyseOligoWise/${thisOligoChr}/${thisOligoName}"
-            outputlogsfolder="D_analyseOligoWise"
+            outputbamsfolder="D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}"
+            outputlogsfolder="D_analyseCapturesiteWise"
             
             bamCombineInnerSub
             
             # Run list update (in here this is for log purposes only - not used in the run below)
-            echo "${thisOligoChr}/${thisOligoName}" >> D_analyseOligoWise/runlist.txt
+            echo "${thisCapturesiteChr}/${thisCapturesiteName}" >> D_analyseCapturesiteWise/runlist.txt
             
             tempGlobinUpperDir=$(pwd)
-            cd D_analyseOligoWise/${thisOligoChr}/${thisOligoName}
+            cd D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}
             
-            printThis="Combining globin BAMS ${globin1} and ${globin2} too become ${thisOligoName}"
+            printThis="Combining globin BAMS ${globin1} and ${globin2} too become ${thisCapturesiteName}"
             printToLogFile 
             
             # The below are copied from oneBamcombineWholenodeWorkdir.sh
@@ -1730,45 +1730,45 @@ do
         
     else
         # Normal captures (no globins)
-        mkdir D_analyseOligoWise/${thisOligoChr}/${thisOligoName}
-        mkdir D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/${F1foldername} 
-        # Oligo itself ..
-        cp $file D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/.
-        # Exclusion list - all but the actual oligo itself ..
-        cat  A_prepareForRun/OLIGOFILE/oligofile_sorted.txt | grep -v '^'${thisOligoName}'\s' > D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/exclusions.txt
+        mkdir D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}
+        mkdir D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/${F1foldername} 
+        # Capturesite itself ..
+        cp $file D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/.
+        # Exclusion list - all but the actual capture-site (REfragment) itself ..
+        cat  A_prepareForRun/CAPTURESITEFILE/capturesitefile_sorted.txt | grep -v '^'${thisCapturesiteName}'\s' > D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/exclusions.txt
         
         # Not using symlinks - as the mainrunner.sh code will meddle with these files - and thus making restarts potentially quite hard to troubleshoot
-        # ln -s ../../../../C_combineOligoWise/${thisOligoChr}/${thisOligoName}/${F1foldername} D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/.
+        # ln -s ../../../../C_combineCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/${F1foldername} D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/.
         
         # True copy of the bams is made only run-time (to avoid messing up symlinked bams if something goes wrong, and avoid memory peaks before they are needed
         # - this results in saving the bams essentially twice, once in C folder, once in D folder - but for the time being keeping it like it is as assuming a lot of restart needs )
-        echo "cp -r $(pwd)/C_combineOligoWise/${thisOligoChr}/${thisOligoName}/*.bam ${F1foldername}/." > D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/run.sh
+        echo "cp -r $(pwd)/C_combineCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/*.bam ${F1foldername}/." > D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/run.sh
         
     fi
     
     # All runs (globins or not)
     
-    if [ "${wePrepareThisOligo}" -eq 1 ]; then
+    if [ "${wePrepareThisCapturesite}" -eq 1 ]; then
     
     # lister ..
-    cp ${CaptureParallelPath}/echoer_for_SunGridEngine_environment.sh D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/.
-    chmod u+x D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/echoer_for_SunGridEngine_environment.sh
+    cp ${CaptureParallelPath}/echoer_for_SunGridEngine_environment.sh D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/.
+    chmod u+x D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/echoer_for_SunGridEngine_environment.sh
     
     # RE fragments ..
-    ln -s ${reGenomeFilePath} D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/.        
+    ln -s ${reGenomeFilePath} D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/.        
     
-    # All runs (globins or not) - get the same run.sh - except normal oligos get the copy of the F1 folder, but globins already have true copy so don't need this.
-    JustNowFile=$(pwd)/D_analyseOligoWise/runJustNow
+    # All runs (globins or not) - get the same run.sh - except normal capture-site (REfragment)s get the copy of the F1 folder, but globins already have true copy so don't need this.
+    JustNowFile=$(pwd)/D_analyseCapturesiteWise/runJustNow
     
-    # echo "${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${file} --${REenzymeShort} --parallel 2 --BLATforREUSEfolderPath ${BLAT_FOLDER_PREFIX} --pf ${publicfolder}/bunchWise/bunch_${thisOligoName} --monitorRunLogFile ${JustNowFile}_${oligofileCount}.log ${parameterList} "
-    echo "${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${file} --${REenzymeShort} --parallel 2 --BLATforREUSEfolderPath ${BLAT_FOLDER_PREFIX} --pf ${publicfolder}/bunchWise/bunch_${thisOligoName} --monitorRunLogFile ${JustNowFile}_${oligofileCount}.log ${parameterList}" >> D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/run.sh
+    # echo "${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${file} --${REenzymeShort} --parallel 2 --BLATforREUSEfolderPath ${BLAT_FOLDER_PREFIX} --pf ${publicfolder}/bunchWise/bunch_${thisCapturesiteName} --monitorRunLogFile ${JustNowFile}_${capturesitefileCount}.log ${parameterList} "
+    echo "${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${file} --${REenzymeShort} --parallel 2 --BLATforREUSEfolderPath ${BLAT_FOLDER_PREFIX} --pf ${publicfolder}/bunchWise/bunch_${thisCapturesiteName} --monitorRunLogFile ${JustNowFile}_${capturesitefileCount}.log ${parameterList}" >> D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/run.sh
     
-    chmod u+x D_analyseOligoWise/${thisOligoChr}/${thisOligoName}/run.sh
+    chmod u+x D_analyseCapturesiteWise/${thisCapturesiteChr}/${thisCapturesiteName}/run.sh
 
     # Run list update
-    echo "${thisOligoChr}/${thisOligoName}" >> D_analyseOligoWise/runlist.txt
-    echo "${thisOligoChr}/${thisOligoName}" >> D_analyseOligoWise/runlistings/oligo${oligofileCount}.txt
-    oligofileCount=$((${oligofileCount}+1))
+    echo "${thisCapturesiteChr}/${thisCapturesiteName}" >> D_analyseCapturesiteWise/runlist.txt
+    echo "${thisCapturesiteChr}/${thisCapturesiteName}" >> D_analyseCapturesiteWise/runlistings/capturesite${capturesitefileCount}.txt
+    capturesitefileCount=$((${capturesitefileCount}+1))
     
     # If we go thread-wise in TMPDIR, we need to monitor the memory inside there ..
     if [ "${useWholenodeQueue}" -eq 0 ] &&[ "${useTMPDIRforThis}" -eq 1 ];then
@@ -1790,7 +1790,7 @@ done
 
 if [ "${weSawGlobins}" -eq 1 ]; then
 
-checkBamsOfThisDir="D_analyseOligoWise"
+checkBamsOfThisDir="D_analyseCapturesiteWise"
 checkBamcombineErrors
 
 fi
@@ -1862,42 +1862,42 @@ fi
 if [ "${isReuseBlatPathGiven}" -eq 1 ] && [ "${onlyblat}" -eq 0 ]; then
 
 blatwarningsCount=0
-blatwarningOligoList=""
-for file in A_prepareForRun/OLIGOSindividualFiles/*/*/oligoFileOneliner.txt 
+blatwarningCapturesiteList=""
+for file in A_prepareForRun/CAPTURESITESindividualFiles/*/*/capturesiteFileOneliner.txt 
 do
 
-    thisOligoName=$( basename $( dirname $file ))
-    thisOligoChr=$( basename $( dirname $( dirname $file ))) 
+    thisCapturesiteName=$( basename $( dirname $file ))
+    thisCapturesiteChr=$( basename $( dirname $( dirname $file ))) 
 
-    checkThis="${thisOligoName}"
-    checkedName='${thisOligoName}'
+    checkThis="${thisCapturesiteName}"
+    checkedName='${thisCapturesiteName}'
     checkParse
 
-    checkThis="${thisOligoChr}"
-    checkedName='${thisOligoChr}'
+    checkThis="${thisCapturesiteChr}"
+    checkedName='${thisCapturesiteChr}'
     checkParse
     
-    ls BLAT/reuseblatFolder | grep TEMP_${thisOligoName}_blat.psl >> "/dev/null"
+    ls BLAT/reuseblatFolder | grep TEMP_${thisCapturesiteName}_blat.psl >> "/dev/null"
     if [ $? -ne 0 ];then
         blatwarningsCount=$((${blatwarningsCount}+1))
-        blatwarningOligoList="${blatwarningOligoList} ${thisOligoChr}/${thisOligoName}"
+        blatwarningCapturesiteList="${blatwarningCapturesiteList} ${thisCapturesiteChr}/${thisCapturesiteName}"
     fi
     
 done
 
 if [ "${blatwarningsCount}" -eq "${pslFilesFound}" ];then
-    printThis="None of the ${pslFilesFound} oligos had .psl files in the BLAT results folder --BLATforREUSEfolderPath ${reuseblatpath} . Maybe you are using wrong REUSE_blat folder ? "
+    printThis="None of the ${pslFilesFound} capture-site (REfragment)s had .psl files in the BLAT results folder --BLATforREUSEfolderPath ${reuseblatpath} . Maybe you are using wrong REUSE_blat folder ? "
     printToLogFile
     printThis="EXITING "
     printToLogFile
     exit 1
 fi
 if [ "${blatwarningsCount}" -ne 0 ];then
-    printThis="EXITING : ${blatwarningsCount} of the oligos didn't have BLAT results .psl file in folder --BLATforREUSEfolderPath ${reuseblatpath} . \t(Even no-homology-regions generates heading lines into the .psl file - assuming failed or missing BLAT run). "
+    printThis="EXITING : ${blatwarningsCount} of the capture-site (REfragment)s didn't have BLAT results .psl file in folder --BLATforREUSEfolderPath ${reuseblatpath} . \t(Even no-homology-regions generates heading lines into the .psl file - assuming failed or missing BLAT run). "
     printToLogFile
-    printThis="The psl files in the folder need to be named like this : TEMP_{thisOligoName}_blat.psl \nwhere {thisOligoName} is the oligo name from the oligo file"
+    printThis="The psl files in the folder need to be named like this : TEMP_{thisCapturesiteName}_blat.psl \nwhere {thisCapturesiteName} is the capture-site (REfragment) name from the capture-site (REfragment) file"
     printToLogFile
-    printThis="List of the missing oligos below : \n ${blatwarningOligoList}"
+    printThis="List of the missing capture-site (REfragment)s below : \n ${blatwarningCapturesiteList}"
     printToLogFile
     printThis="EXITING "
     printToLogFile
@@ -1926,7 +1926,7 @@ if [ "${howManyErrors}" -ne 0 ]; then
   printThis="Some blat runs crashed ."
   printNewChapterToLogFile
   
-  echo "These oligos had problems in blat :"
+  echo "These capture-site (REfragment)s had problems in blat :"
   echo
   cat blatSuccess.log | grep -v '^#' | grep -v '\s1\s'
   echo
@@ -1934,7 +1934,7 @@ if [ "${howManyErrors}" -ne 0 ]; then
   head -n 1 failedBlatsList.log > failedBlatsList.log
   cat failedBlatsList.log | grep -v '^#' | grep -v '\s1$' >> failedBlatsList.log
   
-  printThis="Check which oligos failed, and why : $(pwd)/failedBlatsList.log ! "
+  printThis="Check which capture-site (REfragment)s failed, and why : $(pwd)/failedBlatsList.log ! "
   printToLogFile
   printThis="To rerun only BLAT runs use --onlyBlat"
   printToLogFile
@@ -1986,30 +1986,30 @@ step6middir=$(pwd)
 
 echo "# Blat round run statuses - 1 (finished without errors) , 0 (finished with errors)" > blatSuccess.log
 
-for file in ${oligoBunchesFolder}/* 
+for file in ${capturesiteBunchesFolder}/* 
 do   
-    printThis="Blat for oligo bunch file $file"
+    printThis="Blat for capture-site (REfragment) bunch file $file"
     printToLogFile
-    thisOligoName=$( basename $file | sed 's/^oligofile_sorted_chr//' | sed 's/\.txt$//' )
-    checkThis="${thisOligoName}"
-    checkedName='${thisOligoName}'
+    thisCapturesiteName=$( basename $file | sed 's/^capturesitefile_sorted_chr//' | sed 's/\.txt$//' )
+    checkThis="${thisCapturesiteName}"
+    checkedName='${thisCapturesiteName}'
     checkParse
     
-    echo -n "chr${thisOligoName}" >> blatSuccess.log
+    echo -n "chr${thisCapturesiteName}" >> blatSuccess.log
     thisBunchIsFine=1
     thisBunchAlreadyReportedFailure=0
     
     
-    rmCommand='rm -rf oligoBunch_${thisOligoName}'
-    rmThis="oligoBunch_${thisOligoName}"
+    rmCommand='rm -rf capturesiteBunch_${thisCapturesiteName}'
+    rmThis="capturesiteBunch_${thisCapturesiteName}"
     checkRemoveSafety
-    rm -rf oligoBunch_${thisOligoName}
-    mkdir oligoBunch_${thisOligoName}
+    rm -rf capturesiteBunch_${thisCapturesiteName}
+    mkdir capturesiteBunch_${thisCapturesiteName}
     
-    cdCommand='cd oligoBunch_${thisOligoName}'
-    cdToThis="oligoBunch_${thisOligoName}"
+    cdCommand='cd capturesiteBunch_${thisCapturesiteName}'
+    cdToThis="capturesiteBunch_${thisCapturesiteName}"
     checkCdSafety
-    cd oligoBunch_${thisOligoName}
+    cd capturesiteBunch_${thisCapturesiteName}
     
     ln -s ${reGenomeFilePath} .
     if [ $? != 0 ]; then thisBunchIsFine=0;fi
@@ -2023,7 +2023,7 @@ do
     
     printThis="${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${file} --${REenzymeShort} --onlyBlat --BLATforREUSEfolderPath ${reuseblatpath} --pf ${publicfolder}/bunchWise ${parameterList} --outfile runBLAT.out --errfile runBLAT.err"
     printToLogFile
-    printThis="You can follow the run progress from error and out files :\nBLAT/oligoBunch_${thisOligoName}/runBLAT.out\nBLAT/oligoBunch_${thisOligoName}/runBLAT.err"
+    printThis="You can follow the run progress from error and out files :\nBLAT/capturesiteBunch_${thisCapturesiteName}/runBLAT.out\nBLAT/capturesiteBunch_${thisCapturesiteName}/runBLAT.err"
     printToLogFile
     ${CaptureSerialPath}/mainRunner.sh --CCversion ${CCversion} --genome ${inputgenomename} -s ${samplename} -o ${file} --${REenzymeShort} --onlyBlat --BLATforREUSEfolderPath ${reuseblatpath} --pf ${publicfolder}/bunchWise ${parameterList} --outfile runBLAT.out --errfile runBLAT.err 1> runBLAT.out 2> runBLAT.err
     if [ $? != 0 ]; then thisBunchIsFine=0;fi
@@ -2051,7 +2051,7 @@ do
     fi
     
     if [ "${thisBunchIsFine}" -eq 0 ]; then
-      printThis="Blat filter generation failed for oligo bunch ${thisOligoName} ! "
+      printThis="Blat filter generation failed for capture-site (REfragment) bunch ${thisCapturesiteName} ! "
       printToLogFile
         
       # Print some mainrunner error messages here ..
@@ -2378,15 +2378,15 @@ echo '<hr />' >> index.html
 echo '<h3>CCanalyser runs (duplicate filtering, cis/trans reporters) :</h3>' >> index.html
 
 echo '<pre>' >> index.html
-head -n 20 ${rainbowRunTOPDIR}/D_analyseOligoWise/*FLASHED_percentagesAndFinalCounts.txt | sed 's/\/.*\///' >> index.html
+head -n 20 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/*FLASHED_percentagesAndFinalCounts.txt | sed 's/\/.*\///' >> index.html
 echo '</pre>' >> index.html
 
 if [ "${tiled}" -eq 1 ]; then
     echo '( tiled reporters = all fragments - except exclusion zone fragments - within reads where at least one frag within the tile )' >> index.html
 fi
 
-  fcountOUT=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/FLASHED_percentagesAndFinalCounts.txt    | tail -n 1)
- nfcountOUT=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/NONFLASHED_percentagesAndFinalCounts.txt | tail -n 1)
+  fcountOUT=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/FLASHED_percentagesAndFinalCounts.txt    | tail -n 1)
+ nfcountOUT=$(head -n 2 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/NONFLASHED_percentagesAndFinalCounts.txt | tail -n 1)
  fcountIN=$(echo ${fcountOUT}  | awk '{print 100.0-$1}')
 nfcountIN=$(echo ${nfcountOUT} | awk '{print 100.0-$1}')
 
@@ -2407,8 +2407,8 @@ echo 'ORANGE reads continue, light-orange reads are duplicates (filtered at this
 
 # if [ "${tiled}" -ne 0 ]; then
 
-  fcountIN=$(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/FLASHED_percentagesAndFinalCounts.txt    | grep -v '^\s*$' | tail -n 1 | cut -f 4,5 | sed 's/\t/,/')
- nfcountIN=$(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/NONFLASHED_percentagesAndFinalCounts.txt | grep -v '^\s*$' | tail -n 1 | cut -f 4,5 | sed 's/\t/,/')
+  fcountIN=$(cat ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/FLASHED_percentagesAndFinalCounts.txt    | grep -v '^\s*$' | tail -n 1 | cut -f 4,5 | sed 's/\t/,/')
+ nfcountIN=$(cat ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/NONFLASHED_percentagesAndFinalCounts.txt | grep -v '^\s*$' | tail -n 1 | cut -f 4,5 | sed 's/\t/,/')
 
 echo '<h4>Cis/trans reporters</h4>' >> index.html
 if [ "${tiled}" -eq 1 ]; then
@@ -2441,29 +2441,29 @@ if [ "${tiled}" -eq 1 ]; then
 fi
 
 echo '<pre>' >> index.html
-# if less than 4 oligos - file is called differently.
-if [ -s "${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt" ]; then
-cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt >> index.html
+# if less than 4 capture-site (REfragment)s - file is called differently.
+if [ -s "${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt" ]; then
+cat ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt >> index.html
 else
-cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedian_overOligos.txt >> index.html
+cat ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedian_overCapturesites.txt >> index.html
 fi
 echo '</pre>' >> index.html
 
 # ----------
-# if less than 4 oligos - box plots don't make any sense ..
-if [ -s "${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt" ]; then
+# if less than 4 capture-site (REfragment)s - box plots don't make any sense ..
+if [ -s "${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt" ]; then
 {
 
-oligoStringName="oligo"
+capturesiteStringName="capturesite"
 if [ "${tiled}" -eq 1 ]; then
-    oligoStringName="tile"
+    capturesiteStringName="tile"
 fi
 
-# for small oligo counts we print all of them :
-echo '<h4>Full reporter counts table for all '${oligoStringName}'s :</h4>' >> index.html
-if [ $(($(cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 21 ]; then
+# for small capture-site (REfragment) counts we print all of them :
+echo '<h4>Full reporter counts table for all '${capturesiteStringName}'s :</h4>' >> index.html
+if [ $(($(cat ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 21 ]; then
 echo '<pre>' >> index.html
-cat ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_allFinalCounts_table.txt >> index.html
+cat ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_allFinalCounts_table.txt >> index.html
 echo '<br>( the same as a file here : <a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a> )' >> index.html
 echo '</pre>' >> index.html
 else
@@ -2472,39 +2472,39 @@ fi
 
 # if [ "${tiled}" -ne 0 ]; then
 
-countIN=$(tail -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
-echo '<h4>Reported fragments (total), '${oligoStringName}'-wise distribution</h4>' >> index.html
+countIN=$(tail -n 3 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt | head -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
+echo '<h4>Reported fragments (total), '${capturesiteStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-tail -n 3 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+tail -n 3 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
-countIN=$(tail -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
-echo '<h4>Reported fragments ( CIS ), '${oligoStringName}'-wise distribution</h4>' >> index.html
+countIN=$(tail -n 2 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt | head -n 1 | sed 's/.*max of:\s*//' | tr '\t' ',')
+echo '<h4>Reported fragments ( CIS ), '${capturesiteStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-tail -n 2 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+tail -n 2 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt | head -n 1 | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
-countIN=$(tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
-echo '<h4>Reported fragments ( TRANS ), '${oligoStringName}'-wise distribution</h4>' >> index.html
+countIN=$(tail -n 1 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
+echo '<h4>Reported fragments ( TRANS ), '${capturesiteStringName}'-wise distribution</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
 echo '<p>' >> index.html
 echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html           
 echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-tail -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+tail -n 1 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
@@ -2512,7 +2512,7 @@ echo '' >> index.html
 
 if [ "${tiled}" -eq 0 ]; then
 
-countIN=$(head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
+countIN=$(head -n 1 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt | sed 's/.*max of:\s*//' | tr '\t' ',')
 
 echo '<h4>Capture fragments in reported reads (intra-read duplicates not filtered yet in these counts), distribution over all capture sites</h4>' >> index.html
 echo '(hover over to see the counts)' >> index.html
@@ -2521,7 +2521,7 @@ echo '<span class="boxplotprecalculated">'${countIN}'</span> ' >> index.html
 echo '<br>whiskers from MIN to MAX (i.e. not using STDs)' >> index.html
 echo '</p>' >> index.html
 echo '<pre>' >> index.html
-head -n 1 ${rainbowRunTOPDIR}/D_analyseOligoWise/COMBINED_meanStdMedianQuantiles_overOligos.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
+head -n 1 ${rainbowRunTOPDIR}/D_analyseCapturesiteWise/COMBINED_meanStdMedianQuantiles_overCapturesites.txt | sed 's/and\s/<br>/' | sed 's/max of:\s/max<br>/' >> index.html
 echo '</pre>' >> index.html
 echo '' >> index.html
 
@@ -2676,12 +2676,12 @@ echo "ucscBuild ${ucscBuild}"
 
 # --------------------------------------
 
-listOfChromosomes=$( ls A_prepareForRun/OLIGOSindividualFiles )
+listOfChromosomes=$( ls A_prepareForRun/CAPTURESITESindividualFiles )
 checkThis="${listOfChromosomes}"
 checkedName='${listOfChromosomes}'
 checkParse
 
-cd D_analyseOligoWise
+cd D_analyseCapturesiteWise
 
 rm -rf data_hubs
 mkdir data_hubs
@@ -2701,16 +2701,16 @@ echo '<hr />' >> description.html
 
 mkdir description_page_files
 
-cat ${rainbowRunTOPDIR}/A_prepareForRun/OLIGOFILE/oligofile_sorted.txt | awk '{print $1"\tchr"$2":"$3"-"$4}' > description_page_files/oligo_coordinates.txt
+cat ${rainbowRunTOPDIR}/A_prepareForRun/CAPTURESITEFILE/capturesitefile_sorted.txt | awk '{print $1"\tchr"$2":"$3"-"$4}' > description_page_files/capturesite_coordinates.txt
 
-echo 'Oligo coordinates : <br>' >> description.html
-if [ $(($(cat description_page_files/oligo_coordinates.txt | grep -c ""))) -lt 21 ]; then
+echo 'Capture-site (REfragment) coordinates : <br>' >> description.html
+if [ $(($(cat description_page_files/capturesite_coordinates.txt | grep -c ""))) -lt 21 ]; then
 echo '<pre>' >> description.html
-cat description_page_files/oligo_coordinates.txt >> description.html
-echo '<br>( the same as a file here : <a target="_blank" href="description_page_files/oligo_coordinates.txt" >oligo_coordinates.txt</a> )' >> description.html
+cat description_page_files/capturesite_coordinates.txt >> description.html
+echo '<br>( the same as a file here : <a target="_blank" href="description_page_files/capturesite_coordinates.txt" >capturesite_coordinates.txt</a> )' >> description.html
 echo '</pre>' >> description.html
 else
-echo '<a target="_blank" href="description_page_files/oligo_coordinates.txt" >oligo_coordinates.txt</a>' >> description.html
+echo '<a target="_blank" href="description_page_files/capturesite_coordinates.txt" >capturesite_coordinates.txt</a>' >> description.html
 fi
 echo '<hr />' >> description.html
 
@@ -2754,28 +2754,28 @@ ln -s ../../../B_mapAndDivideFastqs/multiqcReports description_page_files/.
 ln -s ../../parameters_capc.log description_page_files/.
 
 ln -s ../../../B_mapAndDivideFastqs/qsubLogFiles description_page_files/B_folderLogs
-ln -s ../../../C_combineOligoWise/qsubLogFiles description_page_files/C_folderLogs
+ln -s ../../../C_combineCapturesiteWise/qsubLogFiles description_page_files/C_folderLogs
 ln -s ../../qsubLogFiles description_page_files/D_folderLogs
 
 mkdir description_page_files/B_folderLogs_symlinks
 mkdir description_page_files/C_folderLogs_symlinks
 mkdir description_page_files/D_folderLogs_symlinks
 
-echo 'Oligo coordinates : <br>' >> index.html
-if [ $(($(cat description_page_files/oligo_coordinates.txt | grep -c ""))) -lt 21 ]; then
+echo 'Capture-site (REfragment) coordinates : <br>' >> index.html
+if [ $(($(cat description_page_files/capturesite_coordinates.txt | grep -c ""))) -lt 21 ]; then
 echo '<pre>' >> index.html
-cat description_page_files/oligo_coordinates.txt >> index.html
-echo '<br>( the same as a file here : <a target="_blank" href="description_page_files/oligo_coordinates.txt" >oligo_coordinates.txt</a> )' >> index.html
+cat description_page_files/capturesite_coordinates.txt >> index.html
+echo '<br>( the same as a file here : <a target="_blank" href="description_page_files/capturesite_coordinates.txt" >capturesite_coordinates.txt</a> )' >> index.html
 echo '</pre>' >> index.html
 else
-echo '<a target="_blank" href="description_page_files/oligo_coordinates.txt" >oligo_coordinates.txt</a>' >> index.html
+echo '<a target="_blank" href="description_page_files/capturesite_coordinates.txt" >capturesite_coordinates.txt</a>' >> index.html
 fi
 echo '<hr />' >> index.html
 
-echo 'Oligo-wise counts (table) : <br>' >> index.html
+echo 'Capture-site (REfragment)-wise counts (table) : <br>' >> index.html
 echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts_table.txt" >COMBINED_allFinalCounts_table.txt</a>' >> index.html
 echo '<hr />' >> index.html
-echo 'Oligo-wise counts (raw list) : <br>' >> index.html
+echo 'Capture-site (REfragment)-wise counts (raw list) : <br>' >> index.html
 echo '<a target="_blank" href="description_page_files/COMBINED_allFinalCounts.txt" >COMBINED_allFinalCounts.txt</a>' >> index.html
 echo '<hr />' >> index.html
 
@@ -2806,13 +2806,13 @@ echo '<li><a target="_blank" href="C_folderLogs_symlinks/'$(basename ${file}).tx
 done
 echo '<li><a target="_blank" href="description_page_files/folderC.html" >folderC.html</a> ( bam-combining - output logs ) </li>' >> index.html
 # --------------------------------------
-echo '<p>Folder D (oligo-wise analysis) - output logs :</p>' > description_page_files/folderD.html
+echo '<p>Folder D (capture-site (REfragment)-wise analysis) - output logs :</p>' > description_page_files/folderD.html
 for file in description_page_files/D_folderLogs/${CCversion}*
 do
 ln -s ../../${file} description_page_files/D_folderLogs_symlinks/$(basename ${file}).txt
 echo '<li><a target="_blank" href="D_folderLogs_symlinks/'$(basename ${file}).txt'" >'$(basename ${file})'</a></li>' >> description_page_files/folderD.html
 done
-echo '<li><a target="_blank" href="description_page_files/folderD.html" >folderD.html</a> ( oligo-wise analysis - output logs ) </li>' >> index.html
+echo '<li><a target="_blank" href="description_page_files/folderD.html" >folderD.html</a> ( capture-site (REfragment)-wise analysis - output logs ) </li>' >> index.html
 # --------------------------------------
 
 echo '<hr />' >> index.html
@@ -2954,32 +2954,32 @@ done
 
 cd ${hubTopDir}
 
-cat ../../A_prepareForRun/OLIGOFILE/oligofile_sorted.txt | sort -k2,2 -k3,3n > oligofile_sorted.txt
+cat ../../A_prepareForRun/CAPTURESITEFILE/capturesitefile_sorted.txt | sort -k2,2 -k3,3n > capturesitefile_sorted.txt
 
 # ------------------------
 
-printThis="Color key generation : bed track for oligos and exclusions .."
+printThis="Color key generation : bed track for capture-site (REfragment)s and exclusions .."
 printToLogFile
 
-# making the key (excl and oligo added to the bed and last bigbed
+# making the key (excl and capture-site (REfragment) added to the bed and last bigbed
 
-rm -f oligoExclColored_allReps.bed
+rm -f capturesiteExclColored_allReps.bed
 
 
 for folder in ${listOfChromosomes}
 do
 {
-color=(); oligolist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
+color=(); capturesitelist=(); olistrlist=(); olistplist=(); excstrlist=(); excstplist=()
 
-oligoListSetter
-echo -n "${#oligolist[@]} oligos found "
+capturesiteListSetter
+echo -n "${#capturesitelist[@]} capture-site (REfragment)s found "
 setRainbowColors
 echo -n "using ${#color[@]} colors "
 
 counter=1
-for (( i=0; i<${#oligolist[@]}; i++ ))
+for (( i=0; i<${#capturesitelist[@]}; i++ ))
 do
-doOneBedExclOligo
+doOneBedExclCapturesite
 done
 }
 done
@@ -2988,8 +2988,8 @@ echo
 
 # making bigbed ..
 
-sort -k1,1 -k2,2n oligoExclColored_allReps.bed > oligoExclColored_allReps_sorted.bed
-bedToBigBed -type=bed9 -tab oligoExclColored_allReps_sorted.bed ${ucscBuild} oligosAndExclusions_allReps.bb
+sort -k1,1 -k2,2n capturesiteExclColored_allReps.bed > capturesiteExclColored_allReps_sorted.bed
+bedToBigBed -type=bed9 -tab capturesiteExclColored_allReps_sorted.bed ${ucscBuild} capturesitesAndExclusions_allReps.bb
 
 # -----------------------------------------
 
@@ -3034,8 +3034,8 @@ for file in  data_hubs/hub_raw*.txt         ; do echo 'http://userweb.molbiol.ox
 for file in  data_hubs/hub_wholegenome*.txt ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/allChrsHubAddress.txt
 for file in  data_hubs/index.html           ; do echo 'http://userweb.molbiol.ox.ac.uk'$(fp $file); done > ${hubTopDir}/descriptionAddress.txt
 
-trackDescriptionLine='track type=bigBed name="CaptureC_oligos" description="CaptureC_oligos" visibility="pack" itemRgb=On exonArrows=off bigDataUrl='
-echo ${trackDescriptionLine}'http://userweb.molbiol.ox.ac.uk'$( fp data_hubs/oligosAndExclusions_allReps.bb) > ${hubTopDir}/hubColorKeyBigbed.txt
+trackDescriptionLine='track type=bigBed name="CaptureC_capturesites" description="CaptureC_capturesites" visibility="pack" itemRgb=On exonArrows=off bigDataUrl='
+echo ${trackDescriptionLine}'http://userweb.molbiol.ox.ac.uk'$( fp data_hubs/capturesitesAndExclusions_allReps.bb) > ${hubTopDir}/hubColorKeyBigbed.txt
 
 cd ${hubTopDir}
 
@@ -3049,8 +3049,8 @@ echo "DATA HUB ADDRESSES" >> E_hubAddresses.txt
 
 echo
 echo >> E_hubAddresses.txt
-echo "Color key (oligo and exclusion coordinates track) :"
-echo "Color key (oligo and exclusion coordinates track) :" >> E_hubAddresses.txt
+echo "Color key (capture-site (REfragment) and exclusion coordinates track) :"
+echo "Color key (capture-site (REfragment) and exclusion coordinates track) :" >> E_hubAddresses.txt
 echo
 echo >> E_hubAddresses.txt
 cat hubColorKeyBigbed.txt
@@ -3067,8 +3067,8 @@ echo '_______________________________' >> E_hubAddresses.txt
 echo '_______________________________'
 echo >> E_hubAddresses.txt
 
-echo "Combined data hub (all chromosomes) - the main hub for small designs ( upto ~ 200 oligos or so ) :"
-echo "Combined data hub (all chromosomes) - the main hub for small designs ( upto ~ 200 oligos or so ) :" >> E_hubAddresses.txt
+echo "Combined data hub (all chromosomes) - the main hub for small designs ( upto ~ 200 capture-site (REfragment)s or so ) :"
+echo "Combined data hub (all chromosomes) - the main hub for small designs ( upto ~ 200 capture-site (REfragment)s or so ) :" >> E_hubAddresses.txt
 echo
 echo >> E_hubAddresses.txt
 
@@ -3117,8 +3117,8 @@ echo '_______________________________' >> E_hubAddresses.txt
 echo '_______________________________'
 echo >> E_hubAddresses.txt
 
-echo "Chromosome-wise data hubs (for visualising larger than ~ 200 oligos designs) :"
-echo "Chromosome-wise data hubs (for visualising larger than ~ 200 oligos designs) :" >> E_hubAddresses.txt
+echo "Chromosome-wise data hubs (for visualising larger than ~ 200 capture-site (REfragment)s designs) :"
+echo "Chromosome-wise data hubs (for visualising larger than ~ 200 capture-site (REfragment)s designs) :" >> E_hubAddresses.txt
 echo
 echo >> E_hubAddresses.txt
 

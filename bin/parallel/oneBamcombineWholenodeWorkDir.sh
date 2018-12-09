@@ -20,7 +20,7 @@
 ##########################################################################
 
 # This file fetches the fastqs in plateScreen96.sh style, the way that code was 21Feb2018
-# The sub printRunStartArraysOligo is taken from plateScreen96.sh main script, and modified here.
+# The sub printRunStartArraysCapturesite is taken from plateScreen96.sh main script, and modified here.
 
 function finish {
 
@@ -29,17 +29,17 @@ if [ $? != "0" ]; then
 echo
 date
 echo
-echo "RUN CRASHED ! oneBamcombineWholenodeWorkDir.sh for ${oligoFolderRelativePath} - check qsub.err to see why !"
-echo "Dumped files in ${wholenodeSubmitDir}/${oligoFolderRelativePath}_CRASHED"
+echo "RUN CRASHED ! oneBamcombineWholenodeWorkDir.sh for ${capturesiteFolderRelativePath} - check qsub.err to see why !"
+echo "Dumped files in ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}_CRASHED"
 echo
 
-echo "runOK 0" > ${wholenodeSubmitDir}/${oligoFolderRelativePath}/oligoRoundSuccess.log
+echo "runOK 0" > ${wholenodeSubmitDir}/${capturesiteFolderRelativePath}/capturesiteRoundSuccess.log
 
 else
 
 echo
 date
-printThis="oneBamcombineWholenodeWorkDir.sh : Analysis complete for ${oligoFolderRelativePath} ! "
+printThis="oneBamcombineWholenodeWorkDir.sh : Analysis complete for ${capturesiteFolderRelativePath} ! "
 printToLogFile
     
 fi
@@ -110,23 +110,23 @@ parameterList=$@
 
 
 # The fastq number is the task number ..
-oligoCounter=$1
-echo "bamCombine" > runJustNow_${oligoCounter}.log
+capturesiteCounter=$1
+echo "bamCombine" > runJustNow_${capturesiteCounter}.log
 
    
-printThis="oligo_${oligoCounter} : Combining BAM files of all fastqs .. "
+printThis="capturesite_${capturesiteCounter} : Combining BAM files of all fastqs .. "
 printNewChapterToLogFile
   
-    oligoFolderRelativePath=$(cat runlistings/oligo${oligoCounter}.txt | head -n 1 | cut -f 1)
+    capturesiteFolderRelativePath=$(cat runlistings/capturesite${capturesiteCounter}.txt | head -n 1 | cut -f 1)
 
-    cd ${oligoFolderRelativePath}        
+    cd ${capturesiteFolderRelativePath}        
     pwd
     echo
 
     echo "bam combining started : $(date)"
       
     # Writing the queue environment variables to a log file :
-    # ./echoer_for_SunGridEngine_environment.sh > ${wholenodeSubmitDir}/bamcombine${oligoCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
+    # ./echoer_for_SunGridEngine_environment.sh > ${wholenodeSubmitDir}/bamcombine${capturesiteCounter}_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
     ./echoer_for_SunGridEngine_environment.sh > listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log
         
       fCount=0
@@ -137,7 +137,7 @@ printNewChapterToLogFile
       {
         runOK=0    
 
-        printThis="Bam-combining failed on line ${oligoCounter} of C_analyseOligoBunches/runlist.txt ! "
+        printThis="Bam-combining failed on line ${capturesiteCounter} of C_analyseCapturesiteBunches/runlist.txt ! "
         printToLogFile
         
       }
@@ -151,7 +151,7 @@ printNewChapterToLogFile
         
         if [ "${finCount}" -ne "${foutCount}" ] || [ "${nfinCount}" -ne "${nfoutCount}" ]; then runOK=0; 
         
-        printThis="Bam-combining generated truncated files on line ${oligoCounter} of C_analyseOligoBunches/runlist.txt ! "
+        printThis="Bam-combining generated truncated files on line ${capturesiteCounter} of C_analyseCapturesiteBunches/runlist.txt ! "
         printToLogFile
         
         fi
@@ -176,7 +176,7 @@ printNewChapterToLogFile
 
 cd ${wholenodeSubmitDir}
 
-rm -f runJustNow_${oligoCounter}.log
+rm -f runJustNow_${capturesiteCounter}.log
 
 exit 0
 

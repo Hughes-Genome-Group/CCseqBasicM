@@ -37,7 +37,7 @@ rm -rf B_mapAndDivideFastqs/fastq_*/F1_beforeCCanalyser_*/LOOP5_filteredSams
 
 #_________________________________________________________
 # (2)
-# Oligo-wise bam files : Delete the main bams of the run.
+# Capturesite-wise bam files : Delete the main bams of the run.
 #_________________________________________________________
 
 # These are the main bams which are needed for --onlyCCanalyser runs.
@@ -47,9 +47,9 @@ rm -rf B_mapAndDivideFastqs/fastq_*/F1_beforeCCanalyser_*/LOOP5_filteredSams
 # ####################################
 
 # echo ''
-# echo 'Oligo-wise bam files : Delete the main bams of the run.'
-# echo 'rm -f C_combineOligoWise/chr*/*/*FLASHED_REdig.bam'
-# rm -f C_combineOligoWise/chr*/*/*FLASHED_REdig.bam
+# echo 'Capturesite-wise bam files : Delete the main bams of the run.'
+# echo 'rm -f C_combineCapturesiteWise/chr*/*/*FLASHED_REdig.bam'
+# rm -f C_combineCapturesiteWise/chr*/*/*FLASHED_REdig.bam
 
 # ####################################
 
@@ -67,7 +67,7 @@ rm -rf B_mapAndDivideFastqs/fastq_*/F1_beforeCCanalyser_*/LOOP5_filteredSams
 
 echo ''
 echo 'CCanalyser stages : Delete the header-only bam files (to not to give false impression of their existence) :'
-rm -f D_analyseOligoWise/chr*/*/F6_greenGraphs_combined_*/COMBINED_*.bam
+rm -f D_analyseCapturesiteWise/chr*/*/F6_greenGraphs_combined_*/COMBINED_*.bam
 
 #_________________________________________________________
 echo

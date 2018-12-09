@@ -29,7 +29,7 @@
 # --> the point of this run type is to get testing for the code changes "early on" to catch bugs and issues not to do with parallelisation itself
 # (to catch the bugs which may happen just because the codes are meddled to make parallelisation support possible)
 
-# The pipe will run exactly as before in CB5 : input fastq with --R1 and --R2 flags, unpacked combined files only, and oligo file treated as single entity (no oligo bunches)
+# The pipe will run exactly as before in CB5 : input fastq with --R1 and --R2 flags, unpacked combined files only, and capture-site (REfragment) file treated as single entity (no capture-site (REfragment) bunches)
 # we will also not generate the "fancy" output hub, at least in the first stage. Depending how it is decided to do with the visualisation, this may change,
 # and also the legacy run may gain the nice new overlay track as a separate hub.
 

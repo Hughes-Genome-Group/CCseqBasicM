@@ -312,20 +312,46 @@ parameterList=$( cat TEMP.param )
    
 # Will be parsed to a VARIABLE to be used in shell (instead of MACS2) if given (and no parameter file is given) :
 
-# -o (oligo file)
-
+# -o (capturesite file)
+  
    macsflag='-o'
    macsOnOff
-   if [ "${macsHasThisFlag}" -eq 0 ];then
+   macsHasThisFlag1=${macsHasThisFlag}
+   howmanyHasThisMacsFlag=$((${macsHasThisFlag}))
+   
+   macsflag='-c'
+   macsOnOff
+   macsHasThisFlag2=${macsHasThisFlag}
+   howmanyHasThisMacsFlag=$((${howmanyHasThisMacsFlag}+${macsHasThisFlag}))
+  
+   if [ "${howmanyHasThisMacsFlag}" -gt 1 ] ;then
+       printThis="Capturesite parameter file can be given with -c or -o . Do not use BOTH at the same time ! Found both -c and -o (can't decide which one to use). EXITING !"
+       printToLogFile
        parametersOK=0
+   elsif [ "${howmanyHasThisMacsFlag}" -eq 0 ] ;then
+       parametersOK=0
+       macsflag='-c/-o'
        missingFlagErrorMessage
    else
-       macsParam
-       # above sets this : macsvalue
-       echo "oligofile ${macsvalue}" >> TEMP.mainparam
-       removeMacsParamAndValue
+        if [ "${macsHasThisFlag1}" -ne 0 ] ;then
+            macsflag='-o'
+           macsParam
+           # above sets this : macsvalue
+           echo "capturesitefile ${macsvalue}" >> TEMP.mainparam
+           removeMacsParamAndValue
+        fi
+        if [ "${macsHasThisFlag2}" -ne 0 ] ;then
+            macsflag='-c'
+           macsParam
+           # above sets this : macsvalue
+           echo "capturesitefile ${macsvalue}" >> TEMP.mainparam
+           removeMacsParamAndValue
+        fi   
    fi
-   
+   macsHasThisFlag1=0
+   macsHasThisFlag2=0
+   howmanyHasThisMacsFlag=0
+
    macsflag='--genome'
    macsOnOff
    if [ "${macsHasThisFlag}" -eq 0 ];then

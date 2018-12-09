@@ -53,15 +53,15 @@ echo
 
 qsubScriptToBeUsed='UNDEFINED_QSUB_SCRIPT'
 # Override for bamcombining (never in TMPDIR)
-if [ "${FastqOrOligo}" == "Bamcombine" ];then
-    qsubScriptToBeUsed="oneThreadParallel${FastqOrOligo}WorkDir.sh"
+if [ "${FastqOrCapturesite}" == "Bamcombine" ];then
+    qsubScriptToBeUsed="oneThreadParallel${FastqOrCapturesite}WorkDir.sh"
 else
 # Normal run types
     if [ "${useTMPDIRforThis}" -eq 1 ];then
-        qsubScriptToBeUsed="oneThreadParallel${FastqOrOligo}.sh"
+        qsubScriptToBeUsed="oneThreadParallel${FastqOrCapturesite}.sh"
         echo "Will use cluster memory TMPDIR to store all runtime files ! "
     else
-        qsubScriptToBeUsed="oneThreadParallel${FastqOrOligo}WorkDir.sh"
+        qsubScriptToBeUsed="oneThreadParallel${FastqOrCapturesite}WorkDir.sh"
         echo "Will use $(pwd) to store all runtime files ! "
     fi
 fi
@@ -136,10 +136,10 @@ do {
 # After the first five parallel units we want to keep nice image - not to crowd the visual of the queue with endless hqw jobs :
 
 sleepSeconds=600
-# Override for bamcombining and oligorounds (start more frequently than every 10 minutes)
-if [ "${FastqOrOligo}" == "Bamcombine" ];then
+# Override for bamcombining and capturesiterounds (start more frequently than every 10 minutes)
+if [ "${FastqOrCapturesite}" == "Bamcombine" ];then
     sleepSeconds=1
-elif [ "${FastqOrOligo}" == "Oligo" ];then
+elif [ "${FastqOrCapturesite}" == "Capturesite" ];then
     sleepSeconds=10
 fi
 
@@ -233,7 +233,7 @@ done
 
 mkdir qsubLogFiles
 mv ${CCversion}_$$_${fqOrOL}* qsubLogFiles/.
-mv ${fastqOrOligo}*_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log qsubLogFiles/.
+mv ${fastqOrCapturesite}*_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log qsubLogFiles/.
 mv wholerun* qsubLogFiles/.
 mv -f allRunsJUSTNOW.txt qsubLogFiles/allRunsRUNTIME.log
 rm -f runsJUSTNOW*.txt
@@ -261,7 +261,7 @@ checkedName='TMPDIR'
 checkParse
 rm -rf ${TMPDIR}/*
 
-printThis="All ${fastqOrOligo} runs are finished (or crashed) ! "
+printThis="All ${fastqOrCapturesite} runs are finished (or crashed) ! "
 printNewChapterToLogFile
 
 printThis="Run log files available in : $(basename $(pwd))/qsubLogFiles"
@@ -284,15 +284,15 @@ printToLogFile
 runScriptToBeUsed='UNDEFINED_RUN_SCRIPT'
 
 # Override for bamcombining (never in TMPDIR)
-if [ "${FastqOrOligo}" == "Bamcombine" ];then
-    runScriptToBeUsed="one${FastqOrOligo}WholenodeWorkDir.sh"
+if [ "${FastqOrCapturesite}" == "Bamcombine" ];then
+    runScriptToBeUsed="one${FastqOrCapturesite}WholenodeWorkDir.sh"
 else
 # Normal run types
     if [ "${useTMPDIRforThis}" -eq 1 ];then
-        runScriptToBeUsed="one${FastqOrOligo}Wholenode.sh"
+        runScriptToBeUsed="one${FastqOrCapturesite}Wholenode.sh"
         echo "Will use cluster memory TMPDIR to store all runtime files ! "
     else
-        runScriptToBeUsed="one${FastqOrOligo}WholenodeWorkDir.sh"
+        runScriptToBeUsed="one${FastqOrCapturesite}WholenodeWorkDir.sh"
         echo "Will use $(pwd) to store all runtime files ! "
     fi
 fi
@@ -308,10 +308,10 @@ wholenodesafetylimitMem=$((${wholenodeMem}-80000))
 # foundFoldersCount=$(($(ls -1 | grep '^fastq_' | grep -c "")))
 # We default to 24 processors, and are not planning to change this to become a flag instead ..
 askedProcessors=24
-# Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
-if [ "${FastqOrOligo}" == "Bamcombine" ];then
+# Override for bamcombining and capturesiterounds (start more frequently than every 1 minutes)
+if [ "${FastqOrCapturesite}" == "Bamcombine" ];then
     askedProcessors=100
-elif [ "${FastqOrOligo}" == "Oligo" ];then
+elif [ "${FastqOrCapturesite}" == "Capturesite" ];then
     askedProcessors=40
 fi
 neededQsubsCount=$(($((${foundFoldersCount}/${askedProcessors}))+1))
@@ -327,11 +327,11 @@ echo
 
 sleepSeconds=600
 reportEverythismanyRounds=1
-# Override for bamcombining and oligorounds (start more frequently than every 1 minutes)
-if [ "${FastqOrOligo}" == "Bamcombine" ];then
+# Override for bamcombining and capturesiterounds (start more frequently than every 1 minutes)
+if [ "${FastqOrCapturesite}" == "Bamcombine" ];then
     sleepSeconds=1
     reportEverythismanyRounds=60
-elif [ "${FastqOrOligo}" == "Oligo" ];then
+elif [ "${FastqOrCapturesite}" == "Capturesite" ];then
     sleepSeconds=1
     reportEverythismanyRounds=60
 fi
@@ -339,12 +339,12 @@ longSleep=$((${sleepSeconds}*10))
 # Override for Fastq runs - we want to stagger the whole run every 10min,
 # as we are so prone to oscillate and crash when starting new runs right after we have crashed as TMPdir area got full
 # this leading one TMPdir area full event essentially crashing all subsequent samples like dominoes
-if [ "${FastqOrOligo}" == "Fastq" ];then
+if [ "${FastqOrCapturesite}" == "Fastq" ];then
     longSleep=${sleepSeconds}
 fi
 
 echo
-echo "Will be sleeping between starting each of the first 24 runs (to avoid i/o rush hour in downloading ${fastqOrOligo}s) .. "
+echo "Will be sleeping between starting each of the first 24 runs (to avoid i/o rush hour in downloading ${fastqOrCapturesite}s) .. "
 echo "sleep time : ${longSleep} seconds"
 echo
 
@@ -377,8 +377,8 @@ do {
     
     done
     
-    # Log folder for other-than-fastq-runs to be the chr/oligo directory
-    if [ "${FastqOrOligo}" == "Fastq" ];then
+    # Log folder for other-than-fastq-runs to be the chr/capturesite directory
+    if [ "${FastqOrCapturesite}" == "Fastq" ];then
         erroutLogsToHere="."
     else
         erroutLogsToHere="runtimelogfiles/${i}"
@@ -431,8 +431,8 @@ do {
     
     done
 
-    # Log folder for other-than-fastq-runs to be the chr/oligo directory
-    if [ "${FastqOrOligo}" == "Fastq" ];then
+    # Log folder for other-than-fastq-runs to be the chr/capturesite directory
+    if [ "${FastqOrCapturesite}" == "Fastq" ];then
         erroutLogsToHere="."
     else
         erroutLogsToHere="runtimelogfiles/${i}"
@@ -499,8 +499,8 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
 
     if [ "${wePotentiallyStartNew}" -eq 1 ];then
   
-    # Log folder for other-than-fastq-runs to be the chr/oligo directory
-    if [ "${FastqOrOligo}" == "Fastq" ];then
+    # Log folder for other-than-fastq-runs to be the chr/capturesite directory
+    if [ "${FastqOrCapturesite}" == "Fastq" ];then
         erroutLogsToHere="."
     else
         erroutLogsToHere="runtimelogfiles/${i}"
@@ -522,7 +522,7 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     # currentFastqNumber=$((${currentFastqNumber}+1))
     i=$((${i}+1))
     
-    # Not reporting every round, if we are fast-looping (bam or oligo loop)
+    # Not reporting every round, if we are fast-looping (bam or capturesite loop)
     if [ $((${repLoop}%${reportEverythismanyRounds})) -eq 0 ]; then        
         # for testing purposes
         date  >> allRunsJUSTNOW.txt
@@ -540,7 +540,7 @@ if [ "${countOfThemRunningJustNow}" -lt "${askedProcessors}" ]; then
     
 fi
 
-# Not reporting every round, if we are fast-looping (bam or oligo loop)
+# Not reporting every round, if we are fast-looping (bam or capturesite loop)
 if [ $((${repLoop}%${reportEverythismanyRounds})) -eq 0 ]; then
     monitorRun
     # Zeroing the counter, to not to go integer overflow in fast looping loops..
@@ -636,7 +636,7 @@ mv run*.sh runscripts/.
 mv run${FqOrOl}*.out qsubLogFiles/.
 mv run${FqOrOl}*.err qsubLogFiles/.
 
-mv ${fastqOrOligo}*_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log qsubLogFiles/.
+mv ${fastqOrCapturesite}*_listOfAllStuff_theQueueSystem_hasTurnedOn_forUs.log qsubLogFiles/.
 
 fi
 
@@ -675,7 +675,7 @@ checkedName='TMPDIR'
 checkParse
 rm -rf ${TMPDIR}/*
 
-printThis="All ${fastqOrOligo} runs are finished (or crashed) ! "
+printThis="All ${fastqOrCapturesite} runs are finished (or crashed) ! "
 printNewChapterToLogFile
 
 printThis="Run log files available in : $(basename $(pwd))/qsubLogFiles"
@@ -758,18 +758,18 @@ fi
 
 checkIfDownloadsInProgress(){
 # If we have downloads in progress - we can not start a new one .. 
-if [ $(($( ls | grep ${fastqOrOligo}*_download_inProgress.log | grep -c "" ))) -ne 0 ]; then
+if [ $(($( ls | grep ${fastqOrCapturesite}*_download_inProgress.log | grep -c "" ))) -ne 0 ]; then
     echo >> allRunsJUSTNOW.txt
     date >> allRunsJUSTNOW.txt
     echo "Downloads in progress for runs : " >> allRunsJUSTNOW.txt
-    ls | grep ${fastqOrOligo}*_download_inProgress.log | sed 's/_download_inProgress.log//' >> allRunsJUSTNOW.txt
+    ls | grep ${fastqOrCapturesite}*_download_inProgress.log | sed 's/_download_inProgress.log//' >> allRunsJUSTNOW.txt
     echo "Will wait until download finished, before starting new ones .." >> allRunsJUSTNOW.txt
     
     wePotentiallyStartNew=0
     
     date >> downloadIOlimitedLog.txt
     echo "Downloads in progress for runs : " >> downloadIOlimitedLog.txt
-    ls | grep ${fastqOrOligo}*_download_inProgress.log | sed 's/_download_inProgress.log//' >> downloadIOlimitedLog.txt
+    ls | grep ${fastqOrCapturesite}*_download_inProgress.log | sed 's/_download_inProgress.log//' >> downloadIOlimitedLog.txt
     
 fi  
 }
@@ -788,7 +788,7 @@ stuffParsedFromTop=" ${usedProcsRightNow} ${procUsePercentsRightNow} ${freeMemJu
 rm -f TEMPtop.log
 
 # If we are bamcombine run, not doing the complicated parts at all.    
-if [ "${FastqOrOligo}" != "Bamcombine" ]
+if [ "${FastqOrCapturesite}" != "Bamcombine" ]
 then
     
 #_____________________
@@ -812,7 +812,7 @@ date > runsJUSTNOW.txt
 localMemoryUsage="NOTcounted"
 
 # Override for bamcombining (never in TMPDIR)
-if [ "${FastqOrOligo}" == "Bamcombine" ];then
+if [ "${FastqOrCapturesite}" == "Bamcombine" ];then
     tempareaMemoryUsage=0
 else
 
