@@ -306,12 +306,22 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
 
 # If we actually dont' need to filter anything (the _forBlatAndPloidyFiltering.gff was empty) , we can just use the SAM reporter file as it is ..  
 else
+   
     printThis="Filtering not needed for reporter ${basename} SAM file ${reporterfile} \n - no reads overlapped the to-be-filtered regions."
     printToLogFile
-    # Adding to existing file..
+    # Symlinking to existing file..
+    # ln -s ${reporterfile} ${outputfolder}/${basename}_filtered.sam
+ 
+    rm -f ${outputfolder}/${basename}_filtered.sam
     setStringentFailForTheFollowing
-    cat ${reporterfile} > ${outputfolder}/${basename}_filtered.sam
-    stopStringentFailAfterTheAbove        
+    cp ${reporterfile} ${outputfolder}/${basename}_filtered.sam
+    stopStringentFailAfterTheAbove
+    
+    samfragments=$( cat ${outputfolder}/${basename}_filtered.sam | grep -cv "^@" )
+    
+    printThis="After skipping PLOIDY and BLAT filter we have all the ${samfragments} sam fragments left in our ${basename} ${dataprefix} reporter fragment file."
+    printToLogFile
+    
 fi
     
     #--------------------------------------
