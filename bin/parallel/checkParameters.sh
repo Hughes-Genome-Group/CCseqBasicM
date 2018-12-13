@@ -328,7 +328,7 @@ parameterList=$( cat TEMP.param )
        printThis="Capturesite parameter file can be given with -c or -o . Do not use BOTH at the same time ! Found both -c and -o (can't decide which one to use). EXITING !"
        printToLogFile
        parametersOK=0
-   elsif [ "${howmanyHasThisMacsFlag}" -eq 0 ] ;then
+   elif [ "${howmanyHasThisMacsFlag}" -eq 0 ] ;then
        parametersOK=0
        macsflag='-c/-o'
        missingFlagErrorMessage

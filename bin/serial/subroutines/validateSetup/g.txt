@@ -52,6 +52,27 @@ supportedGenomes[8]="dm3"
 supportedGenomes[9]="dm6"
 supportedGenomes[10]="mm10balb"
 supportedGenomes[11]="mm9PARP"
+supportedGenomes[12]="hg19hindMasked"
+supportedGenomes[13]="mm9dpnMasked"
+
+# Coordinate set name - this points to the UCSC coordinate set name
+# i.e. custom genome where the COORDINATES are the same but some are masked or mutated, will have regular UCSC name here.
+# this name will also point to the REcut files (at the moment assuming that none of these mutations are such, that they alter the RE cutting pattern)
+
+ucscGenomeNames[0]="mm9"
+ucscGenomeNames[1]="mm10"
+ucscGenomeNames[2]="hg18"
+ucscGenomeNames[3]="hg19"
+ucscGenomeNames[4]="hg38"
+ucscGenomeNames[5]="danRer7"
+ucscGenomeNames[6]="danRer10"
+ucscGenomeNames[7]="galGal4"
+ucscGenomeNames[8]="dm3"
+ucscGenomeNames[9]="dm6"
+ucscGenomeNames[10]="mm10"
+ucscGenomeNames[11]="mm9PARP"
+ucscGenomeNames[12]="hg19"
+ucscGenomeNames[13]="mm9"
 
 # The above genomes should have :
 # 1) bowtie1 indices
@@ -98,6 +119,8 @@ BOWTIE1[8]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm3/Sequence/BowtieI
 BOWTIE1[9]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm6/Sequence/BowtieIndex/genome"
 BOWTIE1[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly/bowtie1-indexes/mm10_BALB-cJ"
 BOWTIE1[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP"
+BOWTIE1[12]="/t1-data/user/hugheslab/telenius/GENOMES/hg19_hindIII_masked/3_bowtieIndices/hg19_hindII_bl"
+BOWTIE1[13]="/t1-data/user/hugheslab/telenius/GENOMES/mm9_dpnII_masked/3_bowtieIndices/mm9_dpnII_bl"
 
 # The indices in the BOWTIE1 array refer to genome names in supportedGenomes array (top of page).
 
@@ -141,6 +164,8 @@ BOWTIE2[8]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm3/Sequence/Bowtie2
 BOWTIE2[9]="/databank/igenomes/Drosophila_melanogaster/UCSC/dm6/Sequence/Bowtie2Index/genome"
 BOWTIE2[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly/bowtie2-indexes/mm10_BALB-cJ"
 BOWTIE2[11]="NOT_SUPPORTED_needsToBeAddedToConfigFile"
+BOWTIE2[12]="NOT_SUPPORTED_needsToBeAddedToConfigFile"
+BOWTIE2[13]="NOT_SUPPORTED_needsToBeAddedToConfigFile"
 
 # The indices in the BOWTIE2 array refer to genome names in supportedGenomes array (top of page).
 
@@ -174,6 +199,8 @@ WholeGenomeFASTA[10]="/t1-data/user/rbeagrie/genomes/balbc/mm10_BALB-cJ_snpsonly
 # and the subsequent scripts assume file called genome_dpnII_coordinates.txt instead.
 # WholeGenomeFASTA[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP.fa"
 WholeGenomeFASTA[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9/genome.fa"
+WholeGenomeFASTA[12]="/t1-data/user/hugheslab/telenius/GENOMES/hg19_hindIII_masked/2_bedtoolsMaskFasta/genome_hindIII_blacklisted.fa"
+WholeGenomeFASTA[13]="/t1-data/user/hugheslab/telenius/GENOMES/mm9_dpnII_masked/2_bedtoolsMaskFasta/genome_dpnII_blacklisted.fa"
 
 # The indices in the WholeGenomeFASTA array refer to genome names in supportedGenomes array (top of page).
 
@@ -206,9 +233,11 @@ UCSC[6]="${confFolder}/UCSCgenomeSizes/danRer10.chrom.sizes"
 UCSC[7]="${confFolder}/UCSCgenomeSizes/galGal4.chrom.sizes"
 UCSC[8]="${confFolder}/UCSCgenomeSizes/dm3.chrom.sizes"
 UCSC[9]="${confFolder}/UCSCgenomeSizes/dm6.chrom.sizes"
-UCSC[10]="${confFolder}/UCSCgenomeSizes/mm10.chrom.sizes"
+UCSC[10]="MASKED_GENOME_SHOULD_NOT_GET_THIS_FROM_HERE_BUT_FROM_ITS_PARENT_BUILD"
 # UCSC[11]="${confFolder}/UCSCgenomeSizes/mm9.chrom.sizes"
 UCSC[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP_sizes.txt"
+UCSC[12]="MASKED_GENOME_SHOULD_NOT_GET_THIS_FROM_HERE_BUT_FROM_ITS_PARENT_BUILD"
+UCSC[13]="MASKED_GENOME_SHOULD_NOT_GET_THIS_FROM_HERE_BUT_FROM_ITS_PARENT_BUILD"
 
 # The indices in the UCSC array refer to genome names in supportedGenomes array (top of page).
 
@@ -239,7 +268,7 @@ CaptureDigestPath="/home/molhaem2/telenius/CCseqBasic/digests"
 #
 # ----------------------------------------------
 #
-# mm9 = intra-house peak call (Jim Hughes research group) of these regions in amplicon (control) sample data.
+# mm9 = intra-house peak call (Jim Hughes research group) of these regions in sonication (control) sample data.
 # mm10 = lift-over of the mm9 track
 #
 # ----------------------------------------------
@@ -265,21 +294,18 @@ genomesWhichHaveBlacklist[0]="mm9"
 genomesWhichHaveBlacklist[1]="mm10"
 genomesWhichHaveBlacklist[2]="hg18"
 genomesWhichHaveBlacklist[3]="hg19"
-genomesWhichHaveBlacklist[4]="mm10balb"
-genomesWhichHaveBlacklist[5]="mm9PARP"
+genomesWhichHaveBlacklist[4]="mm9PARP"
 # - i.e. : not all genomes have to have a blacklist.
 # If the genome is not listed here, blacklist filtering is NOT conducted within the pipeline (turned off automatically).
 
-# It is recommended to generate intra-house peak call for ALL GENOMES - from a control (amplicon etc) data , however.
+# It is recommended to generate intra-house peak call for ALL GENOMES - from a control (sonication etc) data , however.
 # This is not so crucial as it is for analysis of DNaseI, ATAC or ChIP-seq data, but better safe than sorry !
 
 BLACKLIST[0]="${confFolder}/BLACKLIST/mm9.bed"
 BLACKLIST[1]="${confFolder}/BLACKLIST/mm10.bed"
 BLACKLIST[2]="${confFolder}/BLACKLIST/hg18.bed"
 BLACKLIST[3]="${confFolder}/BLACKLIST/hg19.bed"
-BLACKLIST[4]="${confFolder}/BLACKLIST/mm10.bed"
-BLACKLIST[5]="${confFolder}/BLACKLIST/mm9.bed"
-
+BLACKLIST[4]="${confFolder}/BLACKLIST/mm9.bed"
 # The indices in the BLACKLIST array refer to genome names in genomesWhichHaveBlacklist array.
 
 }
