@@ -446,12 +446,49 @@ cat chr*/*/F6_greenGraphs_combined_${samplename}_${CCversion}/COMBINED_report_${
 if [ "${tiled}" -eq 0 ];then
 
 echo -e "capturesite\tCaptureFrags\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
-cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
+# cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
+# The above doesn't work, as the PERL hash doesn't report "zero counts" if either CIS or TRANS reports zero.
+
+# Making a nice file, from which we can parse this out in awk.
+cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev \
+ | sed 's/\s15.*:/\tcap/' | sed 's/\s17a.*:/\trepTot/' | sed 's/\s17b.*:/\tcisRep/' | sed 's/\s17c.*:/\ttransRep/' \
+> TEMP_parseFinalCounts.txt
+
+cat TEMP_parseFinalCounts.txt | \
+awk 'BEGIN{n="UNDEF";cap=0;r=0;c=0;t=0}\
+{\
+if(NR==1){n=$1}\
+if(NR>1&&n!=$1){print n"\t"cap"\t"r"\t"c"\t"t;n=$1;cap=0;r=0;c=0;t=0}\
+if($2=="cap"){cap=$3}\
+if($2=="repTot"){r=$3}\
+if($2=="cisRep"){c=$3}\
+if($2=="transRep"){t=$3}\
+}\
+END{print n"\t"cap"\t"r"\t"c"\t"t}'  >> COMBINED_allFinalCounts_table.txt
+rm -f TEMP_parseFinalCounts.txt
 
 else
     
 echo -e "capturesite\tRepFragsTotal\tRepFragsCIS\tRepFragsTRANS" > COMBINED_allFinalCounts_table.txt
-cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
+# cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev | paste - - - | cut -f 1,3,6,9,12 >> COMBINED_allFinalCounts_table.txt
+# The above doesn't work, as the PERL hash doesn't report "zero counts" if either CIS or TRANS reports zero.
+
+# Making a nice file, from which we can parse this out in awk.
+cat COMBINED_allFinalCounts.txt | sed 's/\s/\t/' | rev | sed 's/\s/\t/' | rev \
+ | sed 's/\s17a.*:/\trepTot/' | sed 's/\s17b.*:/\tcisRep/' | sed 's/\s17c.*:/\ttransRep/' \
+> TEMP_parseFinalCounts.txt
+
+cat TEMP_parseFinalCounts.txt | \
+awk 'BEGIN{n="UNDEF";cap=0;r=0;c=0;t=0}\
+{\
+if(NR==1){n=$1}\
+if(NR>1&&n!=$1){print n"\t"cap"\t"r"\t"c"\t"t;n=$1;r=0;c=0;t=0}\
+if($2=="repTot"){r=$3}\
+if($2=="cisRep"){c=$3}\
+if($2=="transRep"){t=$3}\
+}\
+END{print n"\t"r"\t"c"\t"t}'  >> COMBINED_allFinalCounts_table.txt
+rm -f TEMP_parseFinalCounts.txt
 
 fi
 
