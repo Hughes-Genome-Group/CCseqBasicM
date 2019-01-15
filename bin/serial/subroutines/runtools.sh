@@ -44,7 +44,7 @@ testedFile="capturesites.bed"
 doTempFileTesting
 
 # List of chromosomes which have this capturesite ..
-cut -f 1 capturesites.bed | uniq | sort | uniq > genome_${REenzyme}_capturesite_chromosomes.txt
+cut -f 1 capturesites.bed | uniq | sort -T $(pwd) | uniq > genome_${REenzyme}_capturesite_chromosomes.txt
 
 # Plus/minus 300 bases to both directions are fine, rest is not. Using blacklist in subtracting ..
 

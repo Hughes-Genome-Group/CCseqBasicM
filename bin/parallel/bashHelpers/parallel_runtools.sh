@@ -564,11 +564,11 @@ if [ $(($(tail -n +2 COMBINED_allFinalCounts_table.txt | grep -c ""))) -lt 4 ]; 
 else
 {
 
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -n > TMPcol2
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -n > TMPcol3
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -n > TMPcol4
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 2 | sort -T $(pwd) -n > TMPcol2
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 3 | sort -T $(pwd) -n > TMPcol3
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 4 | sort -T $(pwd) -n > TMPcol4
 if [ "${tiled}" -eq 0 ];then
-tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -n > TMPcol5
+tail -n +2 COMBINED_allFinalCounts_table.txt | cut -f 5 | sort -T $(pwd) -n > TMPcol5
 fi
 
 if [ "${tiled}" -eq 0 ];then
@@ -776,7 +776,7 @@ if [ "${howManyCrashes}" -ne 0 ]; then
   printThis="They crashed in these steps :"
   printToLogFile
 
-  printThis=$( cat runJustNow_*.log | sort | uniq -c ) 
+  printThis=$( cat runJustNow_*.log | sort -T $(pwd) | uniq -c ) 
   printToLogFile  
   
   weWillExitAfterThis=1
@@ -1063,8 +1063,8 @@ if [ "${TEMPoriginalCount}" -ne "${TEMPfinishedFineCount}" ]; then
   printThis="We had ${TEMPoriginalCount} capture-site (REfragment)s starting the combine preparation.\nBut only ${TEMPfinishedFineCount} of them report finishing fine :"
   printToLogFile
   
-  cat bamcombineprepSuccess.log | grep -v '^#' | sort | uniq -c 
-  cat bamcombineprepSuccess.log | grep -v '^#' | sort | uniq -c >> "/dev/stderr"
+  cat bamcombineprepSuccess.log | grep -v '^#' | sort -T $(pwd) | uniq -c 
+  cat bamcombineprepSuccess.log | grep -v '^#' | sort -T $(pwd) | uniq -c >> "/dev/stderr"
   
   echo ""
   echo ""  >> "/dev/stderr"
@@ -1223,8 +1223,8 @@ if [ "${TEMPoriginalCount}" -ne "${TEMPfinishedFineCount}" ]; then
   printThis="We had ${TEMPoriginalCount} capture-site (REfragment)s starting the combine.\nBut only ${TEMPfinishedFineCount} of them report finishing fine :"
   printToLogFile
   
-  cat chr*/*/bamcombineSuccess.log | sed 's/.* runOK/runOK/' | sort | uniq -c  
-  cat chr*/*/bamcombineSuccess.log | sed 's/.* runOK/runOK/' | sort | uniq -c >> "/dev/stderr"
+  cat chr*/*/bamcombineSuccess.log | sed 's/.* runOK/runOK/' | sort -T $(pwd) | uniq -c  
+  cat chr*/*/bamcombineSuccess.log | sed 's/.* runOK/runOK/' | sort -T $(pwd) | uniq -c >> "/dev/stderr"
   
   echo ""
   echo ""  >> "/dev/stderr"
@@ -2991,7 +2991,7 @@ done
 
 cd ${hubTopDir}
 
-cat ../../A_prepareForRun/CAPTURESITEFILE/capturesitefile_sorted.txt | sort -k2,2 -k3,3n > capturesitefile_sorted.txt
+cat ../../A_prepareForRun/CAPTURESITEFILE/capturesitefile_sorted.txt | sort -T $(pwd) -k2,2 -k3,3n > capturesitefile_sorted.txt
 
 # ------------------------
 
@@ -3025,7 +3025,7 @@ echo
 
 # making bigbed ..
 
-sort -k1,1 -k2,2n capturesiteExclColored_allReps.bed > capturesiteExclColored_allReps_sorted.bed
+sort -T $(pwd) -k1,1 -k2,2n capturesiteExclColored_allReps.bed > capturesiteExclColored_allReps_sorted.bed
 bedToBigBed -type=bed9 -tab capturesiteExclColored_allReps_sorted.bed ${ucscBuild} capturesitesAndExclusions_allReps.bb
 
 # -----------------------------------------

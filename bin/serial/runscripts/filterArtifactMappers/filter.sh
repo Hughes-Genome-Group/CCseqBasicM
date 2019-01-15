@@ -254,9 +254,9 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
     
     echo "${basename} ${dataprefix} - filtering for PLOIDY and BLAT regions.."
     
-    cat ${ucscBuild} | awk '{print $1"\t0\t"$2}' | sort -k1,1 -k2,2 > TEMPfullChrs.bed
+    cat ${ucscBuild} | awk '{print $1"\t0\t"$2}' | sort -T $(pwd) -k1,1 -k2,2 > TEMPfullChrs.bed
     # Making bed file on the fly, from the gff file
-    cut -f 1,4,5 "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff" | awk '{print $1"\t"$2-1"\t"$3}' | sort -k1,1 -k2,2 > TEMP.bed
+    cut -f 1,4,5 "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff" | awk '{print $1"\t"$2-1"\t"$3}' | sort -T $(pwd) -k1,1 -k2,2 > TEMP.bed
     
     echo "bedtools subtract -a ${GENOME}.bed -b ${dataprefix}_${basename}_forBlatAndPloidyFiltering.bed > saveTheseRegions.bed"
     setStringentFailForTheFollowing
@@ -366,7 +366,7 @@ fi
 
     setStringentFailForTheFollowing
     cut -f 1 TEMP.sam | sed 's/:PE[12]:[0123456789][0123456789]*$//' > TEMP_sortcolumn.txt   
-    paste TEMP_sortcolumn.txt TEMP.sam | sort -k1,1 | cut -f 1 --complement > TEMP_sorted.sam
+    paste TEMP_sortcolumn.txt TEMP.sam | sort -T $(pwd) -k1,1 | cut -f 1 --complement > TEMP_sorted.sam
     stopStringentFailAfterTheAbove
 
     ls -lht | grep TEMP >> "/dev/stderr"
@@ -1010,7 +1010,7 @@ do
     # And if we have one or the other, we can also combine and sort them ..
     if [ "${doWeHaveanyREfragments}" -ne 0 ]; then
         setStringentFailForTheFollowing    
-        cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+        cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -T $(pwd) -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
         stopStringentFailAfterTheAbove
     else
         echo "" > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff

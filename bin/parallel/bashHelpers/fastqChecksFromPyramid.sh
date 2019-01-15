@@ -183,12 +183,12 @@ checkFastqFiles(){
     
     # Checking that the names (within R1 series, and within R2 series) are unique
     TEMPcount=$(($( echo ${TEMP_read1} | sed 's/,/\n/g' | grep -v "^\s*$" | grep -c "" )))
-    TEMPcount2=$(($( echo ${TEMP_read1} | sed 's/,/\n/g' | sort | uniq | grep -v "^\s*$" | grep -c "" )))
+    TEMPcount2=$(($( echo ${TEMP_read1} | sed 's/,/\n/g' | sort -T $(pwd) | uniq | grep -v "^\s*$" | grep -c "" )))
     if [ "${TEMPcount2}" -ne "${TEMPcount}" ] ; then echo "Some FASTQ read1 path(s) are NOT UNIQUE for sample ${TEMP_sample} (some lanes are given twice) - correct your PIPE_fastqPaths.txt file !" >> ../FASTQ_LOAD.err ;fastqDataOK=0; fi
     
     if [ ${weHaveRead2} -ne 0 ]; then
     TEMPcount=$(($( echo ${TEMP_read2} | sed 's/,/\n/g' | grep -v "^\s*$" | grep -c "" )))
-    TEMPcount2=$(($( echo ${TEMP_read2} | sed 's/,/\n/g' | sort | uniq | grep -v "^\s*$" | grep -c "" )))
+    TEMPcount2=$(($( echo ${TEMP_read2} | sed 's/,/\n/g' | sort -T $(pwd) | uniq | grep -v "^\s*$" | grep -c "" )))
     if [ "${TEMPcount2}" -ne "${TEMPcount}" ] ; then echo "Some FASTQ read2 path(s) are NOT UNIQUE for sample ${TEMP_sample} (some lanes are given twice) - correct your PIPE_fastqPaths.txt file !" >> ../FASTQ_LOAD.err ;fastqDataOK=0; fi
     fi  
     

@@ -231,8 +231,8 @@ printNewChapterToLogFile
     
     ls -lR $(pwd) > TMPareaDataAfterMovingItBackHere.log
     
-    cat TMPareaBeforeMovingBack.log  | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -k2,2 -k1,1 | grep -v Moving > forDiff1.txt
-    cat TMPareaDataAfterMovingItBackHere.log   | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -k2,2 -k1,1 | grep -v Moving > forDiff2.txt
+    cat TMPareaBeforeMovingBack.log  | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -T $(pwd) -k2,2 -k1,1 | grep -v Moving > forDiff1.txt
+    cat TMPareaDataAfterMovingItBackHere.log   | sed 's/\s\s*/\t/g' | grep '^-' | cut -f 5,9 | sort -T $(pwd) -k2,2 -k1,1 | grep -v Moving > forDiff2.txt
     
     printThis="checking that all got moved properly"
     printToLogFile

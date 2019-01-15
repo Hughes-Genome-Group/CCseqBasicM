@@ -1118,9 +1118,9 @@ echo
 
 # Summary of all of them ..
 
-cat LOOP2_${flashstatus}_REdig_onlyOneFragment_table.txt | cut -f 1,2,5 | sort -k1,1 | sed 's/RdOut/MultifragRds/'                               > tempLOOP2.txt 
-cat LOOP3_${flashstatus}_multicaptures_table.txt         | cut -f 1,2,5 | sort -k1,1 | sed 's/RdIn/RdHasCap/' | sed 's/RdOutJoined/RdSingleCap/' > tempLOOP3.txt 
-cat LOOP5_${flashstatus}_filter_table.txt                               | sort -k1,1 | sed 's/samFin/FragInSingleCapRds/' | sed 's/samFout/FragWithinSonicSize/'> tempLOOP5.txt
+cat LOOP2_${flashstatus}_REdig_onlyOneFragment_table.txt | cut -f 1,2,5 | sort -T $(pwd) -k1,1 | sed 's/RdOut/MultifragRds/'                               > tempLOOP2.txt 
+cat LOOP3_${flashstatus}_multicaptures_table.txt         | cut -f 1,2,5 | sort -T $(pwd) -k1,1 | sed 's/RdIn/RdHasCap/' | sed 's/RdOutJoined/RdSingleCap/' > tempLOOP3.txt 
+cat LOOP5_${flashstatus}_filter_table.txt                               | sort -T $(pwd) -k1,1 | sed 's/samFin/FragInSingleCapRds/' | sed 's/samFout/FragWithinSonicSize/'> tempLOOP5.txt
 
 join -a 1 tempLOOP2.txt tempLOOP3.txt | \
 join -a 1 -             tempLOOP5.txt | \

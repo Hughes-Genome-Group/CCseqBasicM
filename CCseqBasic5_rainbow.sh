@@ -441,7 +441,7 @@ stepAmiddir=$(pwd)
 # 2b) sort capture-site (REfragment) file
 
 mkdir CAPTURESITEFILE
-sort -k2,2n -k3,3n ${capturesitefile} > CAPTURESITEFILE/capturesitefile_sorted.txt
+sort -T $(pwd) -k2,2n -k3,3n ${capturesitefile} > CAPTURESITEFILE/capturesitefile_sorted.txt
 capturesitefile="$(pwd)/CAPTURESITEFILE/capturesitefile_sorted.txt"
 
 # Make oneliners for all capture-site (REfragment)s, to be used in the combining stage..

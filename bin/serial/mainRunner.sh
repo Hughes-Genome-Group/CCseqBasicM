@@ -1045,7 +1045,7 @@ sed -i 's/^dataprefix\s/dataprefix_NONFLASHED\t/' NONFLASHED_parameters_for_filt
 
 # Combining parameter files..
 
-cat FLASHED_parameters_for_filtering.log NONFLASHED_parameters_for_filtering.log | sort | uniq > parameters_for_filtering.log
+cat FLASHED_parameters_for_filtering.log NONFLASHED_parameters_for_filtering.log | sort -T $(pwd) | uniq > parameters_for_filtering.log
 rm -f FLASHED_parameters_for_filtering.log NONFLASHED_parameters_for_filtering.log
 
 
