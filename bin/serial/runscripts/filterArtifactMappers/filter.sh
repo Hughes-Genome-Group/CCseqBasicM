@@ -392,7 +392,7 @@ fi
     
     # Adding to existing file..
     setStringentFailForTheFollowing
-    cat TEMPsortedMerged.txt >> TEMP_${dataprefix}_combined.sam
+    cat TEMPsortedMerged.txt | cut -f 1 --complement >> TEMP_${dataprefix}_combined.sam
     stopStringentFailAfterTheAbove
     ls -lht | grep TEMP >> "/dev/stderr"
     rm -f TEMPsortedMerged.txt
