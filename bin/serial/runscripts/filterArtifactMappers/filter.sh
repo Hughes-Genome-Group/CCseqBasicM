@@ -410,6 +410,9 @@ CaptureCommonHelpersPath=$( dirname ${CaptureTopPath} )"/commonSubroutines"
 # SETTING THE BLACKLIST GENOME LIST PARAMETERS
 . ${CaptureCommonHelpersPath}/blacklistSetters.sh
 
+# SORTING HELPER SUBROUTINES
+. ${CaptureCommonHelpersPath}/sort_helpers.sh
+
 # DEBUG SUBROUTINES - for the situations all hell breaks loose
 # . ${CapturePipePath}/debugHelpers.sh
 

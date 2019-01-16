@@ -183,6 +183,9 @@ fi
 # PARALLEL RUN QSUBBING specific subs - these are needed only within this top level script (and in the above parallel_runtools.sh)
 . ${CaptureParallelPath}/bashHelpers/multitaskers.sh
 
+# SORTING HELPER SUBROUTINES
+. ${CaptureCommonHelpersPath}/sort_helpers.sh
+
 # RERUN INSTRUCTIONS WRITER sub
 . ${CaptureSerialPath}/subroutines/usageAndVersion.sh
 

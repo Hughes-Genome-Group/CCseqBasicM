@@ -148,6 +148,9 @@ echo "Loading subroutines in .."
 # SETTING THE BLACKLIST GENOME LIST PARAMETERS
 . ${CaptureCommonHelpersPath}/blacklistSetters.sh
 
+# SORTING HELPER SUBROUTINES
+. ${CaptureCommonHelpersPath}/sort_helpers.sh
+
 # PRINTING HELP AND VERSION MESSAGES
 . ${CapturePipePath}/usageAndVersion.sh
 
