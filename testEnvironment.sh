@@ -299,6 +299,9 @@ ls ${commonHelpersFolder}/blacklistSetters.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${commonHelpersFolder}/genomeSetters.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${commonHelpersFolder}/sort_helpers.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+
 
 # Serial main 
 
@@ -432,7 +435,7 @@ echo ' |-- testEnvironment.sh'
 echo ' |'
 echo ' `-- bin'
 echo '     |-- commonSubroutines '
-echo '     |    |-- blacklistSetters.sh genomeSetters.sh hubbers.sh'
+echo '     |    |-- blacklistSetters.sh genomeSetters.sh hubbers.sh sort_helpers.sh'
 echo '     |    `-- testers_and_loggers.sh testers_and_loggers_test.sh'
 echo '     |    `-- drawFigure'
 echo '     |       |-- countsFromCCanalyserOutput.sh countsFromCCanalyserOutput_parallel1.sh  countsFromCCanalyserOutput_parallel2.sh '
