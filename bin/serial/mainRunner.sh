@@ -552,7 +552,7 @@ if [[ "${ONLY_BLAT}" -eq "1" ]]; then
 
   echo "BLAT" > ${JustNowLogFile}
 
-  ${CaptureFilterPath}/filter.sh --onlyBlat --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log
+  ${CaptureFilterPath}/filter.sh --onlyBlat --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff}  --bowtieMemory ${BOWTIEMEMORY} > filtering.log
   # cat filtering.log
 
   if [ "$?" -ne 0 ]; then {
@@ -1128,7 +1128,7 @@ mv parameters_for_filtering.log filteringLogFor_${sampleForCCanalyser}_${CCversi
 cd filteringLogFor_${sampleForCCanalyser}_${CCversion}
 
 TEMPreturnvalue=0
-${CaptureFilterPath}/filter.sh --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall ${ploidyFilter} --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff} > filtering.log
+${CaptureFilterPath}/filter.sh --reuseBLAT ${reuseBLATpath} -p parameters_for_filtering.log --pipelinecall ${ploidyFilter} --extend ${extend} --onlyCis ${onlyCis} --stepSize ${stepSize} --minScore ${minScore} --maxIntron=${maxIntron} --tileSize=${tileSize} --oneOff=${oneOff}  --bowtieMemory ${BOWTIEMEMORY} > filtering.log
 TEMPreturnvalue=$?
 
 cat filtering.log
