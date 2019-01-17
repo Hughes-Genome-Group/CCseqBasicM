@@ -127,6 +127,13 @@ filterSams()
 find ${datafolder}/${dataprefix}_capture*.sam
 didWeHaveProblemsInFindingSams=$?
 if [ "${didWeHaveProblemsInFindingSams}" -eq 0 ]; then
+    
+# first the heading.
+rm -f TEMPheading_${dataprefix}.sam
+samtools view -H -o TEMPheading_${dataprefix}.sam $(find ${datafolder} -name ${dataprefix}'_capture*.sam' | head -n 1)
+# ls -lht TEMPheading_${dataprefix}.sam
+# cat TEMPheading_${dataprefix}.sam
+cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' > ${outputfolder}/${dataprefix}_filtered_combined.sam
 
 for file in ${datafolder}/${dataprefix}_capture*.sam
 do
@@ -198,7 +205,8 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
             samtools index TEMP.bam
     
     # Generating the heading (this could be under if clause - as now it is overwritten every round of the loop)
-    samtools view -H -o TEMPheading_${dataprefix}.sam TEMP.bam
+    # samtools view -H -o TEMPheading_${dataprefix}.sam TEMP.bam
+    # doing this outside the loop instead.
 
     # We check PLOIDY filter sam region count, and filter for ploidy..
     echo "${basename} ${dataprefix} - checking the need of filtering for PLOIDY regions.."
@@ -392,21 +400,17 @@ fi
     
     # Adding to existing file..
     setStringentFailForTheFollowing
-    cat TEMPsortedMerged.txt | cut -f 1 --complement >> TEMP_${dataprefix}_combined.sam
+    cat TEMPsortedMerged.txt | cut -f 1 --complement >> ${outputfolder}/${dataprefix}_filtered_combined.sam
     stopStringentFailAfterTheAbove
-    ls -lht | grep TEMP >> "/dev/stderr"
+    ls -lht ${outputfolder}/${dataprefix}_filtered_combined.sam >> "/dev/stderr"
     rm -f TEMPsortedMerged.txt
-  
-
-# We list them in any case ..
-ls -lht | grep combined >> "/dev/stderr"
 
 done
 
 # If we didn't have a file (we just skip all ! )..
 else
-    printThis="Filtering was not done for reporter ${basename} SAM file \n - SAM file ${reporterfile} was not there (no reads to filter)."
-    printToLogFile    
+    printThis="Filtering was not done - no SAM files found (no reads to filter)."
+    printToLogFile     
 fi
     
 }
@@ -1018,7 +1022,7 @@ do
         cat $file | grep 'PloidyRegion=TRUE' > ${outputfolder}/${newname}_forPloidyFiltering.gff
         stopStringentFailAfterTheAbove
     else
-        echo "" > ${outputfolder}/${newname}_forPloidyFiltering.gff
+        echo -n "" > ${outputfolder}/${newname}_forPloidyFiltering.gff
     fi
         
     if [ "${doWeHaveanyBlatREfragments}" -ne 0 ]; then
@@ -1026,7 +1030,7 @@ do
         cat $file | grep 'BlatFilteredRegion=TRUE' > ${outputfolder}/${newname}_forBlatFiltering.gff
         stopStringentFailAfterTheAbove
     else
-        echo "" > ${outputfolder}/${newname}_forBlatFiltering.gff
+        echo -n "" > ${outputfolder}/${newname}_forBlatFiltering.gff
     fi
     
     # And if we have one or the other, we can also combine and sort them ..
@@ -1035,7 +1039,7 @@ do
         cat ${outputfolder}/${newname}_forPloidyFiltering.gff ${outputfolder}/${newname}_forBlatFiltering.gff | sort -T $(pwd) -k1,1 -k4,4n | uniq > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
         stopStringentFailAfterTheAbove
     else
-        echo "" > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
+        echo -n "" > ${outputfolder}/${newname}_forBlatAndPloidyFiltering.gff
     fi        
     
 done
@@ -1053,8 +1057,6 @@ printThis="Flashed sam filtering.."
 printToLogFile
 
 dataprefix="${dataprefixFLASHED}" 
-rm -f TEMPheading_${dataprefix}.sam
-rm -f TEMP_${dataprefix}_combined.sam   
 filterSams
 
 printThis="-------------------------------------"
@@ -1062,9 +1064,7 @@ printToLogFile
 printThis="Nonflashed sam filtering.."
 printToLogFile
 
-dataprefix="${dataprefixNONFLASHED}" 
-rm -f TEMPheading_${dataprefix}.sam
-rm -f TEMP_${dataprefix}_combined.sam   
+dataprefix="${dataprefixNONFLASHED}"  
 filterSams
 
     
@@ -1072,37 +1072,8 @@ filterSams
 
 # Only if we actually needed to filter something !
 if [ -s "${outputfolder}/${newname}_forBlatFiltering.gff" ] ; then
-    setStringentFailForTheFollowing
     cat ${outputfolder}/*.gff | grep BlatFilteredRegion=TRUE | cut -f 1,3,4,5 | awk '{ print $1"\t"$3"\t"$4"\t"$2 }' > ${outputfolder}/blatFilterMarkedREfragments.bed
-    stopStringentFailAfterTheAbove  
-
-    printThis="Combined filtered SAM file - final touches.."
-    printToLogFile 
-    
-    ls -lht TEMP*.sam
-    ls -lht TEMP*.sam >> "/dev/stderr"
-    
-    dataprefix="${dataprefixFLASHED}"
-    setStringentFailForTheFollowing
-    cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
-    stopStringentFailAfterTheAbove
-    
-    dataprefix="${dataprefixNONFLASHED}"    
-    setStringentFailForTheFollowing
-    cat TEMPheading_${dataprefix}.sam | sed 's/SO:coordinate/SO:unsorted/' | cat - TEMP_${dataprefix}_combined.sam > ${outputfolder}/${dataprefix}_filtered_combined.sam
-    stopStringentFailAfterTheAbove
-
-else
-    dataprefix="${dataprefixFLASHED}"
-    mv -f TEMP_${dataprefix}_combined.sam ${outputfolder}/${dataprefix}_filtered_combined.sam
-    dataprefix="${dataprefixNONFLASHED}"
-    mv -f TEMP_${dataprefix}_combined.sam ${outputfolder}/${dataprefix}_filtered_combined.sam
 fi
-
-dataprefix="${dataprefixFLASHED}"
-rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
-dataprefix="${dataprefixNONFLASHED}"
-rm -f TEMPheading_${dataprefix}.sam TEMP_${dataprefix}_combined.sam
 
 ls -lht ${outputfolder}/*filtered_combined.sam
 ls -lht ${outputfolder}/*filtered_combined.sam >> "/dev/stderr"
