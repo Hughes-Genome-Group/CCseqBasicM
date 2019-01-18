@@ -24,25 +24,30 @@ cleanCCfolder(){
 rm -f *_coordstring_${CCversion}.txt
 for file in *.sam
 do
+    TEMPreturnvalue=0
     bamname=$( echo $file | sed 's/.sam/.bam/' )
     if [ -s ${file} ]
     then
     samtools view -bh ${file} > ${bamname}
+    TEMPreturnvalue=$?
         if [ ! -s ${bamname} ]
         then
-            rmCommand='rm -f ${bamname}'
-            rmThis="${bamname}"
-            checkRemoveSafety
             rm -f ${bamname}
         fi    
     fi
     
-    rmCommand='rm -f $file'
-    rmThis="$file"
-    checkRemoveSafety
-    rm -f $file
+    if [ "${TEMPreturnvalue}" -eq 0 ] ; then
+        rmCommand='rm -f $file'
+        rmThis="$file"
+        checkRemoveSafety
+        rm -f $file
+    else
+        printThis="Couldn't sam-->bam transform file $file . Leaving it as SAM file."
+        printToLogFile
+        ls -lht ${file}
+    fi
     ls -lht ${bamname}
-done     
+done  
 }
 
 cleanUpRunFolder(){
@@ -111,6 +116,14 @@ cdCommand='cd ${TEMPcleanupFolder}'
 cdToThis="${TEMPcleanupFolder}"
 checkCdSafety
 cd ${TEMPcleanupFolder}
+
+cd F4_blatPloidyFilteringLog_${Sample}_${CCversion}/BlatPloidyFilterRun/BLAT_PLOIDY_FILTERED_OUTPUT
+cleanCCfolder
+cdCommand='cd ${TEMPcleanupFolder}'
+cdToThis="${TEMPcleanupFolder}"
+checkCdSafety
+cd ${TEMPcleanupFolder}
+
 
 cd F5_greenGraphs_separate_${Sample}_${CCversion}
 echo F5_greenGraphs_separate_${Sample}_${CCversion}
