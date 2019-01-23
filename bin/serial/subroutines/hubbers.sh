@@ -211,7 +211,7 @@ doRegularTrack(){
         echo "TRACK DESCRIPTION NOT CREATED - track ${trackName} does not have size in ${publicPathForCCanalyser}/${fileName}" >> "/dev/stderr"
     fi
 else
-        echo ""
+        echo -n ""
         # echo "TRACK DESCRIPTION NOT CREATED - track ${trackName} already exists in ${publicPathForCCanalyser}/${sampleForCCanalyser}_${CCversion}_tracks.txt"
     fi
     
@@ -608,6 +608,11 @@ printToLogFile
 
 temptime=$( date +%d%m%y )
 
+# PINK GREEN (default)
+redcolor="255,74,179"
+orangecolor="255,140,0"
+greencolor="62,176,145"
+
 # Here add :
 
 # Generate the hub itself, as well as genomes.txt
@@ -723,7 +728,7 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     trackName="${trackname}_raw"
     fileName="${filename}"
     bigWigSubfolder="RAW"
-    trackColor="255,0,0"
+    trackColor="${redcolor}"
     trackPriority="100"
     doMultiWigChild
     
@@ -754,7 +759,7 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     trackName="${trackname}_PREfiltered"
     fileName="${filename}"
     bigWigSubfolder="PREfiltered"
-    trackColor=" 255,140,0"
+    trackColor="${orangecolor}"
     trackPriority="110"
     doMultiWigChild
     
@@ -784,7 +789,7 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     trackName="${trackname}_filtered"
     fileName="${filename}"
     bigWigSubfolder="FILTERED"
-    trackColor="0,200,0"
+    trackColor="${greencolor}"
     trackPriority="120"
     doMultiWigChild
     
@@ -796,10 +801,11 @@ cat ${PublicPath}/RAW/RAW_${tracksTxt} ${PublicPath}/PREfiltered/PREfiltered_${t
     
     # Here used to be also sed 's/visibility hide/visibility full/' : to set only the COMBINED tracks visible.
     # As multi-capture samples grep more frequent, this was taken out of the commands below.
-    cat ${PublicPath}/COMBINED/COMBINED_${tracksTxt} | sed 's/color 0,0,0/color 0,200,0/' | sed 's/priority 200/priority 10/' | sed 's/bigDataUrl .*COMBINED\//bigDataUrl COMBINED\//' | grep -v "^html" > TEMP3_tracks.txt
+    cat ${PublicPath}/COMBINED/COMBINED_${tracksTxt} | sed 's/color 0,0,0/color '"${greencolor}"'/' \
+    | sed 's/priority 200/windowingFunction maximum\npriority 10/' \
+    | sed 's/bigDataUrl .*COMBINED\//bigDataUrl COMBINED\//' | grep -v "^html" \
+    > TEMP3_tracks.txt
     
-    cat ${PublicPath}/COMBINED/COMBINED_${tracksTxt} | sed 's/color 0,0,0/color 0,200,0/' | sed 's/priority 200/priority 10/' | sed 's/bigDataUrl .*COMBINED\//bigDataUrl COMBINED\//' | grep -v "^html"
-   
     cp ${PublicPath}/COMBINED/*.bb ${PublicPath}/.
    
     cat TEMP2_tracks.txt TEMP3_tracks.txt > TEMP4_tracks.txt
