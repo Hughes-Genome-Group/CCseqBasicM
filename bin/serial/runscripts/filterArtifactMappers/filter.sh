@@ -156,7 +156,7 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
 # Combined_reads_REdig_CC2_capture_Hba-1.sam
 # Combined_reads_REdig_CC2_Hba-1.sam
    
-    samDataLineCount1000=$( cat ${file} | head -n 1000 | grep -cv "^@" )
+    samDataLineCount1000=$( cat ${reporterfile} | head -n 1000 | grep -cv "^@" )
 
     if [ "${samDataLineCount1000}" -ne "0" ]; then
         
@@ -312,6 +312,10 @@ if [ -s "${outputfolder}/${dataprefix}_${basename}_forBlatAndPloidyFiltering.gff
     rm -f TEMP.bed
 
     
+    # If we have no reads in the reporter sam file.
+    else
+        printThis="Reporter ${basename} SAM file ${reporterfile} is EMPTY (or heading only) \n - reads cannot be filtered !"
+        printToLogFile
     fi
 
 # If we actually dont' need to filter anything (the _forBlatAndPloidyFiltering.gff was empty) , we can just use the SAM reporter file as it is ..  
