@@ -424,6 +424,9 @@ done
 
 for file in *_blat_filter.gfc
 do
+    
+if [ -s $file ]
+then
 
 newname=$( echo $file | sed 's/TEMP_//' )
 
@@ -436,6 +439,8 @@ if [ "$?" -ne 0 ]; then
 printThis="Couldn't rename output file $file to become ${newname} ! \n EXITING !! "
 printToLogFile
 exit 1
+fi
+
 fi
 
 done
@@ -454,6 +459,9 @@ echo
 for file in *_blat_filter.gfc
 do
 
+if [ -s $file ]
+then
+
 newname=$( echo $file | sed 's/.gfc$//' )
 cat ${file} | sed 's/:/\tcol2\tcol3\t/' | sed 's/-/\t/' | sed 's/$/\t.\t.\t.\tfacet=0/' > ${newname}.gff
 
@@ -464,6 +472,8 @@ if [ "$?" -ne 0 ]; then
 printThis="Bedtools slop to extend filtering coordinates failed for ${newname} ! \n EXITING !! "
 printToLogFile
 exit 1
+fi
+
 fi
 
 done
