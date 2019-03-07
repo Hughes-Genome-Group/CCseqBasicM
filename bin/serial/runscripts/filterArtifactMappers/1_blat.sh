@@ -482,7 +482,8 @@ echo
 echo "Files for blat filtering :"
 ls -lht |  grep "_extendedBy${extend}b.gff"
 
-
+# If the file is not there - avoiding exit 1 with this :
+exit 0
 
 
 
