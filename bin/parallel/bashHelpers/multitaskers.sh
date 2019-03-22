@@ -299,11 +299,11 @@ fi
 
 # TMP area memory in Megas - the whole node has this amount. Thou shalt not go over :D
 wholenodeDisk=300000
-wholenodesafetylimitDisk=$((${wholenodeDisk}-80000))
+wholenodesafetylimitDisk=$((${wholenodeDisk}-100000))
 
 # wholenode RAM memory in Megas - the whole node has this amount. Thou shalt not go over :D
 wholenodeMem=260000
-wholenodesafetylimitMem=$((${wholenodeMem}-80000))
+wholenodesafetylimitMem=$((${wholenodeMem}-100000))
 
 # foundFoldersCount=$(($(ls -1 | grep '^fastq_' | grep -c "")))
 # We default to 24 processors, and are not planning to change this to become a flag instead ..
@@ -312,7 +312,9 @@ askedProcessors=24
 if [ "${FastqOrCapturesite}" == "Bamcombine" ];then
     askedProcessors=100
 elif [ "${FastqOrCapturesite}" == "Capturesite" ];then
-    askedProcessors=40
+    # askedProcessors=40
+    askedProcessors=24
+
 fi
 neededQsubsCount=$(($((${foundFoldersCount}/${askedProcessors}))+1))
 
@@ -332,8 +334,8 @@ if [ "${FastqOrCapturesite}" == "Bamcombine" ];then
     sleepSeconds=1
     reportEverythismanyRounds=60
 elif [ "${FastqOrCapturesite}" == "Capturesite" ];then
-    sleepSeconds=1
-    reportEverythismanyRounds=60
+    sleepSeconds=12
+    reportEverythismanyRounds=5
 fi
 longSleep=$((${sleepSeconds}*10))
 # Override for Fastq runs - we want to stagger the whole run every 10min,
