@@ -290,11 +290,18 @@ CaptureDigestPath="/home/molhaem2/telenius/CCseqBasic/digests"
 
 # Change the files / paths below, if you want to use your own versions of these files.
 
+supportedGenomes[10]="mm10balb"
+supportedGenomes[12]="hg19hindMasked"
+supportedGenomes[13]="mm9dpnMasked"
+
 genomesWhichHaveBlacklist[0]="mm9"
 genomesWhichHaveBlacklist[1]="mm10"
 genomesWhichHaveBlacklist[2]="hg18"
 genomesWhichHaveBlacklist[3]="hg19"
 genomesWhichHaveBlacklist[4]="mm9PARP"
+genomesWhichHaveBlacklist[5]="mm10balb"
+genomesWhichHaveBlacklist[6]="hg19hindMasked"
+genomesWhichHaveBlacklist[7]="mm9dpnMasked"
 # - i.e. : not all genomes have to have a blacklist.
 # If the genome is not listed here, blacklist filtering is NOT conducted within the pipeline (turned off automatically).
 
@@ -306,6 +313,9 @@ BLACKLIST[1]="${confFolder}/BLACKLIST/mm10.bed"
 BLACKLIST[2]="${confFolder}/BLACKLIST/hg18.bed"
 BLACKLIST[3]="${confFolder}/BLACKLIST/hg19.bed"
 BLACKLIST[4]="${confFolder}/BLACKLIST/mm9.bed"
+BLACKLIST[5]="${confFolder}/BLACKLIST/mm10.bed"
+BLACKLIST[6]="${confFolder}/BLACKLIST/hg19.bed"
+BLACKLIST[7]="${confFolder}/BLACKLIST/mm9.bed"
 # The indices in the BLACKLIST array refer to genome names in genomesWhichHaveBlacklist array.
 
 }
