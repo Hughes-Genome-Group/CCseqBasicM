@@ -246,7 +246,7 @@ ls ${PipeTopPath}/CCseqBasic5_rainbow.sh
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 # ls ${PipeTopPath}/CCseqBasic5_parallel.sh
 # scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${PipeTopPath}/testEnvironment.sh 
+ls ${PipeTopPath}/testEnvironment_CCseqBasic.sh 
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 echo
 sleep 3
@@ -578,8 +578,6 @@ fi
 if [ "${exitCode}" -gt 0 ]
 then
 exit 1
-else
-exit 0
 fi
 
 ##########################################################################
@@ -593,14 +591,14 @@ fi
 
 if [ "${genomeSetupMade}" -eq 1 ]; then 
 
-setGenomeLocations 1>/dev/null
-
 supportedGenomes=()
 BOWTIE1=()
 BOWTIE2=()
 UCSC=()
 genomesWhichHaveBlacklist=()
 BLACKLIST=()
+
+setGenomeLocations 1>/dev/null
 
 echo
 sleep 4
