@@ -342,7 +342,7 @@ longSleep=$((${sleepSeconds}*10))
 # as we are so prone to oscillate and crash when starting new runs right after we have crashed as TMPdir area got full
 # this leading one TMPdir area full event essentially crashing all subsequent samples like dominoes
 if [ "${FastqOrCapturesite}" == "Fastq" ];then
-    longSleep=${sleepSeconds}*2
+    longSleep=$((${sleepSeconds}*2))
 fi
 
 echo
