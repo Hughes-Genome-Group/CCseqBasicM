@@ -142,7 +142,7 @@ if [ "${ucscBuildName}" == "UNDETERMINED" ]; then
 fi
 
 echo
-echo "Genome ${GENOME} . Set UCSC genome name : ${ucscBuildName}"
+echo "Genome ${GENOME} . Set UCSC visualisation genome name : ${ucscBuildName}"
 echo
 
 }
@@ -155,25 +155,25 @@ for g in $( seq 0 $((${#supportedGenomes[@]}-1)) ); do
     
 # echo ${supportedGenomes[$g]}
 
-if [ "${supportedGenomes[$g]}" == "${ucscBuildName}" ]; then
+if [ "${supportedGenomes[$g]}" == "${GENOME}" ]; then
     ucscBuild="${UCSC[$g]}"
 fi
 
 done 
     
 if [ "${ucscBuild}" == "UNDETERMINED" ]; then 
-  echo "Genome build " ${ucscBuildName} " is not supported --- aborting !"  >&2
+  echo "Genome build " ${GENOME} " is not supported --- aborting !"  >&2
   exit 1 
 fi
 
 # Check that the file exists..
 if [ ! -e "${ucscBuild}" ] || [ ! -r "${ucscBuild}" ] || [ ! -s "${ucscBuild}" ]; then
-  echo "Genome build ${ucscBuildName} file ${ucscBuild} not found or empty file - aborting !"  >&2
+  echo "Genome build ${GENOME} file ${ucscBuild} not found or empty file - aborting !"  >&2
   exit 1     
 fi
 
 echo
-echo "UCSC genome ${ucscBuildName} . Set UCSC genome sizes file : ${ucscBuild}"
+echo "Analysis genome ${GENOME} . Set UCSC genome sizes file : ${ucscBuild}"
 echo
 
 }

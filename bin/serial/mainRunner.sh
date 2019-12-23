@@ -463,13 +463,13 @@ setGenomeFasta
 echo "GenomeFasta ${GenomeFasta}" >> parameters_capc.log
 echo "BowtieGenome ${BowtieGenome}" >> parameters_capc.log
 
+# Genome sizes file
+setUCSCgenomeSizes
+echo "ucscBuild ${ucscBuild}" >> parameters_capc.log
+
 # If the visualisation genome name differs from the asked genome name : masked genomes
 setUCSCgenomeName
-# Visualisation genome sizes file
-setUCSCgenomeSizes
-
 echo "ucscBuildName ${ucscBuildName}" >> parameters_capc.log
-echo "ucscBuild ${ucscBuild}" >> parameters_capc.log
 
 #------------------------------------------
 
@@ -693,7 +693,7 @@ if [[ ${ONLY_RE_DIGESTS} -eq "1" ]]; then
 echo > REdigest.log
 date >> REdigest.log
 echo >> REdigest.log
-echo "ucscBuildName ${ucscBuildName}" >> REdigest.log
+echo "GENOME ${GENOME}" >> REdigest.log
 echo "genome_${REenzyme}_coordinates.txt" >> REdigest.log
 echo "fullPathDpnGenome ${fullPathDpnGenome}" >> REdigest.log
 echo >> REdigest.log

@@ -27,7 +27,7 @@ for g in $( seq 0 $((${#genomesWhichHaveBlacklist[@]}-1)) ); do
 
 # echo ${supportedGenomes[$g]}
 
-if [ "${genomesWhichHaveBlacklist[$g]}" == "${ucscBuildName}" ]; then
+if [ "${genomesWhichHaveBlacklist[$g]}" == "${GENOME}" ]; then
     ploidyPath="${BLACKLIST[$g]}"
 fi
 
@@ -35,10 +35,10 @@ done
     
 if [ "${ploidyPath}" == "UNDETERMINED" ]; then
   echo
-  echo "NOTE !! Genome build " ${GENOME} " using UCSC build " ${ucscBuildName} " is not supported in BLACKLIST FILTERING - turning blacklist filtering off !"
+  echo "NOTE !! Genome build " ${GENOME} " is not supported in BLACKLIST FILTERING - turning blacklist filtering off !"
   echo
   echo  >&2
-  echo "NOTE !! Genome build " ${GENOME} " using UCSC build " ${ucscBuildName} " is not supported in BLACKLIST FILTERING - turning blacklist filtering off !"  >&2
+  echo "NOTE !! Genome build " ${GENOME} " is not supported in BLACKLIST FILTERING - turning blacklist filtering off !"  >&2
   echo  >&2
   
   weHavePloidyFile=0;
@@ -51,7 +51,7 @@ fi
 if [ "${weHavePloidyFile}" -eq 1 ] ; then
 
 if [ ! -e "${ploidyPath}" ] || [ ! -r "${ploidyPath}" ] || [ ! -s "${ploidyPath}" ]; then
-  echo "Blacklisted regions file not found - for genome " ${GENOME} " using UCSC build " ${ucscBuildName} " - file ${ploidyPath} not found or empty file - aborting !"  >&2
+  echo "Blacklisted regions file not found - for genome " ${GENOME} " - file ${ploidyPath} not found or empty file - aborting !"  >&2
   exit 1     
 fi
 

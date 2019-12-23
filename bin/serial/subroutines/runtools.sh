@@ -111,10 +111,10 @@ rmThis="genome_${REenzyme}_coordinates.txt"
 checkRemoveSafety
 rm -f genome_${REenzyme}_coordinates.txt
 
-if [ -s ${CaptureDigestPath}/${ucscBuildName}.txt ] 
+if [ -s ${CaptureDigestPath}/${GENOME}.txt ] 
 then
     
-ln -s ${CaptureDigestPath}/${ucscBuildName}.txt genome_${REenzyme}_coordinates.txt
+ln -s ${CaptureDigestPath}/${GENOME}.txt genome_${REenzyme}_coordinates.txt
     
 else
     
