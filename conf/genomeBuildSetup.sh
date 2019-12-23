@@ -239,8 +239,8 @@ UCSC[9]="${confFolder}/UCSCgenomeSizes/dm6.chrom.sizes"
 UCSC[10]="MASKED_GENOME_SHOULD_NOT_GET_THIS_FROM_HERE_BUT_FROM_ITS_PARENT_BUILD"
 # UCSC[11]="${confFolder}/UCSCgenomeSizes/mm9.chrom.sizes"
 UCSC[11]="/t1-data/user/hugheslab/telenius/GENOMES/PARP/mm9PARP_sizes.txt"
-UCSC[12]="MASKED_GENOME_SHOULD_NOT_GET_THIS_FROM_HERE_BUT_FROM_ITS_PARENT_BUILD"
-UCSC[13]="MASKED_GENOME_SHOULD_NOT_GET_THIS_FROM_HERE_BUT_FROM_ITS_PARENT_BUILD"
+UCSC[12]="${confFolder}/UCSCgenomeSizes/hg19.chrom.sizes"
+UCSC[13]="${confFolder}/UCSCgenomeSizes/mm9.chrom.sizes"
 
 # The indices in the UCSC array refer to genome names in supportedGenomes array (top of page).
 
@@ -292,10 +292,6 @@ CaptureDigestPath="/home/molhaem2/telenius/CCseqBasic/digests"
 # All these are already there - they come with the CCseqBasic4 codes.
 
 # Change the files / paths below, if you want to use your own versions of these files.
-
-supportedGenomes[10]="mm10balb"
-supportedGenomes[12]="hg19hindMasked"
-supportedGenomes[13]="mm9dpnMasked"
 
 genomesWhichHaveBlacklist[0]="mm9"
 genomesWhichHaveBlacklist[1]="mm10"
