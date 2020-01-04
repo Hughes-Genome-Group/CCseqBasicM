@@ -257,7 +257,7 @@ UCSC[13]="${confFolder}/UCSCgenomeSizes/mm9.chrom.sizes"
 # To turn this off, set :
 # CaptureDigestPath="NOT_IN_USE"
 
-CaptureDigestPath="/home/molhaem2/telenius/CCseqBasic/digests"
+CaptureDigestPath="/t1-data/data/hugheslab/jelenatools/CCseqBasic/digests"
 
 # #############################################################################
 # BLACKLISTED REGIONS FILES
