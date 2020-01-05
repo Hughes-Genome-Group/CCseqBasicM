@@ -220,10 +220,11 @@ echo "This is where they should be ( will soon see if they actually are there ) 
 echo
 echo "PipeTopPath        ${PipeTopPath}"
 echo "confFolder         ${confFolder}"
-echo "parallelScriptFolder   ${mainScriptFolder}"
-echo "parallelHelperScriptFolder ${helperScriptFolder}"
+echo "parallelScriptFolder   ${parallelScriptFolder}"
+echo "parallelHelperScriptFolder ${parallelHelperScriptFolder}"
 echo "mainScriptFolder   ${mainScriptFolder}"
 echo "helperScriptFolder ${helperScriptFolder}"
+echo "commonHelpersFolder ${commonHelpersFolder}"
 echo
 
 sleep 4
@@ -276,14 +277,16 @@ scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${mainScriptFolder}/hindIIIcutReads4.pl
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
-echo "UCSC downloaded tools for visualisation (downloaded 06May2014 from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/ ) :"
-echo
-ls ${confFolder}/ucsctools/bedToBigBed
-scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${confFolder}/ucsctools/wigToBigWig
-scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-echo
-sleep 3
+# This part of CM5 is not made portable. These are taken from module load only, so are not tested here.
+
+# echo "UCSC downloaded tools for visualisation (downloaded 06May2014 from http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/ ) :"
+# echo
+# ls ${confFolder}/ucsctools/bedToBigBed
+# scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+# ls ${confFolder}/ucsctools/wigToBigWig
+# scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+# echo
+# sleep 3
 
 echo
 echo "Helper scripts and subroutines .."
@@ -313,6 +316,8 @@ ls ${mainScriptFolder}/fastq_scores_bowtie2.pl >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${mainScriptFolder}/QC_and_Trimming.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${mainScriptFolder}/bamDivideMappedReads.pl >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 # Serial subs
 
@@ -333,9 +338,7 @@ scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 # Parallel main
 
-ls ${parallelScriptFolder}/checParameters.sh >> "/dev/null"
-scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${parallelScriptFolder}/colotracksForHub.sh >> "/dev/null"
+ls ${parallelScriptFolder}/checkParameters.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${parallelScriptFolder}/fastqExistenceChecks.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
@@ -344,10 +347,53 @@ ls ${parallelScriptFolder}/parallel_QC.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${parallelScriptFolder}/parallelVisualisation.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${parallelScriptFolder}/parallelVisualisationLogs.sh >> "/dev/null"
-scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${parallelScriptFolder}/prepareSampleForCCanalyser.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/eE_cleanupScript_toUse_afterSuccesfull_Run.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+
+ls ${parallelScriptFolder}/colortracksForHub.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/makeRainbowHubs.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/makeRainbowTracks.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/makeRawsamTracks.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+
+ls ${parallelScriptFolder}/javascriptHelpers/jquery.sparkline.min.js >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/javascriptHelpers/example.html >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/javascriptHelpers/jquery-3.2.1.min.js >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+
+ls ${parallelScriptFolder}/echoer_for_SunGridEngine_environment.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+
+ls ${parallelScriptFolder}/oneThreadParallelBamcombineWorkDir.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/oneBamcombineWholenodeWorkDir.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+
+ls ${parallelScriptFolder}/oneFastqWholenode.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/oneFastqWholenodeWorkDir.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/oneCapturesiteWholenode.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/oneCapturesiteWholenodeWorkDir.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+
+ls ${parallelScriptFolder}/oneThreadParallelFastq.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/oneThreadParallelFastqWorkDir.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/oneThreadParallelCapturesite.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelScriptFolder}/oneThreadParallelCapturesiteWorkDir.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+
 
 # Parallel subs
 
@@ -361,7 +407,10 @@ ls ${parallelHelperScriptFolder}/parallel_runtools.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${parallelHelperScriptFolder}/parameterFileReaders.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-
+ls ${parallelHelperScriptFolder}/rainbowHubHelpers.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${parallelHelperScriptFolder}/multitaskers.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 echo
 echo "Scripts for read filtering .."
@@ -378,6 +427,8 @@ echo
 ls ${commonHelpersFolder}/drawFigure/countsFromCCanalyserOutput.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${commonHelpersFolder}/drawFigure/countsFromCCanalyserOutput_parallel1.sh >> "/dev/null"
+scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
+ls ${commonHelpersFolder}/drawFigure/countsFromCCanalyserOutput_parallel2.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${commonHelpersFolder}/drawFigure/countsFromCCanalyserOutput_parallel1tiled.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
@@ -429,59 +480,60 @@ echo "###########################################"
 echo
 echo "This is what you SHOULD see if you run 'tree' command in your CCseqBasic folder :"
 echo
-echo ' |-- CCseqBasic5.sh CCseqBasic5_rainbow.sh'
-# echo ' |-- CCseqBasic6_parallel.sh'
-echo ' |-- testEnvironment.sh'
+echo 
+echo ' |-- CCseqBasic5_rainbow.sh'
+echo ' |-- testEnvironment_CCseqBasic.sh'
 echo ' |'
-echo ' `-- bin'
-echo '     |-- commonSubroutines '
-echo '     |    |-- blacklistSetters.sh genomeSetters.sh hubbers.sh sort_helpers.sh'
-echo '     |    `-- testers_and_loggers.sh testers_and_loggers_test.sh'
-echo '     |    `-- drawFigure'
-echo '     |       |-- countsFromCCanalyserOutput.sh countsFromCCanalyserOutput_parallel1.sh  countsFromCCanalyserOutput_parallel2.sh '
-echo '     |       |-- drawFigure.py drawFigure_parallel1.py drawFigure_parallel1tiled.py'
-echo '     |       `-- generatePercentages.py generatePercentages_parallel1.py generatePercentages_parallel1tiled.py'
-echo '     |'
-echo '     |-- parallel'
-echo '     |   |-- checkParameters.sh fastqExistenceChecks.sh '
-echo '     |   |-- prepareSampleForCCanalyser.sh colortracksForHub.sh'
-echo '     |   |-- parallel_QC.sh parallelVisualisation.sh  parallelVisualisationLogs.sh'
-echo '     |   `-- bashHelpers'
-echo '     |       |-- fastqChecksFromPyramid.sh inputFastqs.sh parallel_runtools.sh'
-echo '     |       `-- parameterFileReaders.sh fileTesters.sh'
-echo '     |'
-echo '     `-- serial'
-echo '         |-- mainRunner.sh'
-echo '         |-- runscripts'
-echo '         |   |-- QC_and_Trimming.sh analyseMappedReads.pl '
-echo '         |   |-- parallel_QC.sh parallelVisualisation.sh '
-echo '         |   |-- fastq_scores_bowtie1.pl fastq_scores_bowtie2.pl intersectappend.pl'
-echo '         |   |-- dpnIIcutGenome4.pl dpnIIcutReads4.pl nlaIIIcutGenome4.pl nlaIIIcutReads4.pl'
-# echo '         |   |   hindIIIcutGenome4.pl hindIIIcutReads4.pl'
-echo '         |   |-- filterArtifactMappers'
-echo '         |   |    `-- filter.sh 1_blat.sh 2_psl_parser.pl '
-echo '         |-- subroutines'
-echo '         |   |-- runtools.sh runtoolsAfterBowtieFilters.sh cleaners.sh'
-echo '         |   |-- defaultparams.sh parameterSetters.sh usageAndVersion.sh'
-echo '         |   `-- validateSetup'
-echo '         |       `-- g.txt l.txt s.txt'
-echo '         `-- perlHelpers'
-echo '             |-- data2gff.pl fastq_scores_bowtie1/2.pl reverse_seq.pl '
-echo '             `-- sam2fastq.pl trim1base3prime.pl windowingScript.pl'
-echo ''
-echo '`-- conf'
-echo '    |-- BLACKLIST'
-echo '    |   `-- hg18.bed hg19.bed mm10.bed mm9.bed'
-echo '    |-- genomeBuildSetup.sh'
-echo '    |-- loadNeededTools.sh'
-echo '    |-- serverAddressAndPublicDiskSetup.sh'
-echo '    |-- ucsctools'
-echo '    |   |-- wigToBigWig '
-echo '    |   `-- bedToBigBed'
-echo '    `-- UCSCgenomeSizes'
-echo '        |-- danRer10/7.chrom.sizes dm3.chrom.sizes galGal4.chrom.sizes'
-echo '        `-- hg18/19/38.chrom.sizes mm10/9.chrom.sizes'
-echo ''
+echo ' |-- bin'
+echo ' |   |-- commonSubroutines'
+echo ' |   |   |-- blacklistSetters.sh genomeSetters.sh sort_helpers.sh'
+echo ' |   |   |-- testers_and_loggers.sh testers_and_loggers_test.sh'
+echo ' |   |   |'
+echo ' |   |   `-- drawFigure'
+echo ' |   |       |-- countsFromCCanalyserOutput.sh countsFromCCanalyserOutput_parallel1.sh countsFromCCanalyserOutput_parallel2.sh'
+echo ' |   |       |-- drawFigure.py drawFigure_parallel1.py drawFigure_parallel1tiled.py'
+echo ' |   |       `-- generatePercentages.py generatePercentages_parallel1.py'
+echo ' |   |'
+echo ' |   |-- parallel'
+echo ' |   |   |-- checkParameters.sh colortracksForHub.sh fastqExistenceChecks.sh'
+echo ' |   |   |-- echoer_for_SunGridEngine_environment.sh E_cleanupScript_toUse_afterSuccesfull_Run.sh'
+echo ' |   |   |-- makeRainbowHubs.sh makeRainbowTracks.sh makeRawsamTracks.sh'
+echo ' |   |   |-- oneBamcombineWholenodeWorkDir.sh oneThreadParallelBamcombineWorkDir.sh'
+echo ' |   |   |-- oneCapturesiteWholenode.sh oneCapturesiteWholenodeWorkDir.sh'
+echo ' |   |   |-- oneFastqWholenode.sh oneFastqWholenodeWorkDir.sh'
+echo ' |   |   |-- oneThreadParallelCapturesite.sh oneThreadParallelCapturesiteWorkDir.sh'
+echo ' |   |   |-- oneThreadParallelFastq.sh oneThreadParallelFastqWorkDir.sh'
+echo ' |   |   |-- parallel_QC.shprepareSampleForCCanalyser.sh'
+echo ' |   |   |'
+echo ' |   |   |-- bashHelpers'
+echo ' |   |   |   |-- fastqChecksFromPyramid.sh fileTesters.sh inputFastqs.sh parameterFileReaders.sh'
+echo ' |   |   |   `-- multitaskers.sh parallel_runtools.sh rainbowHubHelpers.sh'
+echo ' |   |   |'
+echo ' |   |   `-- javascriptHelpers'
+echo ' |   |      `-- example.html jquery-3.2.1.min.js jquery.sparkline.min.js'
+echo ' |   |'
+echo ' |   `-- serial'
+echo ' |       |-- mainRunner.sh'
+echo ' |       |'
+echo ' |       |-- runscripts'
+echo ' |       |   |-- analyseMappedReads.pl bamDivideMappedReads.pl intersectappend.pl QC_and_Trimming.sh'
+echo ' |       |   |-- dpnIIcutGenome4.pl dpnIIcutReads4.pl hindIIIcutGenome4.pl hindIIIcutReads4.pl nlaIIIcutGenome4.pl nlaIIIcutReads4.pl'
+echo ' |       |   |-- fastq_scores_bowtie1.pl fastq_scores_bowtie2.pl'
+echo ' |       |   `-- filterArtifactMappers'
+echo ' |       |       `-- 1_blat.sh 2_psl_parser.pl filter.sh'
+echo ' |       |'
+echo ' |       `-- subroutines'
+echo ' |           |-- cleaners.sh debugHelpers.sh defaultparams.sh hubbers.sh runtools.sh'
+echo ' |           |-- parametersetters.sh runtoolsAfterBowtieFilters.sh usageAndVersion.sh'
+echo ' |           `-- validateSetup'
+echo ' |               `-- g.txt l.txt s.txt'
+echo ' |'
+echo ' `-- conf'
+echo '     |-- genomeBuildSetup.sh loadNeededTools.sh serverAddressAndPublicDiskSetup.sh'
+echo '     `-- UCSCgenomeSizes'
+echo '         |-- howToFetchThese.txt'
+echo '         `-- mm9.chrom.sizes'
+
 
 sleep 4
 
@@ -886,6 +938,8 @@ echo "###########################################"
 echo
 echo "6) Testing that the user-defined public server exists"
 echo
+
+setPublicLocations 1>/dev/null
 
 echo
 echo "Public area settings : "
