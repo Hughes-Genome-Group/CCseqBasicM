@@ -345,11 +345,9 @@ scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 ls ${parallelScriptFolder}/parallel_QC.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${parallelScriptFolder}/parallelVisualisation.sh >> "/dev/null"
-scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${parallelScriptFolder}/prepareSampleForCCanalyser.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${parallelScriptFolder}/eE_cleanupScript_toUse_afterSuccesfull_Run.sh >> "/dev/null"
+ls ${parallelScriptFolder}/E_cleanupScript_toUse_afterSuccesfull_Run.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 ls ${parallelScriptFolder}/colortracksForHub.sh >> "/dev/null"
@@ -430,14 +428,10 @@ ls ${commonHelpersFolder}/drawFigure/countsFromCCanalyserOutput_parallel1.sh >> 
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${commonHelpersFolder}/drawFigure/countsFromCCanalyserOutput_parallel2.sh >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${commonHelpersFolder}/drawFigure/countsFromCCanalyserOutput_parallel1tiled.sh >> "/dev/null"
-scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 ls ${commonHelpersFolder}/drawFigure/generatePercentages.py >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 ls ${commonHelpersFolder}/drawFigure/generatePercentages_parallel1.py >> "/dev/null"
-scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
-ls ${commonHelpersFolder}/drawFigure/generatePercentages_parallel1tiled.py >> "/dev/null"
 scriptFilesMissing=$(( ${scriptFilesMissing} + $? ))
 
 ls ${commonHelpersFolder}/drawFigure/drawFigure.py >> "/dev/null"
