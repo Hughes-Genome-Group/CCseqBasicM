@@ -144,7 +144,7 @@ echo "--stopAfterFolderB      : RAINBOW runs only - stop the run after fastq-wis
 echo "--startAfterFolderB     : RAINBOW runs only - restart the run from folder C onwards. "
 echo "--stopAfterBamCombining : RAINBOW runs only - stop after folder C (bam combining). don't proceed to capture-site (REfragment)-wise analysis "
 echo
-echo "--onlyBlat : Don't analyse the fastq data, or generate public hubs. hust run the blat generation based on the capture-site (REfragment) coordinate file and genome build. "
+echo "--onlyBlat : DISABLED in CM5 : run your onlyBlat runs via CS5 pipe instead (these CS5 blat files go straight in to the CM5 full run) "
 echo "--onlyCCanalyser : Start the analysis from the CCanalyser script (deletes folders F2 --> and the output public folder, and restarts the run from there "
 echo "     : assumes fully completed F1 folder with intact sam files ) . In RAINBOW runs this reruns folder D and data hub. "
 echo

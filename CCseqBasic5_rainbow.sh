@@ -324,6 +324,24 @@ stopAfterBamCombining=$(($( cat TEMP.mainparam | grep -c stopAfterBamCombining )
 onlyCCanalyser=$(($( cat TEMP.mainparam | grep -c onlyCCanalyser )))
 onlyHub=$(($( cat TEMP.mainparam | grep -c onlyHub )))
 
+# -----------------------
+
+# Only blat user case (never got finished - directing users to CS5 instead) ..
+
+if [ "${onlyblat}" -eq 1 ] ; then
+    
+    printThis="BLAT-only user case never got finished in CM5"
+    printToLogFile
+    printThis="Run your only-blat in CS5 instead : those files can be used in subsequent CM5 full run."
+    printToLogFile
+    printThis="EXITING !"
+    printToLogFile
+
+    exit 0
+fi
+
+# -------------------
+
 echo
 echo "Parameters after parsing :"
 echo "${parameterList}"
@@ -587,20 +605,27 @@ prepareBlatFolder
 # Only blat user case ..
 
 if [ "${onlyblat}" -eq 1 ] ; then
-    printThis="Running BLAT ONLY , as user requested --onlyBlat  .. "
-    printNewChapterToLogFile
+    
+    # printThis="Running BLAT ONLY , as user requested --onlyBlat  .. "
+    # printNewChapterToLogFile
   
     #  mainRunner.sh --onlyBlat
-
-    # Test runs - disabling blat ..
 
     # blatRun
     # checkBlatErrors
     
-    printThis="This was --onlyBlat  run, so finishing up "
+    # printThis="This was --onlyBlat  run, so finishing up "
+    # printToLogFile
+    # printThis="All capture-site (REfragment)s are now BLAT-analysed "
+    # printToLogFile
+
+    printThis="BLAT-only user case never got finished in CM5"
     printToLogFile
-    printThis="All capture-site (REfragment)s are now BLAT-analysed "
+    printThis="Run your only-blat in CS5 instead : those files can be used in subsequent CM5 full run."
     printToLogFile
+    printThis="EXITING !"
+    printToLogFile
+
     
     copyRainbowLogFiles
     exit 0
